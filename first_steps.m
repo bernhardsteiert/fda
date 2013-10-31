@@ -4,10 +4,12 @@ close all
 clear all
 clc
 
-fdaMPath = 'fda';
+remotepath = mypath();
+
+fdaMPath = [remotepath 'fda'];
 addpath(fdaMPath)
 
-grabdataPath = 'Code + Stage and Outputsignal';
+grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
 % Stage 17 <--> IGF 100 (from Stage_Treatment_Outputsignal.xlsx)
