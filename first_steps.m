@@ -68,3 +68,14 @@ hold on
 
 plot(spline_data)
 plot(timestamp,c_signal,'o')
+
+%% Make FPCA with data generated in previous block - wip
+close all
+
+nharm = 3;
+c_signal_pcaspline = pca_fd(spline_data, nharm);
+
+disp(c_signal_pcaspline.values(1:4))
+plot_pca_fd(c_signal_pcaspline, 1, 0)
+c_signal_rotpcaspline = varmx_pca(c_signal_pcaspline);
+plot_pca_fd(c_signal_rotpcaspline, 1, 0)
