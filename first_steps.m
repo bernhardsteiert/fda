@@ -41,7 +41,7 @@ hold on
 plot(smoothed_data)
 plot(timestamp,c_signal,'o')
 
-%% Make FPCA - wip
+%% Make FPCA with data generated in previous block - wip
 close all
 
 nharm = 2;
@@ -52,3 +52,19 @@ plot_pca_fd(c_signal_pcastr, 1, 0)
 c_signal_rotpcastr = varmx_pca(c_signal_pcastr);
 plot_pca_fd(c_signal_rotpcastr, 1, 0)
 
+%% Generate smoothing spline fits using as many basis functions as data points
+close all
+
+lambda = 1e4; % smoothing parameter
+nbasis = length(timestamp);
+
+basis_full = create_bspline_basis(timestamp(end), nbasis);
+fdparobj = fdPar(basis_full,2,lambda);
+spline_data = smooth_basis(timestamp,c_signal,fdparobj);
+
+f = figure;
+set(f,'DefaultAxesColorOrder',jet(size(c_signal,2)))
+hold on
+
+plot(spline_data)
+plot(timestamp,c_signal,'o')
