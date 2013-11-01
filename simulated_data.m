@@ -26,8 +26,23 @@ amp = mean_amp + .15*mean_amp*amp_randn;
 off_randn = randn(8,1)*ones(1,340);
 offset = offset + .2*offset*off_randn;
 
-% Uncorrelated noise, better use correlated noise or modulate with sine
+% Uncorrelated noise - looks not like measured data (mean too well defined)
+close all
+
 noise = .001*randn(8,340);
 c_signal = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset + noise;
 
 plot(timestamp,c_signal)
+
+% Correlated noise - looks not like measured data (no oscillations)
+close all
+
+corr_noise = .0002*randn(8,340);
+corr_noise = cumsum(corr_noise,2);
+c_signal_corr = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset + corr_noise;
+
+plot(timestamp,c_signal_corr)
+
+% Sine modulation
+close all
+
