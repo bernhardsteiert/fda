@@ -64,6 +64,15 @@ c_signal_sine = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offs
 
 plot(timestamp,c_signal_sine)
 
+%% Plot: Use cauchy distributed noise - looks not like measured data (extreme jumps)
+noise_level = .0001;
+
+noise_cauchy = noise_level .* randn(8,340) ./ randn(8,340);
+c_signal_cauchy = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset + noise_cauchy;
+
+plot(timestamp,c_signal_cauchy)
+set(gca,'YLim',[-.03 .03])
+
 return
 
 %% Plot timecourses from measurements to compare with
