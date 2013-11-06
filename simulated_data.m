@@ -65,6 +65,8 @@ c_signal_sine = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offs
 plot(timestamp,c_signal_sine)
 
 %% Plot: Use cauchy distributed noise - looks not like measured data (extreme jumps)
+close all
+
 noise_level = .0001;
 
 noise_cauchy = noise_level .* randn(8,340) ./ randn(8,340);
@@ -72,6 +74,35 @@ c_signal_cauchy = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + of
 
 plot(timestamp,c_signal_cauchy)
 set(gca,'YLim',[-.03 .03])
+
+%% Plot: Additional noise term that is added with certain probability - looks not like measured data (mean too well defined)
+close all
+
+noise_level = .0005;
+noise_added = noise_level*randn(8,340);
+
+additional_level = noise_level * 10;
+additional_prob = 0.2;
+additional_noise = additional_level .* randn(8,340) .* (rand(8,340) < additional_prob);
+
+c_signal_added = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset + noise_added + additional_noise;
+
+plot(timestamp,c_signal_added)
+
+%% Plot: Again additional noise, but correlated - looks almost like measured data (but mean hardly visible)
+close all
+
+noise_level = .001;
+noise_added = noise_level*randn(8,340);
+
+additional_level = noise_level * 3;
+additional_prob = 0.1;
+additional_noise = additional_level .* randn(8,340) .* (rand(8,340) < additional_prob);
+additional_noise_cor = cumsum(additional_noise,2);
+
+c_signal_added_cor = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset + noise_added + additional_noise_cor;
+
+plot(timestamp,c_signal_added_cor)
 
 return
 
