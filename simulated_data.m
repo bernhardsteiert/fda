@@ -26,13 +26,13 @@ amp = mean_amp + .15*mean_amp*amp_randn;
 off_randn = randn(8,1)*ones(1,340);
 offset = offset + .2*offset*off_randn;
 
-% Simulation mean
+%% Plot: Simulation mean
 close all
 
 c_signal_mean = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset;
 plot(timestamp,c_signal_mean)
 
-% Uncorrelated noise - looks not like measured data (mean too well defined)
+%% Plot: Uncorrelated noise - looks not like measured data (mean too well defined)
 close all
 
 noise_level = .001;
@@ -42,7 +42,7 @@ c_signal_sim = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offse
 
 plot(timestamp,c_signal_sim)
 
-% Correlated noise - looks not like measured data (no oscillations)
+%% Plot: Correlated noise - looks not like measured data (no oscillations)
 close all
 
 noise_level = .0004;
@@ -53,16 +53,18 @@ c_signal_corr = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offs
 
 plot(timestamp,c_signal_corr)
 
-return
-
-% Sine modulation - work in progress
+%% Plot: Sine modulation - looks not like measured data (oscillations too regular)
 close all
 
-sine_freq = .1;
-mod_amp = 0.2 * mean_amp;
-sine_mod = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step));
+sine_freq = .01;
+mod_amp = 0.1 * mean_amp;
+sine_mod = mod_amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) .* sin(2*pi*sine_freq*repmat(timestamp,8,1));
 noise_sine = .001*randn(8,340) + sine_mod;
-c_signal_corr = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset + noise_sine;
+c_signal_sine = amp./(1+exp(-(repmat(timestamp,8,1)-step_time)/tau_step)) + offset + noise_sine;
+
+plot(timestamp,c_signal_sine)
+
+return
 
 %% Plot timecourses from measurements to compare with
 figure
