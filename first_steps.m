@@ -72,7 +72,7 @@ plot(timestamp,c_signal,'o')
 %% Make FPCA with data generated in previous block - wip
 close all
 
-nharm = 3;
+nharm = 2;
 c_signal_pcaspline = pca_fd(spline_data, nharm);
 
 disp(c_signal_pcaspline.values(1:4))

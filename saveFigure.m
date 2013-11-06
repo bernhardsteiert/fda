@@ -1,10 +1,18 @@
-function saveFigure(h, name)
+function saveFigure(h, name, renameAxis)
+
+if(~exist('renameAxis','var'))
+	renameAxis = true;
+elseif isempty(renameAxis)
+    renameAxis = true;
+end
 
 savePath =  ['./Figures/' datestr(now, 30) '_' name];
 
-axis_handle = get(gcf, 'CurrentAxes');
-xlabel(axis_handle, 'time [min]')
-ylabel(axis_handle, 'FOXO3a Ratio [C/N]')
+if renameAxis
+    axis_handle = get(gcf, 'CurrentAxes');
+    xlabel(axis_handle, 'time [min]')
+    ylabel(axis_handle, 'log10(FOXO3a Ratio [C/N])')
+end
 
 saveas(h, savePath, 'fig');
 print('-depsc', savePath);
