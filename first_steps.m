@@ -13,8 +13,13 @@ grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
 % Stage 17 <--> IGF 100 (from Stage_Treatment_Outputsignal.xlsx)
-site = 17;
-[timestamp,intensity] = grabdata(site);
+% site = 17;
+site = 11; % Unstimulated
+if exist(remotepath,'dir')
+    [timestamp,intensity] = grabdata(site);
+else
+    load(['./Workspaces/site_' num2str(site)])
+end
 c_signal = log10(intensity);
 
 return
