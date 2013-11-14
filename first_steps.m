@@ -12,9 +12,13 @@ addpath(fdaMPath)
 grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
+% Possible stages/sites:
+sites = [2, 4, 7, 8, 11, 13, 14, 17, 19, 22, 24, 28, 33, 34, 37, ...
+    39, 40, 41, 42, 44, 47, 48, 53, 54, 57, 59, 60, 64, 67, 68];
 % Stage 17 <--> IGF 100 (from Stage_Treatment_Outputsignal.xlsx)
 % site = 17;
-site = 11; % Unstimulated
+% site = 11; % Unstimulated
+site = 2;
 if exist(remotepath,'dir')
     [timestamp,intensity] = grabdata(site);
 else
@@ -30,6 +34,37 @@ close all
 plot(timestamp,c_signal,'g','color',[0.7 0.7 0.7])
 hold on
 plot(timestamp,nanmean(c_signal,2),'color','k','LineWidth',2)
+
+%% Plot every data set with distinct color
+close all
+
+% plot_sites = site;
+plot_sites = sites;
+
+first_n = 10; % Plot only first_n data-sets
+
+for ip = 1:length(plot_sites)
+    if length(plot_sites) > 1
+        if exist(remotepath,'dir')
+            [timestamp,intensity] = grabdata(plot_sites(ip));
+        else
+            load(['./Workspaces/site_' num2str(plot_sites(ip))])
+        end
+        c_signal = log10(intensity);
+    end
+    
+    
+    first_n = min(first_n,size(c_signal,2));
+    f = figure;
+    set(f,'DefaultAxesColorOrder',jet(first_n))
+
+    plot(timestamp,c_signal(:,1:first_n))
+    title(['Site ' num2str(plot_sites(ip))])
+    
+    waitforbuttonpress;
+    
+    close gcf
+end
 
 %% Generate spline fits to individual data sets with nbasis basis functions
 close all
