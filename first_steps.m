@@ -130,7 +130,24 @@ ylabel('cumulative variance explained')
 
 fprintf('To explain %s variance, use %i fPCA basis functions.\n\n',num2str(thres_var,3),thres_ind-1);
 
+%% Alternative: Use pareto function of Matlab
+close all
+
+thres_var = 0.9;
+
+percent_explained = 100*c_signal_pcastr.varprop;
+
+pareto(percent_explained)
+% hold on
+% plot(0:thres_ind-1,ones(1,thres_ind)*100*thres_var,'--')
+% plot([thres_ind-1 thres_ind-1],[0 100*thres_var],'--')
+
+xlabel('Principal Component')
+ylabel('Variance Explained (%)')
+
 %% Plot: Harmonic scores PC1 vs. PC2
+close all
+
 plot(c_signal_pcastr.harmscr(:,1),c_signal_pcastr.harmscr(:,2),'.')
 
 %% Read harmonics from harmfd object
@@ -149,20 +166,63 @@ harm_fine = eval_fd(c_signal_pcastr.harmfd,times_fine);
 % figure
 % plot(c_signal_pcastr.harmfd)
 
-% Until here, it seems to be fine. Scores seem to be too small in the following ...
+% Until here, everything is fine. Scores seem to be too small in the following ...
 
-data_fpca_repr = sqrt(c_signal_pcastr.harmscr)*harm_fine';
+data_fpca_repr = c_signal_pcastr.harmscr*harm_fine';
 mean_fine = eval_fd(c_signal_pcastr.meanfd,times_fine);
 
 trace = 1;
 
 plot(times_fine,mean_fine+data_fpca_repr(trace,:)')
 hold on
+% plot(times_fine,mean_fine,'k','LineWidth',2)
 plot(times_fine,mean_fine+data_fpca_repr(trace+1,:)','r')
 plot(times_fine,mean_fine+data_fpca_repr(trace+2,:)','g')
 plot(timestamp(range_ind),c_signal(range_ind,trace),'o')
 plot(timestamp(range_ind),c_signal(range_ind,trace+1),'ro')
 plot(timestamp(range_ind),c_signal(range_ind,trace+2),'go')
+
+% Blow up scores by 10fold and add first 2 harmonics to mean
+close all
+
+plot(times_fine,harm_fine(:,1))
+hold on
+plot(times_fine,harm_fine(:,2),'r')
+plot(time_range,[0 0],'--')
+legend('first harmonic','second harmonic')
+
+% Check if first harmonic is normalized: No!?!
+figure
+plot(times_fine,harm_fine(:,1))
+hold on
+plot(times_fine,harm_fine(:,1).^2,'r')
+plot(time_range,[1 1]./600,'k--')
+plot(times_fine,harm_fine(:,1).*c_signal_pcastr.values(1),'g')
+int_quad_harm1 = cumsum((harm_fine(:,1).^2.*(times_fine(2)-times_fine(1))));
+1/int_quad_harm1(end)
+plot(times_fine,harm_fine(:,1).^2./int_quad_harm1(end),'m')
+legend('first harmonic','first harmonic squared','normalized line','first harmonic*eigenvalue','first harmonic squared * normfac')
+
+figure
+plot(timestamp(range_ind),c_signal(range_ind,1),'o')
+hold on
+plot(times_fine,mean_fine)
+
+scores = c_signal_pcastr.harmscr;
+
+plot(times_fine,mean_fine'+scores(1,1:2)*harm_fine(:,1:2)','r')
+scores(1,1:2) = 10*scores(1,1:2);
+plot(times_fine,mean_fine'+scores(1,1:2)*harm_fine(:,1:2)','k')
+legend('data','mean','mean+score1*harm1+score2*harm2','mean+10*(score1*harm1+score2*harm2)')
+% <-- Good direction, for some reason scores are not as expected, maybe scaled by eigenvalue?
+
+
+%% Check if fd mean fits to data mean: Yes
+close all
+
+plot(c_signal_pcastr.meanfd)
+hold on
+plot(timestamp,nanmean(c_signal,2),'color','k')
 
 
 %% Generate smoothing spline fits using as many basis functions as data points
