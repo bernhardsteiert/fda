@@ -47,7 +47,7 @@ close all
 plot_sites = site;
 % plot_sites = sites;
 
-first_n = 100; % Plot only first_n data-sets
+first_n = 20; % Plot only first_n data-sets
 
 for ip = 1:length(plot_sites)
     if length(plot_sites) > 1
@@ -98,6 +98,20 @@ hold on
 
 plot(smoothed_data)
 plot(timestamp(range_ind),c_signal(range_ind,:),'o')
+
+%% Check smoothed_data: Reading coefs works, reconstruction of data spline works!
+close all
+
+time_range = [50 650];
+
+[tmp range_ind_min] = min(abs(timestamp - time_range(1)));
+[tmp range_ind_max] = min(abs(timestamp - time_range(2)));
+range_ind = range_ind_min:range_ind_max;
+times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
+
+tmpcoef = getcoef(smoothed_data);
+basis_evaluated = eval_basis(basis,times_fine);
+plot(basis_evaluated*tmpcoef)
 
 %% Make FPCA with data generated in previous block - wip
 close all
@@ -168,11 +182,14 @@ harm_fine = eval_fd(c_signal_pcastr.harmfd,times_fine);
 
 % Until here, everything is fine. Scores seem to be too small in the following ...
 
+plot(c_signal_pcastr.meanfd+c_signal_pcastr.fdhatfd)
+
 data_fpca_repr = c_signal_pcastr.harmscr*harm_fine';
 mean_fine = eval_fd(c_signal_pcastr.meanfd,times_fine);
 
 trace = 1;
 
+figure
 plot(times_fine,mean_fine+data_fpca_repr(trace,:)')
 hold on
 % plot(times_fine,mean_fine,'k','LineWidth',2)
@@ -182,7 +199,7 @@ plot(timestamp(range_ind),c_signal(range_ind,trace),'o')
 plot(timestamp(range_ind),c_signal(range_ind,trace+1),'ro')
 plot(timestamp(range_ind),c_signal(range_ind,trace+2),'go')
 
-% Blow up scores by 10fold and add first 2 harmonics to mean
+%% Blow up scores by 10fold and add first 2 harmonics to mean
 close all
 
 plot(times_fine,harm_fine(:,1))
@@ -202,6 +219,11 @@ int_quad_harm1 = cumsum((harm_fine(:,1).^2.*(times_fine(2)-times_fine(1))));
 1/int_quad_harm1(end)
 plot(times_fine,harm_fine(:,1).^2./int_quad_harm1(end),'m')
 legend('first harmonic','first harmonic squared','normalized line','first harmonic*eigenvalue','first harmonic squared * normfac')
+
+% Check if 'normalization' is done by sum(harm_i(t_j)) over i is 1: No ...
+figure
+plot(times_fine,sum(harm_fine,2),times_fine,mean_fine+sum(harm_fine,2))
+title('sum over all harmonics')
 
 figure
 plot(timestamp(range_ind),c_signal(range_ind,1),'o')
