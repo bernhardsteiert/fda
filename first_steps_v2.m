@@ -173,7 +173,7 @@ plot(c_signal_pcastr.harmscr(:,1),c_signal_pcastr.harmscr(:,2),'.')
 %% Plot harmonics from harmfd object
 close all
 
-nperplot = 10;
+nperplot = 4;
 nsubplots = ceil(size(c_signal,2)./nperplot);
 rowstocols = 0.5;
 time_range = [50 650];
