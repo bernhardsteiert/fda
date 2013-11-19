@@ -1,5 +1,6 @@
 %% First steps working with live cell imaging data and functional data analysis:
 % Warning: The workspace will be cleared!
+% All test code for finding bug in FDA package removed
 close all
 clear all
 clc
@@ -33,13 +34,6 @@ end
 range_c_signal = [min(min(c_signal)) max(max(c_signal))];
 
 return
-
-%% Simulate 'trivial' data
-close all
-
-c_signal = ones(size(c_signal)) .* repmat(linspace(range_c_signal(1),range_c_signal(2),size(c_signal,2)),size(c_signal,1),1);
-
-plot(timestamp,c_signal)
 
 %% Reproduce plots from grabdata
 close all
@@ -119,7 +113,11 @@ times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
 
 tmpcoef = getcoef(smoothed_data);
 basis_evaluated = eval_basis(basis,times_fine);
-plot(basis_evaluated*tmpcoef)
+
+figure
+plot(times_fine,basis_evaluated*tmpcoef)
+hold on
+plot(timestamp(range_ind),c_signal(range_ind,:),'o')
 
 %% Make FPCA with data generated in previous block - wip
 close all
@@ -172,10 +170,12 @@ close all
 
 plot(c_signal_pcastr.harmscr(:,1),c_signal_pcastr.harmscr(:,2),'.')
 
-%% Read harmonics from harmfd object
-% Does not work at the moment
+%% Plot harmonics from harmfd object
 close all
 
+nperplot = 10;
+nsubplots = ceil(size(c_signal,2)./nperplot);
+rowstocols = 0.5;
 time_range = [50 650];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
@@ -184,96 +184,22 @@ range_ind = range_ind_min:range_ind_max;
 times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
 harm_fine = eval_fd(c_signal_pcastr.harmfd,times_fine);
 
-% plot(times_fine,harm_fine)
-% figure
-% plot(c_signal_pcastr.harmfd)
-
-% Until here, everything is fine. Scores seem to be too small in the following ...
-
-plot(c_signal_pcastr.meanfd+c_signal_pcastr.fdhatfd)
+nrows = ceil(nsubplots^rowstocols);
+ncols = ceil(nsubplots / nrows);
 
 data_fpca_repr = c_signal_pcastr.harmscr*harm_fine';
 mean_fine = eval_fd(c_signal_pcastr.meanfd,times_fine);
 
-trace = 1;
+for iplot = 1:nsubplots
+    subplot(nrows,ncols,iplot)
+    
+    inds = ((iplot-1)*nperplot+1):min([size(c_signal,2) iplot*nperplot]);
+    plot(times_fine,repmat(mean_fine,1,length(inds))+data_fpca_repr(inds,:)')
+    hold on
+    plot(timestamp(range_ind),c_signal(range_ind,inds),'o')
 
-figure
-plot(times_fine,mean_fine+data_fpca_repr(trace,:)')
-hold on
-% plot(times_fine,mean_fine,'k','LineWidth',2)
-plot(times_fine,mean_fine+data_fpca_repr(trace+1,:)','r')
-plot(times_fine,mean_fine+data_fpca_repr(trace+2,:)','g')
-plot(timestamp(range_ind),c_signal(range_ind,trace),'o')
-plot(timestamp(range_ind),c_signal(range_ind,trace+1),'ro')
-plot(timestamp(range_ind),c_signal(range_ind,trace+2),'go')
-
-%% Blow up scores by 10fold and add first 2 harmonics to mean
-close all
-
-plot(times_fine,harm_fine(:,1))
-hold on
-plot(times_fine,harm_fine(:,2),'r')
-plot(time_range,[0 0],'--')
-legend('first harmonic','second harmonic')
-
-% Check if first harmonic is normalized: No!?!
-figure
-plot(times_fine,harm_fine(:,1))
-hold on
-plot(times_fine,harm_fine(:,1).^2,'r')
-plot(time_range,[1 1]./600,'k--')
-plot(times_fine,harm_fine(:,1).*c_signal_pcastr.values(1),'g')
-int_quad_harm1 = cumsum((harm_fine(:,1).^2.*(times_fine(2)-times_fine(1))));
-1/int_quad_harm1(end)
-plot(times_fine,harm_fine(:,1).^2./int_quad_harm1(end),'m')
-legend('first harmonic','first harmonic squared','normalized line','first harmonic*eigenvalue','first harmonic squared * normfac')
-
-% Check if 'normalization' is done by sum(harm_i(t_j)) over i is 1: No ...
-figure
-plot(times_fine,sum(harm_fine,2),times_fine,mean_fine+sum(harm_fine,2))
-title('sum over all harmonics')
-
-figure
-plot(timestamp(range_ind),c_signal(range_ind,1),'o')
-hold on
-plot(times_fine,mean_fine)
-
-scores = c_signal_pcastr.harmscr;
-
-plot(times_fine,mean_fine'+scores(1,1:2)*harm_fine(:,1:2)','r')
-scores(1,1:2) = 10*scores(1,1:2);
-plot(times_fine,mean_fine'+scores(1,1:2)*harm_fine(:,1:2)','k')
-legend('data','mean','mean+score1*harm1+score2*harm2','mean+10*(score1*harm1+score2*harm2)')
-% <-- Good direction, for some reason scores are not as expected, maybe scaled by eigenvalue?
-
-%% Optimize scaling of first harmonic for 'trivial' example by hand
-close all
-
-scores = c_signal_pcastr.harmscr;
-
-reconstr = basis_evaluated*tmpcoef;
-f = @(s) sum((reconstr(:,1)-(mean_fine+10.^s*scores(1,1)*harm_fine(:,1))).^2);
-s = 1;
-
-scale_par = fminsearch(@(s) f(s),1);
-scaling = 10.^scale_par
-
-figure
-plot(timestamp(range_ind),c_signal(range_ind,1),'o')
-hold on
-plot(times_fine,mean_fine,'k--')
-plot(times_fine,mean_fine+scores(1,1)*harm_fine(:,1),'r')
-plot(times_fine,mean_fine+10.^scale_par*scores(1,1)*harm_fine(:,1))
-
-
-%% Check if fd mean fits to data mean: Yes
-close all
-
-plot(c_signal_pcastr.meanfd)
-hold on
-plot(timestamp,nanmean(c_signal,2),'color','k')
-
-
+end
+    
 %% Generate smoothing spline fits using as many basis functions as data points
 close all
 
