@@ -13,9 +13,10 @@ grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
 
-sites = [4 17 37 44 57 64];
-input_names = {'EGF','IGF','HRG','HGF','EPR','BTC'};
-sites_for_harmonics = [17 57 64];
+sites = [17 41 42 44 57];
+input_names = {'IGF','HGF-MEKi','HGF-AKTi','HGF','EPR'};
+sites_for_harmonics = [17 44 57];
+% sites_for_harmonics = [17 41 42 44 57];
 % all ligands highest dose
 
 
@@ -31,7 +32,7 @@ for isite = sites
         times{end+1} = timestamp;
     end
 
-    log_trafo = 1; % log-transform signal
+    log_trafo = 0; % log-transform signal
 
     if log_trafo
         signals{end+1} = log10(intensity);
@@ -39,13 +40,66 @@ for isite = sites
         signals{end+1} = intensity;
     end
     
+    signals{end} = signals{end} - repmat(nanmean(signals{end},2),1,size(signals{end},2));
+    
     celltype = [celltype ones(1,size(intensity,2))*isite];
 end
 
 timestamp = times{1}; % same time sampling for all data sets
 c_signal = cell2mat(signals);
 
+% Exclude outliers
+% HGF-MEKi, second data-set
+exclude_site = [42];
+exclude_signal = [2];
+for iex = 1:length(exclude_site)
+    tmpi = find(celltype == exclude_site(iex));
+    c_signal = c_signal(:,setdiff(1:size(c_signal,2),tmpi(1)+exclude_signal(iex)-1));
+    celltype = celltype(setdiff(1:size(c_signal,2),tmpi(1)+exclude_signal(iex)-1));
+end
+
 return
+
+%% Plot every data set with distinct color
+close all
+
+% plot_sites = site;
+plot_sites = sites;
+
+rowstocols = 1;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows);
+
+figure
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,ip)
+    
+    c_signal_single = c_signal(:,celltype == plot_sites(ip));
+    
+    first_n = 20; % Plot only first_n data-sets
+    
+    first_n = min(first_n,size(c_signal_single,2));
+%     f = figure;
+%     set(f,'DefaultAxesColorOrder',jet(first_n))
+    
+    plot(timestamp,c_signal_single(:,1:first_n))
+%     title(['Site ' num2str(plot_sites(ip))])
+    title(input_names{ip})
+    
+    set(gca,'XLim',[50 650])
+    
+    hold on
+    plot(timestamp,nanmean(c_signal_single,2),'--k')
+    
+    plot([120 120],[-0.06 0.06],'b--')
+    set(gca,'YLim',[-0.06 0.06])
+    
+%     if length(plot_sites) > 1
+%         waitforbuttonpress;
+%         close gcf
+%     end
+end
 
 %% Generate spline fits to data-sets given in sites_for_harmonics
 close all
@@ -71,13 +125,25 @@ hold on
 plot(smoothed_data)
 plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 
-%% Make FPCA with data generated in previous block - wip
+%% Plot: Check fits visually - wip
+
+%% Reproduce plots from grabdata
 close all
 
-nharm = 8;
+plot(timestamp,c_signal,'g','color',[0.7 0.7 0.7])
+hold on
+plot(timestamp,nanmean(c_signal,2),'color','k','LineWidth',2)
+set(gca,'XLim',[50 650]) % see Pat's Poster
+
+%% Make FPCA with data generated in previous block
+close all
+
+nharm = 12;
 c_signal_pcastr = pca_fd(smoothed_data, nharm);
+% c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 
 plot_pca_fd(c_signal_pcastr, 1, 0)
+% plot(c_signal_pcastr.meanfd)
 
 % c_signal_rotpcastr = varmx_pca(c_signal_pcastr);
 % plot_pca_fd(c_signal_rotpcastr, 1, 0)
@@ -134,6 +200,19 @@ ylabel('cumulative variance explained')
 
 fprintf('To explain at least %s variance, use %i fPCA basis functions.\n\n',num2str(thres_var,3),thres_ind-1);
 
+%% Plot: Eigenvalues linear trend
+close all
+
+linearrange = 8:15;
+
+axb = polyfit(linearrange,log10(c_signal_pcastr.values(linearrange))',1);
+plot(1:max(linearrange),log10(c_signal_pcastr.values(1:max(linearrange))),'ko-')
+hold on
+plot(1:max(linearrange),(1:max(linearrange))*axb(1) + axb(2),'k--')
+
+xlabel('Eigenvalue Number')
+ylabel('log10(Eigenvalue)')
+
 %% Fit additional data with basis from fPCA
 close all
 
@@ -184,10 +263,13 @@ end
 %% Plot: Triagonal Matrix of PCs (the bold points are fitted)
 close all
 
-max_pc = 5;
+max_pc = 8;
+
+% If no harmonics were fitted:
+% fitcoef = zeros(size(c_signal_pcastr.harmscr'));
 
 figure
-color = hsv(length(signals));
+color = lines(length(signals));
 legendstyles = nan(1,length(signals));
 hold on
 
@@ -222,7 +304,7 @@ for irow = 1:max_pc-1
                 legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'o','MarkerFaceColor',color(ilig,:),'LineWidth',linewidth);
             else
                 % Data used for fitting
-                legendstyles(ilig) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),'s','MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth);
+                legendstyles(ilig) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),'s','MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth+1);
             end
             
         end

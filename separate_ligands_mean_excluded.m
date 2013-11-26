@@ -1,4 +1,7 @@
 %% Look at qualitatively different time-courses and use fPCA to reseparate them
+% Standard fPCA: mean + sum(coef*harm)
+% Problem: Mean behavior is meaningless when mean is over different stimuli;
+% Solution: Do fPCA without for mean behavior first ...
 
 close all
 clear all
@@ -72,8 +75,7 @@ plot(timestamp(range_ind),c_signal(range_ind,:),'o')
 close all
 
 nharm = 8;
-% c_signal_pcastr = pca_fd(smoothed_data, nharm);
-c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
+c_signal_pcastr = pca_fd(smoothed_data, nharm);
 
 plot_pca_fd(c_signal_pcastr, 1, 0)
 
@@ -128,17 +130,16 @@ times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
 
 harm_eval = 2 * repmat(sqrt(c_signal_pcastr.values(1:nharm))'.*flipharm(1:nharm),length(times_fine),1) .* eval_fd(c_signal_pcastr.harmfd,times_fine);
 
-% subplot(nrows,ncols,1)
-% plot(times_fine,eval_fd(c_signal_pcastr.meanfd,times_fine))
-% xlabel('Mean')
-% set(gca,'XLim',time_range)
-% set(gca,'YLim',[min(min(harm_eval)) max(max(harm_eval))])
-% hold on
-% plot(time_range,[0 0],'--')
+subplot(nrows,ncols,1)
+plot(times_fine,eval_fd(c_signal_pcastr.meanfd,times_fine))
+xlabel('Mean')
+set(gca,'XLim',time_range)
+set(gca,'YLim',[min(min(harm_eval)) max(max(harm_eval))])
+hold on
+plot(time_range,[0 0],'--')
 
 for iplot = 1:nharm
-%     subplot(nrows,ncols,iplot+1)
-    subplot(nrows,ncols,iplot)
+    subplot(nrows,ncols,iplot+1)
     
     plot(times_fine,harm_eval(:,iplot))
     xlabel(['Harmonic ' num2str(iplot)])

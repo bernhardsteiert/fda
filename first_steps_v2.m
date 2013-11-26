@@ -19,7 +19,7 @@ sites = [2, 4, 7, 8, 11, 13, 14, 17, 19, 22, 24, 28, 33, 34, 37, ...
 % Stage 17 <--> IGF 100 (from Stage_Treatment_Outputsignal.xlsx)
 % site = 17;
 % site = 11; % Unstimulated
-site = 44;
+site = 13; % [13 14 17 53 54 57 64 67 68];
 if exist(remotepath,'dir')
     [timestamp,intensity] = grabdata(site);
 else

@@ -15,13 +15,23 @@ addpath(grabdataPath)
 % Possible stages/sites:
 % sites = [4 17 37 44 57 64];
 % input_names = {'EGF','IGF','HRG','HGF','EPR','BTC'};
-sites = [17 57 64];
-input_names = {'IGF','EPR','BTC'};
+% sites = [13 14 17 53 54 57 64 67 68];
+% doses = [5 10 100 5 10 100 100 10 5];
+% input_link = [1 1 1 2 2 2 3 3 3];
+% input_names = {'IGF','EPR','BTC'};
+
+sites = [13 14 17 44 47 48 53 54 57 41 42];
+doses = [5 10 100 100 10 5 5 10 100 100 100];
+input_link = [1 1 1 2 2 2 3 3 3 4 5];
+input_names = {'IGF','HGF','EPR', 'HGF-MEKi','HGF-AKTi'};
+
 % all ligands highest dose
 
 times = cell(0);
 signals = cell(0);
 celltype = [];
+celllink = [];
+celldose = [];
 
 for isite = sites
     if exist(remotepath,'dir')
@@ -40,6 +50,8 @@ for isite = sites
     end
     
     celltype = [celltype ones(1,size(intensity,2))*isite];
+    celllink = [celllink ones(1,size(intensity,2))*input_link(sites == isite)];
+    celldose = [celldose ones(1,size(intensity,2))*doses(sites == isite)];
 end
 
 timestamp = times{1}; % same time sampling for all data sets
@@ -71,7 +83,7 @@ plot(timestamp(range_ind),c_signal(range_ind,:),'o')
 %% Make FPCA with data generated in previous block - wip
 close all
 
-nharm = 8;
+nharm = 11;
 % c_signal_pcastr = pca_fd(smoothed_data, nharm);
 c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 
@@ -174,7 +186,7 @@ legend(input_names)
 %% Plot: Triagonal Matrix of PCs
 close all
 
-max_pc = 8;
+max_pc = 4;
 % plotfat = [17 57];
 plotfat = [];
 
@@ -183,14 +195,17 @@ flipharm(1:8) = [1 -1 1 -1 -1 1 1 1];
 
 harm_scores_flipped = c_signal_pcastr.harmscr(:,1:max_pc) .* repmat(flipharm(1:max_pc),size(c_signal_pcastr.harmscr(:,max_pc),1),1);
 
+% unitypes = unique(celltype);
+unitypes = unique(celllink);
+
 figure
-color = lines(length(signals));
-legendstyles = nan(1,length(signals));
+color = lines(length(unitypes));
+legendstyles = nan(1,length(unitypes));
 hold on
 
-unitypes = unique(celltype);
 linewidth = 1;
-markers = {'+','o','*','x','s','d','^','v','>','<','p','h','.'};
+% markers = {'+','o','*','x','s','d','^','v','>','<','p','h','.'};
+markers = {'o','o','o','s','s','d','^','v','>','<','p','h','.'};
 
 xpos = .07;
 ypos = .04;
@@ -213,8 +228,8 @@ for irow = 1:max_pc-1
             set(gca,'YTickLabel',[])
         end
         
-        for ilig = 1:length(signals)
-            legendstyles(ilig) = plot(harm_scores_flipped(celltype == unitypes(ilig),icol),harm_scores_flipped(celltype == unitypes(ilig),irow+1),markers{ilig},'Color',color(ilig,:),'LineWidth',linewidth+sum(unitypes(ilig)==plotfat));
+        for ilig = 1:length(unitypes)
+            legendstyles(ilig) = plot(harm_scores_flipped(celllink == unitypes(ilig),icol),harm_scores_flipped(celllink == unitypes(ilig),irow+1),markers{ilig},'Color',color(ilig,:),'LineWidth',linewidth+sum(unitypes(ilig)==plotfat));
         end
         
         xrange = max(harm_scores_flipped(:,icol)) - min(harm_scores_flipped(:,icol));

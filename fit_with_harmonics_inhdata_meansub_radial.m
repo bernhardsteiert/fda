@@ -13,9 +13,10 @@ grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
 
-sites = [4 17 37 44 57 64];
-input_names = {'EGF','IGF','HRG','HGF','EPR','BTC'};
-sites_for_harmonics = [17 57 64];
+sites = [17 41 42 44 57];
+input_names = {'IGF','HGF-MEKi','HGF-AKTi','HGF','EPR'};
+% sites_for_harmonics = [17 44 57];
+sites_for_harmonics = [17 41 42 44 57];
 % all ligands highest dose
 
 
@@ -31,7 +32,7 @@ for isite = sites
         times{end+1} = timestamp;
     end
 
-    log_trafo = 1; % log-transform signal
+    log_trafo = 0; % log-transform signal
 
     if log_trafo
         signals{end+1} = log10(intensity);
@@ -39,13 +40,67 @@ for isite = sites
         signals{end+1} = intensity;
     end
     
+    signals{end} = signals{end} - repmat(nanmean(signals{end},2),1,size(signals{end},2));
+    
     celltype = [celltype ones(1,size(intensity,2))*isite];
 end
 
 timestamp = times{1}; % same time sampling for all data sets
 c_signal = cell2mat(signals);
 
+% Exclude outliers
+% HGF-MEKi, second data-set
+exclude_site = [42];
+exclude_signal = [2];
+for iex = 1:length(exclude_site)
+    tmpi = find(celltype == exclude_site(iex));
+    ind_new = setdiff(1:size(c_signal,2),tmpi(1)+exclude_signal(iex)-1);
+    c_signal = c_signal(:,ind_new);
+    celltype = celltype(ind_new);
+end
+
 return
+
+%% Plot every data set with distinct color
+close all
+
+% plot_sites = site;
+plot_sites = sites;
+
+rowstocols = 1;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows);
+
+figure
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,ip)
+    
+    c_signal_single = c_signal(:,celltype == plot_sites(ip));
+    
+    first_n = 20; % Plot only first_n data-sets
+    
+    first_n = min(first_n,size(c_signal_single,2));
+%     f = figure;
+%     set(f,'DefaultAxesColorOrder',jet(first_n))
+    
+    plot(timestamp,c_signal_single(:,1:first_n))
+%     title(['Site ' num2str(plot_sites(ip))])
+    title(input_names{ip})
+    
+    set(gca,'XLim',[50 650])
+    
+    hold on
+    plot(timestamp,nanmean(c_signal_single,2),'--k')
+    
+    plot([120 120],[-0.06 0.06],'b--')
+    set(gca,'YLim',[-0.06 0.06])
+    
+%     if length(plot_sites) > 1
+%         waitforbuttonpress;
+%         close gcf
+%     end
+end
 
 %% Generate spline fits to data-sets given in sites_for_harmonics
 close all
@@ -71,13 +126,15 @@ hold on
 plot(smoothed_data)
 plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 
-%% Make FPCA with data generated in previous block - wip
+%% Make FPCA with data generated in previous block
 close all
 
-nharm = 8;
+nharm = 12;
 c_signal_pcastr = pca_fd(smoothed_data, nharm);
+% c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 
-plot_pca_fd(c_signal_pcastr, 1, 0)
+% plot_pca_fd(c_signal_pcastr, 1, 0)
+% plot(c_signal_pcastr.meanfd)
 
 % c_signal_rotpcastr = varmx_pca(c_signal_pcastr);
 % plot_pca_fd(c_signal_rotpcastr, 1, 0)
@@ -113,6 +170,88 @@ for iplot = 1:nharm
     plot(time_range,[0 0],'--')
 end
 
+%% Remove all nharm from signal --> only stochastic oscillations remain
+close all
+
+c_signal_woNharm = c_signal(range_ind,ind_harm)-eval_fd(c_signal_pcastr.fdhatfd,timestamp(range_ind));
+celltypeharm = celltype(ind_harm);
+
+plot_sites = sites;
+
+rowstocols = 1;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows);
+
+figure
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,ip)
+    
+    c_signal_single = c_signal_woNharm(:,celltypeharm == plot_sites(ip));
+    
+    first_n = 20;
+    
+    first_n = min(first_n,size(c_signal_single,2));
+    
+    plot(timestamp(range_ind),c_signal_single(:,1:first_n))
+    title(input_names{ip})
+    
+    set(gca,'XLim',[50 650])
+    
+    hold on
+    plot(timestamp(range_ind),nanmean(c_signal_single,2),'--k')
+    
+    plot([120 120],[-0.04 0.04],'b--')
+    set(gca,'YLim',[-0.04 0.04])
+end
+
+%% Generate spline fits to data-sets given in sites_for_harmonics (for remaining variation)
+close all
+
+nbasis = 40;
+
+% ind_harm = ismember(celltype,sites_for_harmonics);
+% ind_fit = ~ind_harm;
+
+smoothed_data_woNharm = smooth_basis(timestamp(range_ind),c_signal_woNharm,basis);
+
+f = figure;
+set(f,'DefaultAxesColorOrder',jet(size(c_signal(1,ind_harm),2)))
+hold on
+
+plot(smoothed_data_woNharm)
+plot(timestamp(range_ind),c_signal_woNharm,'o')
+
+%% Plot: Histogramm of distance to origin
+close all
+
+figure
+hold on
+
+rowstocols = 1;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows);
+
+radial_dist = sqrt(sum(getcoef(smoothed_data_woNharm).^2,1));
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,ip)
+    
+    baredges = linspace(0,0.1,21);
+    bar(baredges,histc(radial_dist(celltypeharm == plot_sites(ip)),baredges));
+    
+    title(input_names{ip})
+    
+    set(gca,'XLim',[0 0.1])
+    if ip == length(plot_sites)
+        xlabel('radial distance')
+    end
+    if ip == ceil(length(plot_sites)/2)
+        ylabel('absolute frequency')
+    end
+end
+
+
 %% Plot: %variance explained vs. #basis functions
 close all
 
@@ -133,6 +272,19 @@ xlabel('fPCA basis functions')
 ylabel('cumulative variance explained')
 
 fprintf('To explain at least %s variance, use %i fPCA basis functions.\n\n',num2str(thres_var,3),thres_ind-1);
+
+%% Plot: Eigenvalues linear trend
+close all
+
+linearrange = 8:15;
+
+axb = polyfit(linearrange,log10(c_signal_pcastr.values(linearrange))',1);
+plot(1:max(linearrange),log10(c_signal_pcastr.values(1:max(linearrange))),'ko-')
+hold on
+plot(1:max(linearrange),(1:max(linearrange))*axb(1) + axb(2),'k--')
+
+xlabel('Eigenvalue Number')
+ylabel('log10(Eigenvalue)')
 
 %% Fit additional data with basis from fPCA
 close all
@@ -184,16 +336,21 @@ end
 %% Plot: Triagonal Matrix of PCs (the bold points are fitted)
 close all
 
-max_pc = 5;
+max_pc = 3;
+
+% If no harmonics were fitted:
+fitcoef = zeros(size(c_signal_pcastr.harmscr'));
 
 figure
-color = hsv(length(signals));
+color = lines(length(signals));
 legendstyles = nan(1,length(signals));
 hold on
 
 unitypes = unique(celltype);
 linewidth = 1;
-markers = {'+','o','*','x','s','d','^','v','>','<','p','h','.'};
+% markers = {'+','o','*','x','s','d','^','v','>','<','p','h','.'};
+markers = {'o','*','s','d','v','>','<','p','h','.'};
+% markers = {'o','s','s','o','o'};
 
 xpos = .07;
 ypos = .04;
@@ -219,10 +376,11 @@ for irow = 1:max_pc-1
         for ilig = 1:length(signals)
             if sum(unitypes(ilig)==sites_for_harmonics)
                 % Data used for harmonics
-                legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'o','MarkerFaceColor',color(ilig,:),'LineWidth',linewidth);
+%                 legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'o','MarkerFaceColor',color(ilig,:),'LineWidth',linewidth);
+                legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),markers{ilig},'MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth+1);
             else
                 % Data used for fitting
-                legendstyles(ilig) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),'s','MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth);
+                legendstyles(ilig) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),'s','MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth+1);
             end
             
         end

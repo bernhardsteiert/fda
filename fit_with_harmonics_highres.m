@@ -12,6 +12,7 @@ addpath(fdaMPath)
 grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
+dataPath = 'Dataset2_130825_2minute_interval';
 
 sites = [4 17 37 44 57 64];
 input_names = {'EGF','IGF','HRG','HGF','EPR','BTC'};
@@ -25,7 +26,7 @@ celltype = [];
 
 for isite = sites
     if exist(remotepath,'dir')
-        [times{end+1},intensity] = grabdata(isite);
+        [times{end+1},intensity] = grabdata(isite,dataPath);
     else
         load(['./Workspaces/site_' num2str(isite)])
         times{end+1} = timestamp;
@@ -52,7 +53,7 @@ close all
 
 nbasis = 40;
 % time_range = [min(timestamp) max(timestamp)];
-time_range = [50 650];
+time_range = [200 650];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -79,9 +80,6 @@ c_signal_pcastr = pca_fd(smoothed_data, nharm);
 
 plot_pca_fd(c_signal_pcastr, 1, 0)
 
-% c_signal_rotpcastr = varmx_pca(c_signal_pcastr);
-% plot_pca_fd(c_signal_rotpcastr, 1, 0)
-
 %% Plot: Eigenfunctions
 close all
 
@@ -89,28 +87,20 @@ rowstocols = 0.5;
 nrows = ceil(nharm^rowstocols);
 ncols = ceil(nharm / nrows);
 
-time_range = [50 650];
-
-flipharm = ones(1,nharm);
-flipharm(1:8) = [1 -1 1 -1 -1 1 1 1];
+time_range = [200 650];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
 range_ind = range_ind_min:range_ind_max;
 times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
 
-harm_eval = 2 * repmat(sqrt(c_signal_pcastr.values(1:nharm))'.*flipharm(1:nharm),length(times_fine),1) .* eval_fd(c_signal_pcastr.harmfd,times_fine);
+harm_eval = eval_fd(c_signal_pcastr.harmfd,times_fine);
 
 for iplot = 1:nharm
     subplot(nrows,ncols,iplot)
     
     plot(times_fine,harm_eval(:,iplot))
     xlabel(['Harmonic ' num2str(iplot)])
-    set(gca,'XLim',time_range)
-    set(gca,'YLim',[min(min(harm_eval)) max(max(harm_eval))])
-    
-    hold on
-    plot(time_range,[0 0],'--')
 end
 
 %% Plot: %variance explained vs. #basis functions
@@ -154,7 +144,7 @@ close all
 nperplot = 8;
 nsubplots = ceil(size(c_signal(1,ind_fit),2)./nperplot);
 rowstocols = 0.5;
-time_range = [50 650];
+time_range = [200 650];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
