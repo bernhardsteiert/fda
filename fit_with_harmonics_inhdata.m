@@ -13,10 +13,18 @@ grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
 
-sites = [17 41 42 44 57];
-input_names = {'IGF','HGF-MEKi','HGF-AKTi','HGF','EPR'};
+% sites = [17 41 42 44 57];
+% % sites = [17 44 57];
+% input_names = {'IGF','HGF-MEKi','HGF-AKTi','HGF','EPR'};
+% % input_names = {'IGF','HGF','EPR'};
 % sites_for_harmonics = [17 44 57];
-sites_for_harmonics = [17 41 42 44 57];
+% % sites_for_harmonics = [17 41 42 44 57];
+% % all ligands highest dose
+
+
+sites = [1 2 4:9 17:-1:12 57:-1:52];
+input_names = {'EGF-MEKi','EGF-AKTi','EGF 100','EGF 50','EGF 20','EGF 10','EGF 5','EGF 2.5','IGF 100','IGF 50','IGF 20','IGF 10','IGF 5','IGF 2.5','EPR 100','EPR 50','EPR 20','EPR 10','EPR 5','EPR 2.5'};
+sites_for_harmonics = [4:9 17:-1:12 57:-1:52];
 % all ligands highest dose
 
 
@@ -75,7 +83,7 @@ plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 %% Make FPCA with data generated in previous block - wip
 close all
 
-nharm = 12;
+nharm = 8;
 % c_signal_pcastr = pca_fd(smoothed_data, nharm);
 c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 
@@ -94,7 +102,7 @@ ncols = ceil(nharm / nrows);
 time_range = [50 650];
 
 flipharm = ones(1,nharm);
-% flipharm(1:8) = [1 -1 -1 -1 -1 1 1 1];
+% flipharm(1:4) = [1 1 -1 -1];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -186,10 +194,10 @@ end
 %% Plot: Triagonal Matrix of PCs (the bold points are fitted)
 close all
 
-max_pc = 5;
+max_pc = 4;
 
 % If no harmonics were fitted:
-fitcoef = zeros(size(c_signal_pcastr.harmscr'));
+% fitcoef = zeros(size(c_signal_pcastr.harmscr'));
 
 figure
 color = lines(length(signals));
@@ -199,8 +207,11 @@ hold on
 unitypes = unique(celltype);
 linewidth = 1;
 % markers = {'+','o','*','x','s','d','^','v','>','<','p','h','.'};
-markers = {'o','*','s','d','v','>','<','p','h','.'};
+% markers = {'o','*','s','d','v','>','<','p','h','.'};
 % markers = {'o','s','s','o','o'};
+markers = {'o','o','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s'};
+color = lines(5);
+color = [color(1:2,:); repmat(color(3,:),6,1); repmat(color(4,:),6,1); repmat(color(5,:),6,1)]
 
 xpos = .07;
 ypos = .04;
@@ -227,10 +238,10 @@ for irow = 1:max_pc-1
             if sum(unitypes(ilig)==sites_for_harmonics)
                 % Data used for harmonics
 %                 legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'o','MarkerFaceColor',color(ilig,:),'LineWidth',linewidth);
-                legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),markers{ilig},'MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth+1);
+                legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),markers{ilig},'MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth);
             else
                 % Data used for fitting
-                legendstyles(ilig) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),'s','MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth+1);
+                legendstyles(ilig) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),markers{ilig},'MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth);
             end
             
         end
