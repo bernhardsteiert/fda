@@ -51,9 +51,9 @@ c_signal = cell2mat(signals);
 return
 
 % Exclude outliers
-% HGF-MEKi, second data-set
+% HGF-AKTi, seventh data-set
 exclude_site = [42];
-exclude_signal = [2];
+exclude_signal = [7];
 for iex = 1:length(exclude_site)
     tmpi = find(celltype == exclude_site(iex));
     ind_new = setdiff(1:size(c_signal,2),tmpi(1)+exclude_signal(iex)-1);
@@ -90,7 +90,7 @@ for ip = 1:length(plot_sites)
 %     title(['Site ' num2str(plot_sites(ip))])
     title(input_names{ip})
     
-    set(gca,'XLim',[50 650])
+    set(gca,'XLim',[200 650])
     
     hold on
     plot(timestamp,nanmean(c_signal_single,2),'--k')
@@ -109,7 +109,7 @@ close all
 
 nbasis = 40;
 % time_range = [min(timestamp) max(timestamp)];
-time_range = [50 650];
+time_range = [200 650];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -148,10 +148,10 @@ rowstocols = 0.5;
 nrows = ceil(nharm^rowstocols);
 ncols = ceil(nharm / nrows);
 
-time_range = [50 650];
+time_range = [200 650];
 
 flipharm = ones(1,nharm);
-flipharm(1:8) = [1 -1 1 -1 -1 1 1 1];
+% flipharm(1:8) = [1 -1 1 -1 -1 1 1 1];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -198,7 +198,7 @@ for ip = 1:length(plot_sites)
     plot(timestamp(range_ind),c_signal_single(:,1:first_n))
     title(input_names{ip})
     
-    set(gca,'XLim',[50 650])
+    set(gca,'XLim',[200 650])
     
     hold on
     plot(timestamp(range_ind),nanmean(c_signal_single,2),'--k')
@@ -239,12 +239,12 @@ radial_dist = sqrt(sum(getcoef(smoothed_data_woNharm).^2,1));
 for ip = 1:length(plot_sites)
     subplot(nrows,ncols,ip)
     
-    baredges = linspace(0,0.1,21);
+    baredges = linspace(0,max(radial_dist)+.01,21);
     bar(baredges,histc(radial_dist(celltypeharm == plot_sites(ip)),baredges));
     
     title(input_names{ip})
     
-    set(gca,'XLim',[0 0.1])
+    set(gca,'XLim',[0 max(radial_dist)+.01])
     if ip == length(plot_sites)
         xlabel('radial distance')
     end

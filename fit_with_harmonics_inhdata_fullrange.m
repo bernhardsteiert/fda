@@ -17,7 +17,11 @@ addpath(grabdataPath)
 % sites_for_harmonics = [4:9 17:-1:12 57:-1:52];
 
 % All ligands
-sites = [4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
+% sites = [4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
+% sites_for_harmonics = [4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
+
+% All ligands + EGF with Inhibitors
+sites = [1 2 4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
 sites_for_harmonics = [4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
 
 
@@ -142,7 +146,7 @@ fprintf('To explain at least %s variance, use %i fPCA basis functions.\n\n',num2
 close all
 
 % Define principal components to be plotted
-pcs = [1 2];
+pcs = [2 3];
 
 unitypes = unique(celltype(ind_harm));
 
@@ -259,17 +263,18 @@ for iplot = 1:nsubplots
 end
 
 %% Plot: Triagonal Matrix of PCs (the bold points are fitted)
-% close all
-figure
+close all
+% figure
 
 max_pc = 4;
 
 % If no harmonics were fitted:
-fitcoef = zeros(size(c_signal_pcastr.harmscr'));
+% fitcoef = zeros(size(c_signal_pcastr.harmscr'));
 
 figure
 color = lines(length(signals));
-legendstyles = nan(1,length(signals));
+% legendstyles = nan(1,length(signals));
+legendstyles = nan(1,3);
 hold on
 
 unitypes = unique(celltype);
@@ -278,8 +283,7 @@ linewidth = 1;
 % markers = {'o','*','s','d','v','>','<','p','h','.'};
 % markers = {'o','s','s','o','o'};
 markers = {'o','o','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s','s'};
-color = lines(5);
-color = [color(1:2,:); repmat(color(3,:),6,1); repmat(color(4,:),6,1); repmat(color(5,:),6,1)]
+color = lines(3);
 
 xpos = .07;
 ypos = .04;
@@ -302,14 +306,33 @@ for irow = 1:max_pc-1
             set(gca,'YTickLabel',[])
         end
         
+        cinh = 1;
+        
+        resort = [];
         for ilig = 1:length(signals)
-            if sum(unitypes(ilig)==sites_for_harmonics)
+            if unitypes(ilig) == 4 % EGF Alone High dose
+                resort = [resort ilig];
+            elseif sum(unitypes(ilig)==sites_for_harmonics)
                 % Data used for harmonics
-%                 legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'o','MarkerFaceColor',color(ilig,:),'LineWidth',linewidth);
-                legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),markers{ilig},'MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth);
+                resort = [ilig resort];
             else
                 % Data used for fitting
-                legendstyles(ilig) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),markers{ilig},'MarkerEdgeColor',color(ilig,:),'LineWidth',linewidth);
+                resort = [resort ilig];
+            end
+            
+        end
+        
+        for ilig = resort
+            if unitypes(ilig) == 4 % EGF Alone High dose
+                legendstyles(cinh) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'.','Color',color(cinh,:),'LineWidth',linewidth);
+            elseif sum(unitypes(ilig)==sites_for_harmonics)
+                % Data used for harmonics
+%                 legendstyles(ilig) = plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'o','MarkerFaceColor',color(ilig,:),'LineWidth',linewidth);
+                plot(c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),icol),c_signal_pcastr.harmscr(celltype(ind_harm) == unitypes(ilig),irow+1),'.','Color',[.7 .7 .7],'LineWidth',linewidth);
+            else
+                % Data used for fitting
+                legendstyles(cinh) = plot(fitcoef(icol,celltype(ind_fit) == unitypes(ilig)),fitcoef(irow+1,celltype(ind_fit) == unitypes(ilig)),'.','MarkerEdgeColor',color(cinh,:),'LineWidth',linewidth);
+                cinh = cinh + 1;
             end
             
         end
@@ -327,4 +350,11 @@ end
 g = subplot(max_pc-1,max_pc-1,max_pc-1);
 set(gca,'Visible','off')
 % legend(g,legendstyles,input_names)
-legend(g,legendstyles,site_lig_name)
+
+leg_str = cell(0);
+for isite = [1 2 4]
+    s = siteprop(isite);
+    leg_str{end+1} = [s.lig_name num2str(s.lig_dose) s.inh_name];
+end
+
+legend(g,legendstyles,leg_str)
