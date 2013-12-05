@@ -13,10 +13,15 @@ grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
 addpath(grabdataPath)
 
 
-sites = [17 41 42 44 57];
-input_names = {'IGF','HGF-MEKi','HGF-AKTi','HGF','EPR'};
-% sites_for_harmonics = [17 44 57];
-sites_for_harmonics = [17 41 42 44 57];
+% sites = [17 41 42 44 57];
+% input_names = {'IGF','HGF-MEKi','HGF-AKTi','HGF','EPR'};
+% sites_for_harmonics = [17 41 42 44 57];
+
+sites = [1 2 4 17 57];
+input_names = {'EGF-MEKi','EGF-AKTi','EGF','IGF','EPR'};
+sites_for_harmonics = [1 2 4 17 57];
+% all ligands highest dose
+
 % all ligands highest dose
 
 
@@ -80,7 +85,7 @@ for ip = 1:length(plot_sites)
     
     c_signal_single = c_signal(:,celltype == plot_sites(ip));
     
-    first_n = 20; % Plot only first_n data-sets
+    first_n = 100; % Plot only first_n data-sets
     
     first_n = min(first_n,size(c_signal_single,2));
 %     f = figure;
@@ -191,7 +196,7 @@ for ip = 1:length(plot_sites)
     
     c_signal_single = c_signal_woNharm(:,celltypeharm == plot_sites(ip));
     
-    first_n = 20;
+    first_n = 100;
     
     first_n = min(first_n,size(c_signal_single,2));
     
@@ -227,6 +232,8 @@ plot(timestamp(range_ind),c_signal_woNharm,'o')
 %% Plot: Histogramm of distance to origin
 close all
 
+rad_dist_thres = 0.04;
+
 figure
 hold on
 
@@ -251,6 +258,67 @@ for ip = 1:length(plot_sites)
     if ip == ceil(length(plot_sites)/2)
         ylabel('absolute frequency')
     end
+    
+    hold on
+    
+    plot([rad_dist_thres rad_dist_thres],get(gca,'YLim'),'--')
+end
+
+%% Plot traces under/over a defined radial distance threshold seperately
+close all
+
+rowstocols = 1;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows)*2;
+
+figure
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,(ip-1)*2+1)
+    
+    c_signal_single = c_signal_woNharm(:,(celltypeharm == plot_sites(ip)) & (radial_dist <= rad_dist_thres));
+    
+    first_n = 20;
+    
+    first_n = min(first_n,size(c_signal_single,2));
+    
+    try
+        plot(timestamp(range_ind),c_signal_single(:,1:first_n))
+    end
+    
+    hold on
+    plot(get(gca,'XLim'),[0 0],'--k')
+    
+    title(input_names{ip})
+    
+    set(gca,'XLim',[200 650])
+    
+    plot([120 120],[-0.04 0.04],'b--')
+    set(gca,'YLim',[-0.04 0.04])
+end
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,ip*2)
+    
+    c_signal_single = c_signal_woNharm(:,(celltypeharm == plot_sites(ip)) & (radial_dist > rad_dist_thres));
+    
+    first_n = 20;
+    
+    first_n = min(first_n,size(c_signal_single,2));
+    
+    try
+        plot(timestamp(range_ind),c_signal_single(:,1:first_n))
+    end
+    
+    hold on
+    plot(get(gca,'XLim'),[0 0],'--k')
+    
+    title(input_names{ip})
+    
+    set(gca,'XLim',[200 650])
+    
+    plot([120 120],[-0.04 0.04],'b--')
+    set(gca,'YLim',[-0.04 0.04])
 end
 
 

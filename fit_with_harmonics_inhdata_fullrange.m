@@ -146,7 +146,7 @@ fprintf('To explain at least %s variance, use %i fPCA basis functions.\n\n',num2
 close all
 
 % Define principal components to be plotted
-pcs = [2 3];
+pcs = [1 2];
 
 unitypes = unique(celltype(ind_harm));
 
@@ -214,6 +214,95 @@ colorbar('Location','North','XTick',log10([2.5 5 10 20 50 100]),'XTickLabel',[2.
 set(gca,'Visible','off')
 
 
+%% Plot: Show effect of different eigenfunctions by color circle
+close all
+
+circ_thres = .9;
+
+subplot(4,4,[1,2,5,6])
+plot(c_signal_pcastr.harmscr(:,pcs(1)),c_signal_pcastr.harmscr(:,pcs(2)),'.','Color',[.7 .7 .7]);
+
+set(gca,'XLim',[min(c_signal_pcastr.harmscr(:,pcs(1))) max(c_signal_pcastr.harmscr(:,pcs(1)))]*1.1,'YLim',[min(c_signal_pcastr.harmscr(:,pcs(2))) max(c_signal_pcastr.harmscr(:,pcs(2)))]*1.1)
+
+ylabel(['PC ' num2str(pcs(2))])
+
+hold on
+
+% [dists dist_ind] = sort((c_signal_pcastr.harmscr(:,pcs(1))-mean(c_signal_pcastr.harmscr(:,pcs(1)))).^2 + (c_signal_pcastr.harmscr(:,pcs(2))-mean(c_signal_pcastr.harmscr(:,pcs(2)))).^2);
+[dists dist_ind] = sort((1./c_signal_pcastr.values(pcs(1))*(c_signal_pcastr.harmscr(:,pcs(1))-mean(c_signal_pcastr.harmscr(:,pcs(1))))).^2 + (1./c_signal_pcastr.values(pcs(2))*(c_signal_pcastr.harmscr(:,pcs(2))-mean(c_signal_pcastr.harmscr(:,pcs(2))))).^2);
+
+tcirc = 0:0.01:1;
+plot(mean(c_signal_pcastr.harmscr(:,pcs(1)))+c_signal_pcastr.values(pcs(1))*sqrt(dists(floor(length(dists)*circ_thres)))*sin(2*pi*tcirc),mean(c_signal_pcastr.harmscr(:,pcs(2)))+c_signal_pcastr.values(pcs(2))*sqrt(dists(floor(length(dists)*circ_thres)))*cos(2*pi*tcirc),'k--')
+
+
+subplot(4,4,[3,4,7,8])
+plot(c_signal_pcastr.harmscr(dist_ind(floor(length(dists)*circ_thres):end),pcs(1)),c_signal_pcastr.harmscr(dist_ind(floor(length(dists)*circ_thres):end),pcs(2)),'.','Color',[.7 .7 .7]);
+
+set(gca,'XLim',[min(c_signal_pcastr.harmscr(:,pcs(1))) max(c_signal_pcastr.harmscr(:,pcs(1)))]*1.1,'YLim',[min(c_signal_pcastr.harmscr(:,pcs(2))) max(c_signal_pcastr.harmscr(:,pcs(2)))]*1.1)
+
+xlabel(['PC ' num2str(pcs(1))])
+
+hold on
+
+radius = linspace(0,sqrt(dists(floor(length(dists)*circ_thres))),6);
+angle = 0:0.05:1;
+
+X = c_signal_pcastr.values(pcs(1))*radius'*cos(2*pi*angle);
+Y = c_signal_pcastr.values(pcs(2))*radius'*sin(2*pi*angle);
+
+H = repmat(linspace(0,1,length(angle)),length(radius),1);
+S = repmat(linspace(0,1,length(radius))',1,length(angle));
+V = .9*ones(length(radius),length(angle));
+
+hsvImage = cat(3,H,S,V);
+C = hsv2rgb(hsvImage);
+
+for r = 1:length(radius)-1
+    for a = 1:length(angle)-1
+        x = X(r:r+1,a:a+1);
+        y = Y(r:r+1,a:a+1);
+        patch(mean(c_signal_pcastr.harmscr(:,pcs(1)))+x([1 2 4 3]),mean(c_signal_pcastr.harmscr(:,pcs(2)))+y([1 2 4 3]),C(r,a,:))
+    end
+end
+
+subplot(4,4,[9,10,11,13,14,15])
+
+hold on
+
+for r = 2:length(radius)-1
+    for a = 2:length(angle)-1
+        x = X(r:r+1,a:a+1);
+        y = Y(r:r+1,a:a+1);
+        plot(times_fine,(mean(c_signal_pcastr.harmscr(:,pcs(1)))+mean(x(:)))*harm_eval(:,pcs(1))+(mean(c_signal_pcastr.harmscr(:,pcs(2)))+mean(y(:)))*harm_eval(:,pcs(2)),'Color',C(r,a,:))
+    end
+end
+
+plot(times_fine,mean(c_signal_pcastr.harmscr(:,pcs(1)))*harm_eval(:,pcs(1))+mean(c_signal_pcastr.harmscr(:,pcs(2)))*harm_eval(:,pcs(2)),'k','LineWidth',2)
+
+xlabel('time')
+ylabel('reconstructed signal')
+
+subplot(4,4,12)
+
+plot(times_fine,harm_eval(:,pcs(1)))
+title(['Harmonic ' num2str(pcs(1))])
+set(gca,'XLim',time_range)
+set(gca,'YLim',[min(min(harm_eval)) max(max(harm_eval))]*1.1)
+set(gca,'XTick',[],'YTick',[])
+
+hold on
+plot(time_range,[0 0],'--')
+
+subplot(4,4,16)
+
+plot(times_fine,harm_eval(:,pcs(2)))
+title(['Harmonic ' num2str(pcs(2))])
+set(gca,'XLim',time_range)
+set(gca,'YLim',[min(min(harm_eval)) max(max(harm_eval))]*1.1)
+set(gca,'XTick',[],'YTick',[])
+
+hold on
+plot(time_range,[0 0],'--')
 
 %% Fit additional data with basis from fPCA
 close all
