@@ -537,7 +537,7 @@ for ilig = 1:length(sites_remain)
     
     c_signal_meansub_single = c_signal_meansub_woNharm(:,celltypeharm == ip);
     
-    first_n = 100;
+    first_n = 20;
     
     first_n = min(first_n,size(c_signal_meansub_single,2));
     
@@ -661,6 +661,7 @@ for ilig = 1:length(sites_remain)
     set(gca,'YLim',[-0.04 0.04])
 end
 
+
 %% Make comprehensive PCA with scores of fPCA and radial distance combined
 % Comment: This might not be a good idea ... maybe better as Pat already
 % suggested: Take radial axis as another dimension!
@@ -741,3 +742,78 @@ set(gca,'CLim',log10([lig_min lig_max]))
 colormap(flipud(jet(ncolor)))
 colorbar('Location','North','XTick',log10([2.5 5 10 20 50 100]),'XTickLabel',[2.5 5 10 20 50 100])
 set(gca,'Visible','off')
+
+
+%% Plot: 3D Plot of PCA i vs j from fPCA with radial distance on 3rd axis
+close all
+
+% Define principal components to be plotted
+pcs = [1 2];
+
+unitypes = unique(celltype(ind_harm));
+
+site_lig_ind = [];
+site_lig_name = {};
+site_lig_dose = [];
+site_inh_name = {};
+site_inh_dose = [];
+
+% Exclude Inhibitor data
+
+for isite = sites_for_harmonics   % only plot ligands used for harmonics
+    s = siteprop(isite);
+    site_lig_ind = [site_lig_ind s.lig_index];
+    site_lig_name{end+1} = s.lig_name;
+    site_lig_dose = [site_lig_dose s.lig_dose];
+    site_inh_name{end+1} = s.inh_name;
+    site_inh_dose = [site_inh_dose s.inh_dose];
+end
+
+sites_remain = find(~site_inh_dose);
+uni_lig = unique(site_lig_ind(sites_remain));
+lig_min = min(site_lig_dose(sites_remain));
+lig_max = max(site_lig_dose(sites_remain));
+ncolor = 201;
+colmap = flipud(jet(ncolor));
+color_doses = 10.^linspace(log10(lig_min),log10(lig_max),ncolor);
+
+rowstocols = 0.5;
+nrows = ceil((length(uni_lig)+1)^rowstocols);
+ncols = ceil((length(uni_lig)+1) / nrows);
+
+for ilig = 1:length(uni_lig)
+    
+    subplot(nrows,ncols,ilig)
+    hold on
+    tmpind = find(site_lig_ind(sites_remain) == uni_lig(ilig));
+    title(site_lig_name{sites_remain(tmpind(1))})
+    
+    if ilig == 1
+        ylabel(['PC ' num2str(pcs(2))])
+    end
+    if ilig == length(uni_lig)
+        xlabel(['PC ' num2str(pcs(1))])
+    end
+    
+%     plot3(c_signal_pcastr.harmscr(:,pcs(1)),c_signal_pcastr.harmscr(:,pcs(2)),radial_dist','.','Color',[.7 .7 .7]);
+    
+    for isite = tmpind
+        % Colored
+        [tmp color_ind] = min(abs(color_doses-site_lig_dose(sites_remain(isite))));
+        mycolor = colmap(color_ind,:);
+        plot3(c_signal_pcastr.harmscr(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),pcs(1)),c_signal_pcastr.harmscr(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),pcs(2)),radial_dist(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)))','.','Color',mycolor);
+    end
+    
+    set(gca,'XLim',[min(c_signal_pcastr.harmscr(:,pcs(1))) max(c_signal_pcastr.harmscr(:,pcs(1)))]*1.1,'YLim',[min(c_signal_pcastr.harmscr(:,pcs(2))) max(c_signal_pcastr.harmscr(:,pcs(2)))]*1.1)
+    set(gca,'ZLim',[min(radial_dist)-.01 max(radial_dist)+.01])
+    
+    view(45, 10);
+end
+
+h = get(gca);
+subplot(nrows,ncols,ilig+1)
+set(gca,'CLim',log10([lig_min lig_max]))
+colormap(flipud(jet(ncolor)))
+colorbar('Location','North','XTick',log10([2.5 5 10 20 50 100]),'XTickLabel',[2.5 5 10 20 50 100])
+set(gca,'Visible','off')
+
