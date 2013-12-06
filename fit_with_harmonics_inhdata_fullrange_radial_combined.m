@@ -146,7 +146,7 @@ fprintf('To explain at least %s variance, use %i fPCA basis functions.\n\n',num2
 close all
 
 % Define principal components to be plotted
-pcs = [1 2];
+pcs = [2 3];
 
 unitypes = unique(celltype(ind_harm));
 
@@ -229,10 +229,10 @@ ylabel(['PC ' num2str(pcs(2))])
 hold on
 
 % [dists dist_ind] = sort((c_signal_pcastr.harmscr(:,pcs(1))-mean(c_signal_pcastr.harmscr(:,pcs(1)))).^2 + (c_signal_pcastr.harmscr(:,pcs(2))-mean(c_signal_pcastr.harmscr(:,pcs(2)))).^2);
-[dists dist_ind] = sort((1./c_signal_pcastr.values(pcs(1))*(c_signal_pcastr.harmscr(:,pcs(1))-mean(c_signal_pcastr.harmscr(:,pcs(1))))).^2 + (1./c_signal_pcastr.values(pcs(2))*(c_signal_pcastr.harmscr(:,pcs(2))-mean(c_signal_pcastr.harmscr(:,pcs(2))))).^2);
+[dists dist_ind] = sort((1./sqrt(c_signal_pcastr.values(pcs(1)))*(c_signal_pcastr.harmscr(:,pcs(1))-mean(c_signal_pcastr.harmscr(:,pcs(1))))).^2 + (1./sqrt(c_signal_pcastr.values(pcs(2)))*(c_signal_pcastr.harmscr(:,pcs(2))-mean(c_signal_pcastr.harmscr(:,pcs(2))))).^2);
 
 tcirc = 0:0.01:1;
-plot(mean(c_signal_pcastr.harmscr(:,pcs(1)))+c_signal_pcastr.values(pcs(1))*sqrt(dists(floor(length(dists)*circ_thres)))*sin(2*pi*tcirc),mean(c_signal_pcastr.harmscr(:,pcs(2)))+c_signal_pcastr.values(pcs(2))*sqrt(dists(floor(length(dists)*circ_thres)))*cos(2*pi*tcirc),'k--')
+plot(mean(c_signal_pcastr.harmscr(:,pcs(1)))+sqrt(c_signal_pcastr.values(pcs(1)))*sqrt(dists(floor(length(dists)*circ_thres)))*cos(2*pi*tcirc),mean(c_signal_pcastr.harmscr(:,pcs(2)))+sqrt(c_signal_pcastr.values(pcs(2)))*sqrt(dists(floor(length(dists)*circ_thres)))*sin(2*pi*tcirc),'k--')
 
 
 subplot(4,4,[3,4,7,8])
@@ -247,8 +247,8 @@ hold on
 radius = linspace(0,sqrt(dists(floor(length(dists)*circ_thres))),6);
 angle = 0:0.05:1;
 
-X = c_signal_pcastr.values(pcs(1))*radius'*cos(2*pi*angle);
-Y = c_signal_pcastr.values(pcs(2))*radius'*sin(2*pi*angle);
+X = sqrt(c_signal_pcastr.values(pcs(1)))*radius'*cos(2*pi*angle);
+Y = sqrt(c_signal_pcastr.values(pcs(2)))*radius'*sin(2*pi*angle);
 
 H = repmat(linspace(0,1,length(angle)),length(radius),1);
 S = repmat(linspace(0,1,length(radius))',1,length(angle));
