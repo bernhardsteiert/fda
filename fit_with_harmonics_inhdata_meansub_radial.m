@@ -136,11 +136,11 @@ plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 %% Make FPCA with data generated in previous block
 close all
 
-nharm = 3;
+nharm = 2;
 c_signal_pcastr = pca_fd(smoothed_data, nharm);
 % c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 
-% plot_pca_fd(c_signal_pcastr, 1, 0)
+plot_pca_fd(c_signal_pcastr, 1, 0)
 % plot(c_signal_pcastr.meanfd)
 
 % c_signal_rotpcastr = varmx_pca(c_signal_pcastr);

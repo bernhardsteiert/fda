@@ -21,8 +21,8 @@ addpath(grabdataPath)
 % sites_for_harmonics = [4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
 
 % All ligands + EGF with Inhibitors
-sites = [1 2 4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
-sites_for_harmonics = [4:9 17:-1:12 24:29 37:-1:32 44:49 57:-1:52 64:69];
+sites = [1 2 4:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 64:69];
+sites_for_harmonics = [4:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 64:69];
 
 
 times = cell(0);
@@ -99,7 +99,7 @@ ncols = ceil(nharm / nrows);
 time_range = [50 200];
 
 flipharm = ones(1,nharm);
-% flipharm(1:4) = [1 1 -1 -1];
+flipharm(1:8) = [-1 1 -1 1 1 1 1 1];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -173,9 +173,9 @@ lig_min = min(site_lig_dose(sites_remain));
 lig_max = max(site_lig_dose(sites_remain));
 ncolor = 201;
 colmap = flipud(jet(ncolor));
-color_doses = 10.^linspace(log10(lig_min),log10(lig_max),ncolor);
+color_doses = 10.^linspace(max(log10([lig_min 1])),log10(lig_max),ncolor);
 
-rowstocols = 0.5;
+rowstocols = 0.3;
 nrows = ceil((length(uni_lig)+1)^rowstocols);
 ncols = ceil((length(uni_lig)+1) / nrows);
 
@@ -193,24 +193,26 @@ for ilig = 1:length(uni_lig)
         xlabel(['PC ' num2str(pcs(1))])
     end
     
-    plot(c_signal_pcastr.harmscr(:,pcs(1)),c_signal_pcastr.harmscr(:,pcs(2)),'.','Color',[.7 .7 .7]);
+    plot(flipharm(pcs(1))*c_signal_pcastr.harmscr(:,pcs(1)),flipharm(pcs(2))*c_signal_pcastr.harmscr(:,pcs(2)),'.','Color',[.7 .7 .7]);
     
     for isite = tmpind
         % Colored
         [tmp color_ind] = min(abs(color_doses-site_lig_dose(sites_remain(isite))));
         mycolor = colmap(color_ind,:);
-        plot(c_signal_pcastr.harmscr(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),pcs(1)),c_signal_pcastr.harmscr(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),pcs(2)),'.','Color',mycolor);
+        plot(flipharm(pcs(1))*c_signal_pcastr.harmscr(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),pcs(1)),flipharm(pcs(2))*c_signal_pcastr.harmscr(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),pcs(2)),'.','Color',mycolor);
     end
     
-    set(gca,'XLim',[min(c_signal_pcastr.harmscr(:,pcs(1))) max(c_signal_pcastr.harmscr(:,pcs(1)))]*1.1,'YLim',[min(c_signal_pcastr.harmscr(:,pcs(2))) max(c_signal_pcastr.harmscr(:,pcs(2)))]*1.1)
+    set(gca,'XLim',[min(flipharm(pcs(1))*c_signal_pcastr.harmscr(:,pcs(1))) max(flipharm(pcs(1))*c_signal_pcastr.harmscr(:,pcs(1)))]*1.1,'YLim',[min(flipharm(pcs(2))*c_signal_pcastr.harmscr(:,pcs(2))) max(flipharm(pcs(2))*c_signal_pcastr.harmscr(:,pcs(2)))]*1.1)
     
 end
 
 h = get(gca);
 subplot(nrows,ncols,ilig+1)
-set(gca,'CLim',log10([lig_min lig_max]))
+clim = log10([lig_min lig_max]);
+clim(1) = max([clim(1) 0]);
+set(gca,'CLim',clim)
 colormap(flipud(jet(ncolor)))
-colorbar('Location','North','XTick',log10([2.5 5 10 20 50 100]),'XTickLabel',[2.5 5 10 20 50 100])
+colorbar('Location','North','XTick',log10([1 2.5 5 10 20 50 100]),'XTickLabel',[0 2.5 5 10 20 50 100])
 set(gca,'Visible','off')
 
 
@@ -526,7 +528,7 @@ close all
 c_signal_meansub_woNharm = c_signal_meansub(range_ind,ind_harm)-eval_fd(c_signal_meansub_pcastr.fdhatfd,timestamp(range_ind));
 celltypeharm = celltype(ind_harm);
 
-ncols = 6;
+ncols = 7;
 nrows = ceil(length(sites_remain)/ncols);
 
 figure
@@ -573,11 +575,11 @@ plot(timestamp(range_ind),c_signal_meansub_woNharm,'o')
 %% Plot: Histogramm of distance to origin
 close all
 
-rad_dist_thres = 0.025;
+rad_dist_thres = 0.035;
 
 radial_dist = sqrt(sum(getcoef(smoothed_data_woNharm).^2,1));
 
-ncols = 6;
+ncols = 7;
 nrows = ceil(length(sites_remain)/ncols);
 
 figure
@@ -607,7 +609,9 @@ end
 %% Plot traces under/over a defined radial distance threshold seperately
 close all
 
-ncols = 6;
+only_plot_more_than = 5;
+
+ncols = 7;
 nrows = ceil(length(sites_remain)/ncols);
 
 figure
@@ -646,8 +650,10 @@ for ilig = 1:length(sites_remain)
     
     first_n = min(first_n,size(c_signal_meansub_single,2));
     
-    try
-        plot(timestamp(range_ind),c_signal_meansub_single(:,1:first_n))
+    if first_n >= only_plot_more_than
+        try
+            plot(timestamp(range_ind),c_signal_meansub_single(:,1:first_n))
+        end
     end
     
     hold on
@@ -658,7 +664,7 @@ for ilig = 1:length(sites_remain)
     set(gca,'XLim',[200 650])
     
     plot([120 120],[-0.04 0.04],'b--')
-    set(gca,'YLim',[-0.04 0.04])
+    set(gca,'YLim',[-0.02 0.02])
 end
 
 
