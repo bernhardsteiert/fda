@@ -22,8 +22,6 @@ input_names = {'EGF-MEKi','EGF-AKTi','EGF','No Lig','IGF','EPR','BTC'};
 sites_for_harmonics = [1 2 4 10 17 57 64];
 % all ligands highest dose
 
-% all ligands highest dose
-
 
 times = cell(0);
 signals = cell(0);
@@ -306,14 +304,14 @@ end
 %% Plot: Histogramm of distance to origin (new - overlayed)
 close all
 
-rad_dist_thres = 0.03;
+groups = {[1 2 4], [4 17 57 64]};
 
 figure
 hold on
 
 rowstocols = 0.6;
-nrows = ceil(length(plot_sites)^rowstocols);
-ncols = ceil(length(plot_sites) / nrows);
+nrows = ceil(length(groups)^rowstocols);
+ncols = ceil(length(groups) / nrows);
 
 radial_dist = sqrt(sum(getcoef(smoothed_data_woNharm).^2,1));
 
@@ -323,32 +321,89 @@ posFig = get(gcf,'Position');
 set(gcf,'Position',posFig)
 set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
 
+for ig = 1:length(groups)
+    g = subplot(nrows,ncols,ig);
+    hold on
+    
+    mygroup = groups{ig};
+    
+    legend_names = {};
+    legendstyles = nan(1,length(mygroup));
+    color = lines(length(mygroup));
+    for ip = 1:length(mygroup)
+
+        baredges = linspace(0,max(radial_dist)+.01,26);
+        barheight = histc(radial_dist(celltypeharm == mygroup(ip)),baredges)./sum(celltypeharm == mygroup(ip));
+        legendstyles(ip) = plot(baredges,barheight,'Color',color(ip,:));
+
+        legend_names{end+1} = (input_names{mygroup(ip) == sites_for_harmonics});
+
+    end
+    
+    legend(g,legendstyles,legend_names)
+    
+    set(gca,'XLim',[0 max(radial_dist)+.01])
+    set(gca,'YLim',[0 .5])
+
+    xlabel('radial distance')
+    ylabel('relative frequency')
+
+end
+
+%% Plot traces with gray level corrsesponding to radial distance
+close all
+
+rowstocols = 0.6;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows);
+
+figure
+
+posFig = get(gcf,'Position');
+% posFig(3) = posFig(3)/2;
+% posFig(4) = posFig(4)*2;
+set(gcf,'Position',posFig)
+set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
+
+ncolor = 201;
+color = repmat(linspace(0,1,ncolor),3,1);
+
+color = color(:,end:-1:1); % Gray scale - darkness depending on score
+
+% TODO: As Pat suggested: Plot 4 representing lines / subplot in red - saturation depending on score
+
+% color = (abs(1-color .* lines(ncolor)')).^2; % Colored - saturation depending on score
+radial_space = linspace(min(radial_dist),max(radial_dist),ncolor);
+[radial_dist_sorted ind_sort_radial] = sort(radial_dist);
+
 for ip = 1:length(plot_sites)
     subplot(nrows,ncols,ip)
+    hold on
     
-    baredges = linspace(0,max(radial_dist)+.01,21);
-    bar(baredges,histc(radial_dist(celltypeharm == plot_sites(ip)),baredges));
+    c_signal_single = c_signal_raw(:,ind_sort_radial);
+    c_signal_single = c_signal_single(:,(celltypeharm(ind_sort_radial) == plot_sites(ip)));
+    radial_dist_single = radial_dist_sorted(celltypeharm(ind_sort_radial) == plot_sites(ip));
+    
+    for i = 1:size(c_signal_single,2)
+        [tmp color_ind] = min(abs(radial_dist_single(i) - radial_space));
+        plot(timestamp,c_signal_single(:,i),'Color',color(:,color_ind))
+    end
+    
+    plot(get(gca,'XLim'),[0 0],'--k')
     
     title(input_names{ip})
     
-    set(gca,'XLim',[0 max(radial_dist)+.01])
-    if ip == length(plot_sites)
-        xlabel('radial distance')
-    end
-    if ip == 1
-        ylabel('absolute frequency')
-    end
+    set(gca,'XLim',[50 650])
     
-    hold on
-    
-%     plot([rad_dist_thres rad_dist_thres],get(gca,'YLim'),'--')
+    plot([120 120],[-0.04 0.04],'b--')
+%     set(gca,'YLim',[-0.04 0.04])
 end
 
 
 %% Plot traces under/over a defined radial distance threshold seperately
 close all
 
-rowstocols = 0,6;
+rowstocols = 1;
 nrows = ceil(length(plot_sites)^rowstocols);
 ncols = ceil(length(plot_sites) / nrows)*2;
 
@@ -394,56 +449,6 @@ for ip = 1:length(plot_sites)
     end
     
     hold on
-    plot(get(gca,'XLim'),[0 0],'--k')
-    
-    title(input_names{ip})
-    
-    set(gca,'XLim',[50 650])
-    
-    plot([120 120],[-0.04 0.04],'b--')
-%     set(gca,'YLim',[-0.04 0.04])
-end
-
-
-%% Plot traces with gray level corrsesponding to radial distance
-close all
-
-rowstocols = 0.6;
-nrows = ceil(length(plot_sites)^rowstocols);
-ncols = ceil(length(plot_sites) / nrows);
-
-figure
-
-posFig = get(gcf,'Position');
-% posFig(3) = posFig(3)/2;
-% posFig(4) = posFig(4)*2;
-set(gcf,'Position',posFig)
-set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
-
-ncolor = 201;
-color = repmat(linspace(0,1,ncolor),3,1);
-
-color = color(:,end:-1:1); % Gray scale - darkness depending on score
-
-% TODO: As Pat suggested: Plot 4 representing lines / subplot in red - saturation depending on score
-
-% color = (abs(1-color .* lines(ncolor)')).^2; % Colored - saturation depending on score
-radial_space = linspace(min(radial_dist),max(radial_dist),ncolor);
-[radial_dist_sorted ind_sort_radial] = sort(radial_dist);
-
-for ip = 1:length(plot_sites)
-    subplot(nrows,ncols,ip)
-    hold on
-    
-    c_signal_single = c_signal_raw(:,ind_sort_radial);
-    c_signal_single = c_signal_single(:,(celltypeharm(ind_sort_radial) == plot_sites(ip)));
-    radial_dist_single = radial_dist_sorted(celltypeharm(ind_sort_radial) == plot_sites(ip));
-    
-    for i = 1:size(c_signal_single,2)
-        [tmp color_ind] = min(abs(radial_dist_single(i) - radial_space));
-        plot(timestamp,c_signal_single(:,i),'Color',color(:,color_ind))
-    end
-    
     plot(get(gca,'XLim'),[0 0],'--k')
     
     title(input_names{ip})
