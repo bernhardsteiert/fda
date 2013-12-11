@@ -304,7 +304,8 @@ end
 %% Plot: Histogramm of distance to origin (new - overlayed)
 close all
 
-groups = {[1 2 4], [4 17 57 64]};
+groups = {[1 2 4 10], [4 10 17 57 64]};
+resort = {[2 3 1 4], [1 4 2 3 5]};
 
 figure
 hold on
@@ -315,12 +316,6 @@ ncols = ceil(length(groups) / nrows);
 
 radial_dist = sqrt(sum(getcoef(smoothed_data_woNharm).^2,1));
 
-posFig = get(gcf,'Position');
-% posFig(3) = posFig(3)/2;
-% posFig(4) = posFig(4)*2;
-set(gcf,'Position',posFig)
-set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
-
 for ig = 1:length(groups)
     g = subplot(nrows,ncols,ig);
     hold on
@@ -330,11 +325,15 @@ for ig = 1:length(groups)
     legend_names = {};
     legendstyles = nan(1,length(mygroup));
     color = lines(length(mygroup));
+    color(4,:) = 0;
     for ip = 1:length(mygroup)
 
-        baredges = linspace(0,max(radial_dist)+.01,26);
-        barheight = histc(radial_dist(celltypeharm == mygroup(ip)),baredges)./sum(celltypeharm == mygroup(ip));
-        legendstyles(ip) = plot(baredges,barheight,'Color',color(ip,:));
+%         baredges = linspace(0,max(radial_dist)+.01,26);
+%         barheight = histc(radial_dist(celltypeharm == mygroup(ip)),baredges)./sum(celltypeharm == mygroup(ip));
+%         legendstyles(ip) = plot(baredges,barheight,'Color',color(resort{ig}(ip),:));
+
+        [f,xi] = ksdensity(radial_dist(celltypeharm == mygroup(ip)));
+        legendstyles(ip) = plot(xi,f,'Color',color(resort{ig}(ip),:));
 
         legend_names{end+1} = (input_names{mygroup(ip) == sites_for_harmonics});
 
@@ -343,10 +342,11 @@ for ig = 1:length(groups)
     legend(g,legendstyles,legend_names)
     
     set(gca,'XLim',[0 max(radial_dist)+.01])
-    set(gca,'YLim',[0 .5])
+    set(gca,'YLim',[0 200])
 
     xlabel('radial distance')
-    ylabel('relative frequency')
+%     ylabel('relative frequency')
+    ylabel('estimated density')
 
 end
 
