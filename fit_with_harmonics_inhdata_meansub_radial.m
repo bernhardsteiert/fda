@@ -17,9 +17,9 @@ addpath(grabdataPath)
 % input_names = {'IGF','HGF-MEKi','HGF-AKTi','HGF','EPR'};
 % sites_for_harmonics = [17 41 42 44 57];
 
-sites = [1 2 4 17 57];
-input_names = {'EGF-MEKi','EGF-AKTi','EGF','IGF','EPR'};
-sites_for_harmonics = [1 2 4 17 57];
+sites = [1 2 4 10 17 57 64];
+input_names = {'EGF-MEKi','EGF-AKTi','EGF','No Lig','IGF','EPR','BTC'};
+sites_for_harmonics = [1 2 4 10 17 57 64];
 % all ligands highest dose
 
 % all ligands highest dose
@@ -27,6 +27,7 @@ sites_for_harmonics = [1 2 4 17 57];
 
 times = cell(0);
 signals = cell(0);
+signals_raw = cell(0);
 celltype = [];
 
 for isite = sites
@@ -37,15 +38,15 @@ for isite = sites
         times{end+1} = timestamp;
     end
 
-    log_trafo = 0; % log-transform signal
+    log_trafo = 1; % log-transform signal
 
     if log_trafo
-        signals{end+1} = log10(intensity);
+        signals_raw{end+1} = log10(intensity);
     else
-        signals{end+1} = intensity;
+        signals_raw{end+1} = intensity;
     end
     
-    signals{end} = signals{end} - repmat(nanmean(signals{end},2),1,size(signals{end},2));
+    signals{end+1} = signals_raw{end} - repmat(nanmean(signals_raw{end},2),1,size(signals_raw{end},2));
     
     celltype = [celltype ones(1,size(intensity,2))*isite];
 end
@@ -67,6 +68,38 @@ for iex = 1:length(exclude_site)
 end
 
 return
+
+%% Plot raw data of defined ligands
+close all
+figure
+
+c_signal_raw = cell2mat(signals_raw);
+
+plot_ligs = sites;
+plot_name = input_names;
+nrows = 3;
+ncols = 3;
+
+nplot = 20;
+
+for iplot = 1:length(plot_ligs)
+    subplot(nrows,ncols,iplot)
+    
+    plot(repmat(timestamp,1,sum(celltype == plot_ligs(iplot))),c_signal_raw(:,celltype == plot_ligs(iplot)),'g','color',[0.7 0.7 0.7])
+    colored_ind = find(celltype == plot_ligs(iplot));
+    hold on
+%     plot(repmat(timestamp,1,nplot),c_signal_raw(:,colored_ind(1:nplot)))
+    plot(timestamp,nanmean(c_signal_raw(:,celltype == plot_ligs(iplot)),2),'color','k','LineWidth',2)
+    title(plot_name{iplot})
+    
+    ylim = [-1 1]*.04;
+    if ~log_trafo
+        ylim = 10.^ylim;
+    end
+    set(gca,'XLim',[0 650],'YLim',ylim)
+    set(gca,'XLim',[0 650])
+
+end
 
 %% Plot every data set with distinct color
 close all
@@ -136,7 +169,7 @@ plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 %% Make FPCA with data generated in previous block
 close all
 
-nharm = 2;
+nharm = 3;
 c_signal_pcastr = pca_fd(smoothed_data, nharm);
 % c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 
@@ -209,7 +242,7 @@ for ip = 1:length(plot_sites)
     plot(timestamp(range_ind),nanmean(c_signal_single,2),'--k')
     
     plot([120 120],[-0.04 0.04],'b--')
-    set(gca,'YLim',[-0.04 0.04])
+%     set(gca,'YLim',[-0.04 0.04])
 end
 
 %% Generate spline fits to data-sets given in sites_for_harmonics (for remaining variation)
@@ -232,16 +265,22 @@ plot(timestamp(range_ind),c_signal_woNharm,'o')
 %% Plot: Histogramm of distance to origin
 close all
 
-rad_dist_thres = 0.04;
+rad_dist_thres = 0.03;
 
 figure
 hold on
 
-rowstocols = 1;
+rowstocols = 0.6;
 nrows = ceil(length(plot_sites)^rowstocols);
 ncols = ceil(length(plot_sites) / nrows);
 
 radial_dist = sqrt(sum(getcoef(smoothed_data_woNharm).^2,1));
+
+posFig = get(gcf,'Position');
+% posFig(3) = posFig(3)/2;
+% posFig(4) = posFig(4)*2;
+set(gcf,'Position',posFig)
+set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
 
 for ip = 1:length(plot_sites)
     subplot(nrows,ncols,ip)
@@ -255,19 +294,61 @@ for ip = 1:length(plot_sites)
     if ip == length(plot_sites)
         xlabel('radial distance')
     end
-    if ip == ceil(length(plot_sites)/2)
+    if ip == 1
         ylabel('absolute frequency')
     end
     
     hold on
     
-    plot([rad_dist_thres rad_dist_thres],get(gca,'YLim'),'--')
+%     plot([rad_dist_thres rad_dist_thres],get(gca,'YLim'),'--')
 end
+
+%% Plot: Histogramm of distance to origin (new - overlayed)
+close all
+
+rad_dist_thres = 0.03;
+
+figure
+hold on
+
+rowstocols = 0.6;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows);
+
+radial_dist = sqrt(sum(getcoef(smoothed_data_woNharm).^2,1));
+
+posFig = get(gcf,'Position');
+% posFig(3) = posFig(3)/2;
+% posFig(4) = posFig(4)*2;
+set(gcf,'Position',posFig)
+set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,ip)
+    
+    baredges = linspace(0,max(radial_dist)+.01,21);
+    bar(baredges,histc(radial_dist(celltypeharm == plot_sites(ip)),baredges));
+    
+    title(input_names{ip})
+    
+    set(gca,'XLim',[0 max(radial_dist)+.01])
+    if ip == length(plot_sites)
+        xlabel('radial distance')
+    end
+    if ip == 1
+        ylabel('absolute frequency')
+    end
+    
+    hold on
+    
+%     plot([rad_dist_thres rad_dist_thres],get(gca,'YLim'),'--')
+end
+
 
 %% Plot traces under/over a defined radial distance threshold seperately
 close all
 
-rowstocols = 1;
+rowstocols = 0,6;
 nrows = ceil(length(plot_sites)^rowstocols);
 ncols = ceil(length(plot_sites) / nrows)*2;
 
@@ -276,14 +357,15 @@ figure
 for ip = 1:length(plot_sites)
     subplot(nrows,ncols,(ip-1)*2+1)
     
-    c_signal_single = c_signal_woNharm(:,(celltypeharm == plot_sites(ip)) & (radial_dist <= rad_dist_thres));
-    
-    first_n = 20;
+%     c_signal_single = c_signal_woNharm(:,(celltypeharm == plot_sites(ip)) & (radial_dist <= rad_dist_thres));
+    c_signal_single = c_signal_raw(:,(celltypeharm == plot_sites(ip)) & (radial_dist <= rad_dist_thres));
+
+    first_n = 10;
     
     first_n = min(first_n,size(c_signal_single,2));
     
     try
-        plot(timestamp(range_ind),c_signal_single(:,1:first_n))
+        plot(timestamp,c_signal_single(:,1:first_n))
     end
     
     hold on
@@ -291,23 +373,24 @@ for ip = 1:length(plot_sites)
     
     title(input_names{ip})
     
-    set(gca,'XLim',[200 650])
+    set(gca,'XLim',[50 650])
     
     plot([120 120],[-0.04 0.04],'b--')
-    set(gca,'YLim',[-0.04 0.04])
+%     set(gca,'YLim',[-0.04 0.04])
 end
 
 for ip = 1:length(plot_sites)
     subplot(nrows,ncols,ip*2)
     
-    c_signal_single = c_signal_woNharm(:,(celltypeharm == plot_sites(ip)) & (radial_dist > rad_dist_thres));
-    
-    first_n = 20;
+%     c_signal_single = c_signal_woNharm(:,(celltypeharm == plot_sites(ip)) & (radial_dist > rad_dist_thres));
+    c_signal_single = c_signal_raw(:,(celltypeharm == plot_sites(ip)) & (radial_dist > rad_dist_thres));
+
+    first_n = 10;
     
     first_n = min(first_n,size(c_signal_single,2));
     
     try
-        plot(timestamp(range_ind),c_signal_single(:,1:first_n))
+        plot(timestamp,c_signal_single(:,1:first_n))
     end
     
     hold on
@@ -315,10 +398,60 @@ for ip = 1:length(plot_sites)
     
     title(input_names{ip})
     
-    set(gca,'XLim',[200 650])
+    set(gca,'XLim',[50 650])
     
     plot([120 120],[-0.04 0.04],'b--')
-    set(gca,'YLim',[-0.04 0.04])
+%     set(gca,'YLim',[-0.04 0.04])
+end
+
+
+%% Plot traces with gray level corrsesponding to radial distance
+close all
+
+rowstocols = 0.6;
+nrows = ceil(length(plot_sites)^rowstocols);
+ncols = ceil(length(plot_sites) / nrows);
+
+figure
+
+posFig = get(gcf,'Position');
+% posFig(3) = posFig(3)/2;
+% posFig(4) = posFig(4)*2;
+set(gcf,'Position',posFig)
+set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
+
+ncolor = 201;
+color = repmat(linspace(0,1,ncolor),3,1);
+
+color = color(:,end:-1:1); % Gray scale - darkness depending on score
+
+% TODO: As Pat suggested: Plot 4 representing lines / subplot in red - saturation depending on score
+
+% color = (abs(1-color .* lines(ncolor)')).^2; % Colored - saturation depending on score
+radial_space = linspace(min(radial_dist),max(radial_dist),ncolor);
+[radial_dist_sorted ind_sort_radial] = sort(radial_dist);
+
+for ip = 1:length(plot_sites)
+    subplot(nrows,ncols,ip)
+    hold on
+    
+    c_signal_single = c_signal_raw(:,ind_sort_radial);
+    c_signal_single = c_signal_single(:,(celltypeharm(ind_sort_radial) == plot_sites(ip)));
+    radial_dist_single = radial_dist_sorted(celltypeharm(ind_sort_radial) == plot_sites(ip));
+    
+    for i = 1:size(c_signal_single,2)
+        [tmp color_ind] = min(abs(radial_dist_single(i) - radial_space));
+        plot(timestamp,c_signal_single(:,i),'Color',color(:,color_ind))
+    end
+    
+    plot(get(gca,'XLim'),[0 0],'--k')
+    
+    title(input_names{ip})
+    
+    set(gca,'XLim',[50 650])
+    
+    plot([120 120],[-0.04 0.04],'b--')
+%     set(gca,'YLim',[-0.04 0.04])
 end
 
 

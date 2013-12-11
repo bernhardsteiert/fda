@@ -437,7 +437,7 @@ for ilig = 1:length(ind_included_panel1)
         std_trajectories = std(pc_trajectories)./sqrt(size(pc_trajectories,1));
         
         tmpx = [times_fine'; flipud(times_fine')];
-        tmpy = [mean_trajectories'+std_trajectories'; flipud(mean_trajectories'-std_trajectories')];
+        tmpy = [mean_trajectories'+2*std_trajectories'; flipud(mean_trajectories'-2*std_trajectories')];
         
         plot(times_fine,mean_trajectories,'Color',color(ilig,:))
         
@@ -480,7 +480,7 @@ for ilig = 1:length(ind_included_panel2)
         std_trajectories = std(pc_trajectories)./sqrt(size(pc_trajectories,1));
         
         tmpx = [times_fine'; flipud(times_fine')];
-        tmpy = [mean_trajectories'+std_trajectories'; flipud(mean_trajectories'-std_trajectories')];
+        tmpy = [mean_trajectories'+2*std_trajectories'; flipud(mean_trajectories'-2*std_trajectories')];
         
         plot(times_fine,mean_trajectories,'Color',color(ilig,:))
         
@@ -503,7 +503,7 @@ for ilig = 1:length(ind_included_panel2)
         std_trajectories = std(pc_trajectories)./sqrt(size(pc_trajectories,1));
         
         tmpx = [times_fine'; flipud(times_fine')];
-        tmpy = [mean_trajectories'+std_trajectories'; flipud(mean_trajectories'-std_trajectories')];
+        tmpy = [mean_trajectories'+2*std_trajectories'; flipud(mean_trajectories'-2*std_trajectories')];
         
         plot(times_fine,mean_trajectories,'Color',color(ilig,:))
         
