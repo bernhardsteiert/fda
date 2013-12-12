@@ -14,4 +14,5 @@ dose_index = mod(dose_index-1,5)+1;
 
 s.lig_dose = ligand_dose(dose_index);
 s.inh_name = inh_name{name_ind};
+s.inh_ind = name_ind;
 s.inh_dose = inh_dose(inh_index);
