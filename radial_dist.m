@@ -1,6 +1,6 @@
 function radial_dist = radial_dist(isite)
     
-    load('harmonics_slow.mat') % Contains only c_signal_pcastr from all data-sets
+    load('harm_basis.mat') % Contains only harm_basis from all data-sets
     
     remotepath = mypath();
     
@@ -30,8 +30,6 @@ function radial_dist = radial_dist(isite)
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
     [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
     range_ind = range_ind_min:range_ind_max;
-    
-    harm_basis = create_fd_basis(c_signal_pcastr.harmfd);
     
     smoothed_additional = smooth_basis(timestamp(range_ind),c_signal(range_ind,:),harm_basis);
     
