@@ -1,4 +1,4 @@
-function radial_dist = radial_dist(isite)
+function [radial_dist c_signal_woNharm] = radial_dist(isite)
     
     load('harm_basis.mat') % Contains only harm_basis from all data-sets
     
