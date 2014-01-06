@@ -11,10 +11,10 @@ for i=1:length(sites)
 end
 %%
 for i=1:length(sites)
-    figure(2);subplot(1,6,i),plot(mysignal{i});
+    figure(2);subplot(2,3,i),plot(mysignal{i});
     title(num2str(sites(i)));
     
-    figure(3);myp(i) = subplot(1,6,i),hist(myrad{i},linspace(0,0.1,32));
+    figure(3);myp(i) = subplot(2,3,i),hist(myrad{i},linspace(0,0.1,32));
     xlim([0 0.1]);
     title(num2str(sites(i)));
 end
@@ -22,37 +22,38 @@ end
 old_pxx = zeros(32,1);
 fs = (1/(5*60));
 for i=1:length(sites)
-    figure(4);s(i) = subplot(1,6,i);
+    figure(4);s(i) = subplot(2,3,i);
+    figure(5);s1(i) = subplot(2,3,i);
 end
 linkaxes(s);
+linkaxes(s1);
 
 for i=1:length(sites)
-    figure(4);s(i) = subplot(1,6,i);
+    figure(4);subplot(2,3,i);
     for c = 1:size(mysignal{i},2)
         x = mysignal{i}(:,c);
         [pxx,f] = periodogram(x,hamming(length(x)),length(x),fs,'onesided','power');
         old_pxx = (old_pxx*(c-1)+pxx)/c;
             
         plot(f,10*log10(old_pxx));
-        title(num2str(sites(i)));
         drawnow;
     end
+    title(num2str(sites(i)));
 end
 figure(5);
-set(gcf,'Position',[10,200,1000,200]);
 mycolor = hsv(20);
 for i=1:length(sites)
-    s(i) = subplot(1,6,i);
+    subplot(2,3,i);
     p = randperm(size(mysignal{i},2));
     for c =  p(1:30)
         x = mysignal{i}(:,c);
         y = [0;diff(x)];
         z = [0;diff(y)];
         plot(y,z,'color',mycolor(randi(20,1),:)); hold on; axis image;
-        pause(1);
-        title(num2str(sites(i)));
-        drawnow;
+        
+        
     end
+    title(num2str(sites(i)));
     hold off;
 end
 
