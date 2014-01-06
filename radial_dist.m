@@ -11,7 +11,7 @@ function [radial_dist c_signal_woNharm] = radial_dist(isite)
     addpath(grabdataPath)
 
     log_trafo = 1; % log-transform signal
-    time_range = [200 510];
+    time_range = getbasisrange(harm_basis);
     
     if exist(remotepath,'dir')
         [timestamp,intensity] = grabdata(isite);
@@ -30,6 +30,13 @@ function [radial_dist c_signal_woNharm] = radial_dist(isite)
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
     [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
     range_ind = range_ind_min:range_ind_max;
+    
+    if timestamp(range_ind(1)) < time_range(1)
+        range_ind = range_ind(2:end);
+    end
+    if timestamp(range_ind(end)) > time_range(2)
+        range_ind = range_ind(1:end-1);
+    end
     
     smoothed_additional = smooth_basis(timestamp(range_ind),c_signal(range_ind,:),harm_basis);
     
