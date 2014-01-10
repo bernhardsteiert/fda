@@ -62,6 +62,7 @@ c_signal = cell2mat(signals);
 
 % return
 
+
 %% Register to mean value in time range
 close all
 
@@ -251,6 +252,7 @@ for ilig_plot = 1:length(ligs_to_plot)
     
     ilig = ligs_to_plot(ilig_plot);
     subplot(nrows,ncols,(2*(ilig_plot-1)+1):(2*ilig_plot))
+    box on
     hold on
     tmpind = find(site_lig_ind(sites_remain) == uni_lig(ilig));
     title(site_lig_name{sites_remain(tmpind(1))})
@@ -302,12 +304,15 @@ for ilig_plot = 1:length(ligs_to_plot)
     if ilig_plot == 1
         ylabel(['PC ' num2str(pcs(2))])
         arrow([-.13 -.1],[.2 -.1],'Width',.5,'Length',7)
+        set(gca,'YTick',-.1:.1:.2)
     end
     if ilig_plot == length(ligs_to_plot)-1
         xlabel(['PC ' num2str(pcs(1))])
+        set(gca,'YTickLabel',[])
     end
     if ilig_plot == length(ligs_to_plot)
         arrow([-.13 .08],[.05 .2],'Width',.5,'Length',7)
+        set(gca,'YTickLabel',[])
     end
 end
 
@@ -324,13 +329,75 @@ text(0,-.05,'Ligand dose\newline[ng/ml]')
 
 return
 
-%% Figure 2B: Eigenfunctions (new - rotated)
+%% Plot EGF early vs. late time-points
 close all
+
+time_range = [50 510];
+
+[tmp range_ind_min] = min(abs(timestamp - time_range(1)));
+[tmp range_ind_max] = min(abs(timestamp - time_range(2)));
+range_ind = range_ind_min:range_ind_max;
+
+f = figure;
+
+posFig = get(gcf,'Position');
+posFig(4) = posFig(4)/1.5;
+set(gcf,'Position',posFig)
+set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./17);
+
+nrows = 3;
+ncols = 5;
+subplot(nrows,ncols,[1 2 3 6 7 8 11 12 13])
+
+site_lig_ind = [];
+site_lig_name = {};
+site_lig_dose = [];
+site_inh_name = {};
+site_inh_dose = [];
+
+% Exclude Inhibitor data
+for isite = sites_for_harmonics   % only plot ligands used for harmonics
+    s = siteprop(isite);
+    site_lig_ind = [site_lig_ind s.lig_index];
+    site_lig_name{end+1} = s.lig_name;
+    site_lig_dose = [site_lig_dose s.lig_dose];
+    site_inh_name{end+1} = s.inh_name;
+    site_inh_dose = [site_inh_dose s.inh_dose];
+end
+
+iplot = 1; % EGF high dose
+first_n = 15; % Plot first_n traces colored
+set(f,'DefaultAxesColorOrder',lines(first_n))
+
+plotsignals = find(celltype == sites_for_harmonics(iplot));
+plot(repmat(timestamp(range_ind),1,length(plotsignals)),c_signal(range_ind,plotsignals),'g','color',[0.7 0.7 0.7])
+hold on
+plot(repmat(timestamp(range_ind),1,first_n),c_signal(range_ind,plotsignals(1:first_n)))
+plot(timestamp(range_ind),nanmean(c_signal(range_ind,plotsignals),2),'color','k','LineWidth',2)
+title([site_lig_name{iplot} num2str(site_lig_dose(iplot)) ' [ng/ml]'])
+
+xlabel('time [min]')
+ylabel('log_{10} FOXO3a Cyt/Nuc ratio');
+
+ylim = [-1 1]*.04;
+if ~log_trafo
+    ylim = 10.^ylim;
+end
+plot([200 200],ylim,'k--')
+text(75,.035,'early response\newline(deterministic)')
+text(300,.035,'late response\newline(stochastic)')
+
+set(gca,'XLim',time_range,'YLim',ylim)
+set(gca,'XTick',50:50:500)
+
+% Figure 2B: Eigenfunctions (new - rotated)
 pcs = 1:3;
 
-rowstocols = 1;
-nrows = ceil(nharm^rowstocols);
-ncols = ceil(nharm / nrows);
+% rowstocols = 1;
+% nrows = ceil(nharm^rowstocols);
+% ncols = ceil(nharm / nrows);
+
+time_range = [50 200];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -342,12 +409,10 @@ harm_eval_rescale = 2 * repmat(sqrt(c_signal_pcastr.values(1:nharm))',length(tim
 % <-- Why does Ramsay do that?? Destroys normalization and may not be done if harmonics are rotated!
 harm_eval_rescale = harm_eval;
 
-figure
-
-posFig = get(gcf,'Position');
-posFig(3) = posFig(3)/2.5;
-set(gcf,'Position',posFig)
-set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./20);
+% posFig = get(gcf,'Position');
+% posFig(3) = posFig(3)/2.5;
+% set(gcf,'Position',posFig)
+% set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./20);
 
 harmscr = (Rmat * flipped_scores(:,1:3)')';
 propvar = squeeze(sum(harmscr.^2));
@@ -355,7 +420,7 @@ propvar = propvar./sum(propvar);
 propvar = propvar.*sum(c_signal_pcastr.varprop(1:3));
 
 for iplot = 1:nharm
-    subplot(nrows,ncols,iplot)
+    subplot(nrows,ncols,ncols*(iplot-1)+ncols-1)
     
     if iplot <= length(pcs)
         tmpplot = sum(repmat(Rmat(iplot,:),size(harm_eval_rescale,1),1) .* harm_eval_rescale(:,pcs),2);
@@ -366,16 +431,58 @@ for iplot = 1:nharm
     end
     
     plot(times_fine,tmpplot)
-    ylabel(['Harmonic ' num2str(iplot)])
+    title(['Harmonic ' num2str(iplot)])
     set(gca,'XLim',time_range)
     set(gca,'YLim',[min(min(harm_eval_rescale)) max(max(harm_eval_rescale))]*1.2)
     
     hold on
     plot(time_range,[0 0],'--')
     
-    title(['Variance explained: ' num2str(varper*100,3) '%'])
+%     title(['Variance explained: ' num2str(varper*100,3) '%'])
     
     if iplot == nharm
-        xlabel('time [min]')
+%         xlabel('time [min]')
+        set(gca,'XTick',50:50:200)
+    else
+        set(gca,'XTick',[])
     end
+    
+    set(gca,'YTick',[])
+end
+
+load('harm_basis.mat') % Contains only harm_basis from all data-sets
+
+
+time_range = [200 510];
+
+[tmp range_ind_min] = min(abs(timestamp - time_range(1)));
+[tmp range_ind_max] = min(abs(timestamp - time_range(2)));
+range_ind = range_ind_min:range_ind_max;
+times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
+
+basis_eval = eval_basis(harm_basis,times_fine);
+
+for iplot = 1:size(basis_eval,2)
+    subplot(nrows,ncols,ncols*(iplot-1)+ncols)
+    
+    tmpplot = basis_eval(:,iplot);
+    
+    plot(times_fine,tmpplot)
+    title(['Harmonic ' num2str(iplot)])
+    set(gca,'XLim',time_range)
+    set(gca,'YLim',[min(min(basis_eval)) max(max(basis_eval))]*1.2)
+    
+    hold on
+    plot(time_range,[0 0],'--')
+    
+%     title(['Variance explained: ' num2str(varper*100,3) '%'])
+    
+    if iplot == nharm
+%         xlabel('time [min]')
+        set(gca,'XTick',200:100:500)
+    else
+        set(gca,'XTick',[])
+    end
+    
+    set(gca,'YTick',[])
 end

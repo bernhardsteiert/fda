@@ -14,10 +14,11 @@ addpath(grabdataPath)
 
 log_trafo = 1; % log-transform signal
 time_range = [200 650];
+time_range = [200 510];
 
 % Get properties of sites by calling siteprop(site)
 sites_for_harmonics = [4:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 64:70];
-% Note: Site 70 is blank and therefore a copy of site 10
+% Note: Site 70 is blank and therefore a copy of site 30
 
 times = cell(0);
 signals = cell(0);
@@ -285,12 +286,12 @@ for ilig = uni_lig
 
     if ilig == 1
 %         ylabel('relative frequency')
-        ylabel('estimated density')
-%         ylabel('median(radial distance)')
+%         ylabel('estimated density')
+        ylabel('median(pulsatory strength)')
     end
     if ilig == uni_lig(end)
-        xlabel('radial distance')
-%         xlabel('log10(ligand dose)')
+%         xlabel('radial distance')
+        xlabel('log10(ligand dose)')
     end
 
     hold on
@@ -312,10 +313,10 @@ for ilig = uni_lig
             barheight = histc(mydist,baredges)./sum(celltype == sites_for_harmonics(tmpind(ip)));
 %             legendstyles = [legendstyles plot(baredges,barheight,'Color',color(ip,:))];
 
-            [f,xi] = ksdensity(mydist);
-            legendstyles = [legendstyles plot(xi,f,'Color',color(ip,:))];
+%             [f,xi] = ksdensity(mydist);
+%             legendstyles = [legendstyles plot(xi,f,'Color',color(ip,:))];
 
-            legend_names{end+1} = num2str(site_lig_dose(prop_ind));
+%             legend_names{end+1} = num2str(site_lig_dose(prop_ind));
 
             mf = [mf median(mydist)];
             mx = [mx site_lig_dose(prop_ind)];
@@ -323,20 +324,25 @@ for ilig = uni_lig
 
     end
 
-%     mx = log10(mx);
-%     mx(mx==-Inf) = 0;
-%     plot(mx,mf,'x')
-%     set(gca,'XLim',[-.1 2.1],'YLim',[.005 .02])
-%     plot([0.2 .2],get(gca,'YLim'),'b--')
-%     
-%     axb = polyfit(mx(2:end),mf(2:end),1);
-%     plot(mx,mx*axb(1) + axb(2),'k--')
+    mx = log10(mx);
+    mx(mx==-Inf) = 0;
+    plot(mx,mf,'x')
+    set(gca,'XLim',[-.1 2.1],'YLim',[.005 .02])
+    plot([0.2 .2],get(gca,'YLim'),'b--')
+    
+    [axb s] = polyfit(mx(2:end),mf(2:end),1);
+    plot(mx,mx*axb(1) + axb(2),'k--')
+    
+    Rinv = inv(s.R);
+    covmat = (Rinv*Rinv')*s.normr^2/s.df;
+    plot(mx,mx*(axb(1)+sqrt(covmat(1))) + axb(2),'k:')
+    plot(mx,mx*(axb(1)-sqrt(covmat(1))) + axb(2),'k:')
 
-    legend(sps(end),legendstyles,legend_names)
+%     legend(sps(end),legendstyles,legend_names)
 
-    set(gca,'XLim',[0 max(radial_dist)])
+%     set(gca,'XLim',[0 max(radial_dist)])
 %     set(gca,'YLim',[0 .6])
-    set(gca,'YLim',[0 120])
+%     set(gca,'YLim',[0 120])
 
 end
 

@@ -1,8 +1,10 @@
-function [radial_dist c_signal_woNharm] = radial_dist(isite)
+function [radial_dist c_signal_woNharm range_ind] = radial_dist(isite)
     
     load('harm_basis.mat') % Contains only harm_basis from all data-sets
     
     remotepath = mypath();
+    
+    warning('off','MATLAB:dispatcher:pathWarning')
     
     fdaMPath = [remotepath 'fda'];
     addpath(fdaMPath)
