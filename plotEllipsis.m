@@ -7,7 +7,7 @@ function plotEllipsis(x_scores,y_scores,mycolor,alpha)
     end
 
     STD = 1;                     %# standard deviations
-    conf = 2*normcdf(STD)-1;     %# covers around 95% of population
+    conf = 2*normcdf(STD)-1;     %# covers around 95% of population (for STD = 2)
     scale = chi2inv(conf,2);     %# inverse chi-squared with dof=#dimensions
 
     %# substract mean
