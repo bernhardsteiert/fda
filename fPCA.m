@@ -1,5 +1,11 @@
-function [scores c_signal range_ind] = fPCA(isite)
-    
+function [scores c_signal range_ind] = fPCA(isite,extension,timeshift)
+    if(~exist('extension','var'))
+        extension = '';
+    end
+    if(~exist('timeshift','var'))
+        timeshift = 0;
+    end
+
     load('harm_basis_fPCA.mat') % Contains only harm_basis_fPCA from all data-sets
     
     remotepath = mypath();
@@ -16,9 +22,9 @@ function [scores c_signal range_ind] = fPCA(isite)
     time_range = getbasisrange(harm_basis_fPCA);
     
     if exist(remotepath,'dir')
-        [timestamp,intensity] = grabdata(isite);
+        [timestamp,intensity] = grabdata_new(isite,extension);
     else
-        load(['./Workspaces/site_' num2str(isite)])
+        load(['./Workspaces/site_' num2str(isite) '_' extension])
     end
 
     if log_trafo
@@ -26,6 +32,7 @@ function [scores c_signal range_ind] = fPCA(isite)
     else
         c_signal = intensity;
     end
+    timestamp = timestamp - timeshift;
     
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
     [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
