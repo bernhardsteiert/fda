@@ -1,6 +1,6 @@
-function [scores c_signal range_ind] = fPCA(isite,extension,timeshift)
-    if(~exist('extension','var'))
-        extension = '';
+function [scores c_signal range_ind] = fPCA(isite,myextension,timeshift)
+    if(~exist('myextension','var'))
+        myextension = '';
     end
     if(~exist('timeshift','var'))
         timeshift = 0;
@@ -19,12 +19,13 @@ function [scores c_signal range_ind] = fPCA(isite,extension,timeshift)
     addpath(grabdataPath)
 
     log_trafo = 1; % log-transform signal
+    register = 1; % register IC50
     time_range = getbasisrange(harm_basis_fPCA);
     
     if exist(remotepath,'dir')
-        [timestamp,intensity] = grabdata_new(isite,extension);
+        [timestamp,intensity] = grabdata_new(isite,myextension);
     else
-        load(['./Workspaces/site_' num2str(isite) '_' extension])
+        load(['./Workspaces/site_' num2str(isite) '_' myextension])
     end
 
     if log_trafo
@@ -33,6 +34,10 @@ function [scores c_signal range_ind] = fPCA(isite,extension,timeshift)
         c_signal = intensity;
     end
     timestamp = timestamp - timeshift;
+    
+    if register
+        c_signal = register_signal(c_signal,myextension);
+    end
     
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
     [tmp range_ind_max] = min(abs(timestamp - time_range(2)));

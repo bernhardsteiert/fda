@@ -1,7 +1,7 @@
 close all
 
 load('Workspaces/site_2_12-08-2013.mat')
-timeshift = -100;
+timeshift = -101;
 timestamp = timestamp - timeshift; % Shift to main data set
 
 extension = '12-08-2013';
@@ -77,11 +77,17 @@ rowstocols = 0.5;
 nrows = 6;
 ncols = 10;
 
+first_n = 10; % Plot first_n data-sets colored
+
 for isite = sites_all
     subplot(nrows,ncols,subplotpos(isite))
     plot(repmat(timestamp,1,sum(celltype == isite)),c_signal(:,celltype == isite),'Color',[.7 .7 .7])
     hold on
+    first_n = min(first_n,sum(celltype == isite));
+    tmpind = find(celltype == isite);
+    plot(repmat(timestamp,1,first_n),c_signal(:,tmpind(1:first_n)))
     plot(timestamp,nanmean(c_signal(:,celltype == isite),2),'color','k','LineWidth',2)
+    
     set(gca,'XLim',[50 200])
     set(gca,'YLim',[-.01 .01])
     plot([120 120],get(gca,'YLim'),'b--')
