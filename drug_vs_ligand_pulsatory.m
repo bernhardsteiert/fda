@@ -357,7 +357,7 @@ set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./15);
 
 for ip1 = 1:length(plot_sites)
     ip = plot_sites(ip1);
-    subplot(nrows,ncols,ip)
+    subplot(nrows,ncols,subplotpos(ip))
     
     baredges = linspace(0,max(radial_dist)+.01,21);
     bar(baredges,histc(radial_dist(celltype_drug == ip),baredges));

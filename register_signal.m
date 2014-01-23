@@ -21,6 +21,9 @@ switch extension
         x = 2:12;
         ic50 = 6;
         % timestamp(6) = 128min = IC50 at harm_basis_fPCA
+    otherwise
+        out_c_signal = c_signal;
+        return
 end
         
 out_c_signal = c_signal;

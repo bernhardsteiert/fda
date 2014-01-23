@@ -1,4 +1,10 @@
-function [radial_dist c_signal_woNharm range_ind] = radial_dist(isite)
+function [radial_dist c_signal_woNharm range_ind] = radial_dist(isite,myextension,timeshift)
+    if(~exist('myextension','var'))
+        myextension = '';
+    end
+    if(~exist('timeshift','var'))
+        timeshift = 0;
+    end
     
     load('harm_basis.mat') % Contains only harm_basis from all data-sets
     
@@ -13,12 +19,13 @@ function [radial_dist c_signal_woNharm range_ind] = radial_dist(isite)
     addpath(grabdataPath)
 
     log_trafo = 1; % log-transform signal
+    register = 1; % register IC50
     time_range = getbasisrange(harm_basis);
     
     if exist(remotepath,'dir')
-        [timestamp,intensity] = grabdata(isite);
+        [timestamp,intensity] = grabdata_new(isite,myextension);
     else
-        load(['./Workspaces/site_' num2str(isite)])
+        load(['./Workspaces/site_' num2str(isite) '_' myextension])
     end
 
     if log_trafo
@@ -26,7 +33,11 @@ function [radial_dist c_signal_woNharm range_ind] = radial_dist(isite)
     else
         c_signal = intensity;
     end
+    timestamp = timestamp - timeshift;
     
+    if register
+        c_signal = register_signal(c_signal,myextension);
+    end
     c_signal = c_signal - repmat(nanmean(c_signal,2),1,size(c_signal,2));
     
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
