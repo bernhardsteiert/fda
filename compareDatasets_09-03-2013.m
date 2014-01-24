@@ -86,13 +86,13 @@ for isite = sites_all
 end
 
 % highdoses = [6:10]; % all EGF doses for high MEKi
-highdoses = [6 15 26 35 46 55 66]; % EGF high for all MEKi doses
+% highdoses = [6 15 26 35 46 55 66]; % EGF high for all MEKi doses
 highdoses = [7 14 27 34 47 54 67]; % EGF 50 for all MEKi doses
 % highdoses = [1 21 40 41 60 61]; % EGF high for all AKTi doses
 % highdoses = [2 19 22 39 42 59 62]; % EGF 50 for all AKTi doses
 
 color_ind = 1;
-colmap = hsv(length(highdoses));
+colmap = spring(length(highdoses));
 legstr = {};
 for isite = highdoses
     sprop = siteprop(isite,datasetName);
@@ -116,7 +116,7 @@ xlabel(['PC ' num2str(pcs(1))])
 set(gca,'CLim',[0 1])
 colormap(colmap)
 colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
-return
+% return
 % -------------------------------------------------------------------------
 
 f4 = figure;
@@ -139,7 +139,8 @@ celltypeharm = [];
 for isite = sites_all
     subplot(nrows,ncols,subplotpos(isite))
     
-    radial_dists = radial_dist(isite,extension,timeshift);
+%     radial_dists = radial_dist(isite,extension,timeshift);
+    radial_dists = freq_analysis(isite,0.2,extension,timeshift);
     dists = [dists radial_dists];
     celltypeharm = [celltypeharm ones(size(radial_dists))*isite];
     

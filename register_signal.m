@@ -10,6 +10,9 @@ function out_c_signal = register_signal(c_signal,extension)
 if(~exist('extension','var'))
     out_c_signal = c_signal;
     return
+elseif isempty(extension)
+    out_c_signal = c_signal;
+    return
 end
 
 switch extension

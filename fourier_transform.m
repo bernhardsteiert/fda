@@ -55,7 +55,8 @@ clear radial_dist
 
 for isite = plot_sites
     
-    radial_dists = radial_dist(isite);
+%     radial_dists = radial_dist(isite);
+    radial_dists = freq_analysis(isite);
     
     dists = [dists radial_dists];
     
