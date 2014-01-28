@@ -1,4 +1,4 @@
-function out_c_signal = register_signal(c_signal,extension)
+function out_c_signal = register_signal_slope(c_signal,extension)
 % Step detection
 % By using first derivative
 % Criteria:
@@ -82,7 +82,7 @@ for i = ind_to_test
         blockend = strfind([0 fposnorm(:,i)'>0 0], [1 0]);
 
         if ~isempty(blockstart)
-            slope(i) = (f(blockend(end)-1) - f(blockstart(1)))./(dx*(blockend(end)-blockstart(1)));
+            % slope(i) = (f(blockend(end),i) - f(blockstart(1),i))./(dx*(blockend(end)-blockstart(1))); % Not optimal for well-defined steps (range too wide)
             if slope(i) < 0
                 slope(i) = nan;
                 selected(i) = 0;
@@ -133,24 +133,63 @@ for i = 1:nsubplots
         elseif deltaind(i) < 0
             out_c_signal(-deltaind(i)+1:size(c_signal,1),i) = c_signal(1:size(c_signal,1)+deltaind(i),i);
         end
+        if isnan(slope(i))
+            slope(i) = (out_c_signal(ic50+1,i)-out_c_signal(ic50-1,i))./(2*dx);
+        end
 %         plot(x,c_signal(x+deltaind(i),i),'r')
     end
 
 end
 
-return
+% return
 
-figure
-unidelta = setdiff(unique(deltaind),0);
+% figure
+unidelta = unique(deltaind);
+% unidelta = setdiff(unidelta,0);
 slopemat = [];
 for u = 1:length(unidelta)
     slopemat = padconcatenation(slopemat,slope(deltaind == unidelta(u)),2);
 end
 
-plot(deltaind,slope,'*')
+% plot(deltaind,slope,'*')
 % plot(deltaind(deltaind~=0),slope(deltaind~=0),'*')
 
 % sum(selected)
 % find(deltaind~=0)
 % boxplot(slopemat)
 % set(gca,'XTick',1:length(unidelta),'XTickLabel',unidelta)
+
+% return
+
+f1 = figure;
+
+xfac = 1;
+yfac = 1;
+fontsize = 4;
+
+setFigure(f1,xfac,yfac,fontsize)
+
+plotdelta = 4;
+% sum(deltaind==plotdelta)
+myinds = find(deltaind==plotdelta);
+% size(myinds)
+
+rowstocols = .5;
+nrows = 10;
+ncols = 8;
+
+x = 40:60;
+
+for i = 1:nrows*ncols
+    subplot(nrows,ncols,i)
+    plot(x,c_signal(x+deltaind(myinds(i)),myinds(i)))
+    ylim = get(gca,'YLim');
+    hold on
+    plot(x,c_signal(x,myinds(i)),'g')
+    plot([ic50 ic50],ylim,'k--')
+    
+    plot([ic50-2 ic50+2],c_signal(ic50+deltaind(myinds(i)),myinds(i)) + [-2 2]*slope(myinds(i)),'r:')
+end
+% slope(250:270)
+% slope(myinds(i))
+% myinds(i)

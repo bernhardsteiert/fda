@@ -1,4 +1,4 @@
-close all
+% close all
 
 load('Workspaces/site_2_12-25-2013.mat')
 timeshift = 125;
@@ -8,7 +8,8 @@ timestamp = timestamp - timeshift; % Shift to main data set
 extension = '12-25-2013';
 
 sites_all = [2:10 20:-1:11 21:30 40:-1:31 41:50 60:-1:51];
-sites_colored = [22:24 21 2 4]; % BTC vs. IGF Native
+% sites_colored = [22:24 21 2 4]; % BTC vs. IGF Native
+sites_colored = 4;
 % sites_colored = [22:24 21]; % only IGF
 % sites_colored = [2:4 21]; % only BTC
 % sites_colored = [16:19 21]; % only EGF
@@ -35,6 +36,8 @@ for isite = sites_all
     plot(scores(pcs(1),:),scores(pcs(2),:),'.','Color',[.7 .7 .7])
 end
 
+% return
+
 ncolor = 201;
 colmap = jet(ncolor);
 dose_range = [0 100];
@@ -55,6 +58,7 @@ for isite = sites_colored
 end
 
 axisEqual(get(gcf,'Position'))
+set(gca,'YLim',[-.05 .03])
 
 ylabel(['PC ' num2str(pcs(2))])
 xlabel(['PC ' num2str(pcs(1))])
@@ -83,14 +87,25 @@ for isite = sites_all
     sprop = siteprop(isite,extension);
 end
 
-highdoses = [4 17 24 21]; % BTC EGF IGF NS
+% highdoses = [4 17 24 21]; % BTC EGF IGF NS
+highdoses = [5 4 3 2 21 9 8 7 6]; % BTC w / wo MEKi
+% highdoses = [16 17 18 19 21 12 13 14 15]; % EGF w / wo MEKi
+% highdoses = [25 24 23 22 21 29 28 27 26]; % IGF w / wo MEKi
 
 color_ind = 1;
-colmap = hsv(length(highdoses));
+colmap = spring(length(highdoses));
 legstr = {};
 for isite = highdoses
-    sprop = siteprop(isite,extension);
-    legstr{end+1} = sprop.lig_name;
+    s = siteprop(isite,extension);
+    titstr = s.lig_name;
+    if s.lig_index > 1
+        titstr = sprintf('%s %i',titstr,s.lig_dose);
+    end
+    if s.inh_dose > 0
+%         titstr = sprintf('%s%s %i muM',titstr,s.inh_name,s.inh_dose);
+        titstr = sprintf('%s%s',titstr,s.inh_name);
+    end
+    legstr{end+1} = sprintf('%s - %s',titstr,s.celltype);
     
     scores = fPCA(isite,extension,timeshift);
     plot(scores(2,:),scores(3,:),'o','Color',colmap(isite == highdoses,:),'MarkerFaceColor',colmap(isite == highdoses,:))
@@ -99,8 +114,9 @@ end
 
 % xlim = [-.16 .24];
 % set(gca,'XLim',xlim)
+set(gca,'YLim',[-.05 .03])
 
-axisEqual(get(gcf,'Position'))
+% axisEqual(get(gcf,'Position'))
 
 ylabel(['PC ' num2str(pcs(2))])
 % set(gca,'YTick',-.1:.1:.2)
@@ -110,7 +126,7 @@ xlabel(['PC ' num2str(pcs(1))])
 set(gca,'CLim',[0 1])
 colormap(colmap)
 colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
-
+return
 % -------------------------------------------------------------------------
 
 f4 = figure;
@@ -125,7 +141,8 @@ rowstocols = 0.5;
 nrows = 6;
 ncols = 10;
 
-baredges = linspace(0,0.022,21);
+% baredges = linspace(0,0.022,21); % radial_dist.m
+baredges = linspace(0,0.08,16); % edge_snr_score_pw.m
 
 dists = [];
 celltypeharm = [];
@@ -133,7 +150,8 @@ celltypeharm = [];
 for isite = sites_all
     subplot(nrows,ncols,subplotpos(isite))
     
-    radial_dists = radial_dist(isite,extension,timeshift);
+%     radial_dists = radial_dist(isite,extension,timeshift);,
+    radial_dists = edge_snr_score_pw(isite,extension,timeshift);
     dists = [dists radial_dists];
     celltypeharm = [celltypeharm ones(size(radial_dists))*isite];
     
@@ -151,7 +169,7 @@ for isite = sites_all
     titstr = sprintf('%s - %s',titstr,s.celltype);
     title(titstr)
     
-    set(gca,'XLim',[-.002 0.024])
+    set(gca,'XLim',[-.002 1.1*max(baredges)])
 end
 
 % -------------------------------------------------------------------------
@@ -225,8 +243,8 @@ color = repmat(linspace(0,1,ncolor),3,1);
 
 color = color(:,end:-1:1); % Gray scale - darkness depending on score
 
-radial_space = linspace(min(dists),max(dists),ncolor);
 [radial_dist_sorted ind_sort_radial] = sort(dists);
+radial_space = linspace(min(dists),dists(ind_sort_radial(ceil(length(dists)*.99))),ncolor);
 
 for isite = sites_all
     subplot(nrows,ncols,subplotpos(isite))

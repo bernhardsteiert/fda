@@ -131,7 +131,7 @@ rowstocols = 0.5;
 nrows = 7;
 ncols = 10;
 
-baredges = linspace(0,0.03,21);
+baredges = linspace(0,0.03,16);
 
 dists = [];
 celltypeharm = [];
@@ -140,7 +140,8 @@ for isite = sites_all
     subplot(nrows,ncols,subplotpos(isite))
     
 %     radial_dists = radial_dist(isite,extension,timeshift);
-    radial_dists = freq_analysis(isite,0.2,extension,timeshift);
+    radial_dists = edge_snr_score_pw(isite,extension,timeshift);
+%     radial_dists = freq_analysis(isite,0.2,extension,timeshift);
     dists = [dists radial_dists];
     celltypeharm = [celltypeharm ones(size(radial_dists))*isite];
     

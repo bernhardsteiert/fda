@@ -56,7 +56,10 @@ clear radial_dist
 for isite = plot_sites
     
 %     radial_dists = radial_dist(isite);
-    radial_dists = freq_analysis(isite);
+%     radial_dists = freq_analysis(isite);
+%     radial_dists = edge_snr_score(isite);
+    radial_dists = edge_snr_score_pw(isite);
+%     radial_dists = radial_dist_pw(isite);
     
     dists = [dists radial_dists];
     

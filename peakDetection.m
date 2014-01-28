@@ -35,15 +35,18 @@ bsfindTruePeaks(timestamp(range_ind),c_signal_woNharm(:,end-isig+1),showPlots,Mi
 
 
 %%
-isig =  12;
+isig =  2;
 close all
 
-noise_thres = .3;
+noise_thres = .4;
 
 nbasis = 20;
 basis = create_bspline_basis([timestamp(range_ind(1)) timestamp(range_ind(end))], nbasis);
 smoothed_data_woNharm = smooth_basis(timestamp(range_ind),c_signal_woNharm,basis);
 c_smoothed_eval = eval_fd(smoothed_data_woNharm,linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),201));
+c_smoothed_eval_data = eval_fd(smoothed_data_woNharm,timestamp(range_ind));
+
+rss_spline = nansum((c_signal_woNharm - c_smoothed_eval_data).^2,1);
 
 xs = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),201);
 plot(xs,c_smoothed_eval(:,end-isig+1))
@@ -80,7 +83,7 @@ while ~isempty(bs)
     else
         % So not nicely done :(
         if blockstart(b) > 1
-            if blockend(b) < length(candidate_left)
+            if blockend(b) < length(candidate_left)+1
                 candidate_left = candidate_left(setdiff(1:length(candidate_left),blockstart(b):blockend(b)));
                 candidate_right = candidate_right(setdiff(1:length(candidate_right),blockstart(b)-1:blockend(b)-1));
             else
@@ -99,6 +102,11 @@ while ~isempty(bs)
     blocklength = blockend-blockstart;
     bs = find(mod(blocklength,2));
 end
+
+nEdges = sum(ispeak)
+SNR = range_smoothed./sqrt(rss_spline(end-isig+1)./size(c_signal_woNharm,1))
+
+score = nEdges + SNR
 
 options = statset('Display','off');
 idx = kmeans(all_pks,3,'distance','sqEuclidean','emptyaction','drop','options',options,'Replicates',5);

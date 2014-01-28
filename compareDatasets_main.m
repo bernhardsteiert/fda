@@ -1,16 +1,19 @@
 close all
 
-load('Workspaces/site_2_12-08-2013.mat')
-timeshift = -101;
-timestamp = timestamp - timeshift; % Shift to main data set
+load('Workspaces/site_1.mat')
+timeshift = 0;
+% timeshift = 125;
+% timestamp = timestamp - timeshift; % Shift to main data set
 
-extension = '12-08-2013';
+% extension = '12-08-2013';
 % extension = '12-25-2013';
+extension = '';
 
-sites_all = [2:8 10 20 19 17:-1:11 21:29 40:-1:31 41:50 60:-1:56 54 53 52 51];
-sites_colored = [22:24 21 2:4]; % BTC vs. IGF
+sites_all = [1:70];
+sites_colored = [22:24 21 2 4]; % BTC vs. IGF Native
 % sites_colored = [22:24 21]; % only IGF
 % sites_colored = [2:4 21]; % only BTC
+% sites_colored = [16:19 21]; % only EGF
 
 pcs = [2 3];
 
@@ -18,7 +21,7 @@ f1 = figure;
 
 xfac = 1;
 yfac = 1;
-fontsize = 14;
+fontsize = 20;
 
 setFigure(f1,xfac,yfac,fontsize)
 
@@ -39,19 +42,21 @@ colmap = jet(ncolor);
 dose_range = [0 100];
 dose_inds = 10.^linspace(log10(max([dose_range(1) .1])),log10(dose_range(2)),floor(ncolor/2));
 
-firstprop = siteprop(sites_colored(1),extension);
+firstprop = siteprop(sites_colored(1));
 for isite = sites_colored
     scores = fPCA(isite,extension,timeshift);
-    sprop = siteprop(isite,extension);
+    sprop = siteprop(isite);
     
     colfac = 2*(sprop.lig_index == firstprop.lig_index)-1;
     [tmp colind] = min(abs(sprop.lig_dose - dose_inds));
     mycolor = colmap(ceil(ncolor/2) + colfac*colind,:);
     
-    plot(scores(pcs(1),:),scores(pcs(2),:),'.','Color',mycolor)
+    plot(scores(pcs(1),:),scores(pcs(2),:),'o','Color',mycolor,'MarkerFaceColor',mycolor)
 %     plotEllipsis(scores(pcs(1),:),scores(pcs(2),:),mycolor,.5);
     
 end
+
+axisEqual(get(gcf,'Position'))
 
 ylabel(['PC ' num2str(pcs(2))])
 xlabel(['PC ' num2str(pcs(1))])
@@ -61,9 +66,6 @@ clim(1) = max([clim(1) 0]);
 set(gca,'CLim',clim)
 colormap(colmap)
 colorbar('YTick',log10([1 10 100]),'YTickLabel',{sprop.lig_name,'No Stim',firstprop.lig_name}) % Vertical colorbar
-
-% return
-% close all
 
 % -------------------------------------------------------------------------
 
@@ -80,23 +82,30 @@ for isite = sites_all
     scores = fPCA(isite,extension,timeshift);
     plot(scores(2,:),scores(3,:),'.','Color',[.7 .7 .7])
     
-    sprop = siteprop(isite,extension);
+    sprop = siteprop(isite);
 end
 
-highdoses = [21 22 23 24 26 28 29]; % BTC w / wo MEKi
+% highdoses = [4 17 24 21]; % BTC EGF IGF NS
+highdoses = [1:10]; % BTC w / wo MEKi
+% highdoses = [16 17 18 19 21 12 13 14 15]; % EGF w / wo MEKi
+% highdoses = [25 24 23 22 21 29 28 27 26]; % IGF w / wo MEKi
 
 color_ind = 1;
-colmap = hsv(length(highdoses));
+colmap = spring(length(highdoses));
 legstr = {};
 for isite = highdoses
-    s = siteprop(isite,extension);
+    s = siteprop(isite);
     titstr = s.lig_name;
-    titstr = sprintf('%s %i',titstr,s.lig_dose);
-    legstr{end+1} = sprintf('%s - %s',titstr,s.celltype);
+    titstr = sprintf('%s %g',titstr,s.lig_dose);
+    if s.inh_dose > 0
+%         titstr = sprintf('%s%s %i muM',titstr,s.inh_name,s.inh_dose);
+        titstr = sprintf('%s%s',titstr,s.inh_name);
+    end
+    legstr{end+1} = titstr;
     
     scores = fPCA(isite,extension,timeshift);
     plot(scores(2,:),scores(3,:),'o','Color',colmap(isite == highdoses,:),'MarkerFaceColor',colmap(isite == highdoses,:))
-    plotEllipsis(scores(2,:),scores(3,:),colmap(isite == highdoses,:),.5);
+%     plotEllipsis(scores(2,:),scores(3,:),colmap(isite == highdoses,:),.5);
 end
 
 % xlim = [-.16 .24];
@@ -112,44 +121,8 @@ xlabel(['PC ' num2str(pcs(1))])
 set(gca,'CLim',[0 1])
 colormap(colmap)
 colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
-return
+% return
 % -------------------------------------------------------------------------
-
-f2 = figure;
-
-xfac = 1;
-yfac = 1;
-fontsize = 4;
-
-setFigure(f2,xfac,yfac,fontsize)
-
-rowstocols = 0.5;
-nrows = 6;
-ncols = 10;
-
-first_n = 10; % Plot first_n data-sets colored
-
-for isite = sites_all
-    subplot(nrows,ncols,subplotpos(isite))
-    plot(repmat(timestamp,1,sum(celltype == isite)),c_signal(:,celltype == isite),'Color',[.7 .7 .7])
-    hold on
-    first_n = min(first_n,sum(celltype == isite));
-    tmpind = find(celltype == isite);
-    plot(repmat(timestamp,1,first_n),c_signal(:,tmpind(1:first_n)))
-    plot(timestamp,nanmean(c_signal(:,celltype == isite),2),'color','k','LineWidth',2)
-    
-    set(gca,'XLim',[50 200])
-    set(gca,'YLim',[-.01 .01])
-    plot([120 120],get(gca,'YLim'),'b--')
-    s = siteprop(isite,extension);
-    titstr = s.lig_name;
-    titstr = sprintf('%s %i',titstr,s.lig_dose);
-    titstr = sprintf('%s - %s',titstr,s.celltype);
-    title(titstr)
-end
-
-
-%% -------------------------------------------------------------------------
 
 f4 = figure;
 
@@ -160,11 +133,11 @@ fontsize = 4;
 setFigure(f4,xfac,yfac,fontsize)
 
 rowstocols = 0.5;
-nrows = 6;
+nrows = 7;
 ncols = 10;
 
 % baredges = linspace(0,0.022,21); % radial_dist.m
-baredges = linspace(0,0.08,16); % edge_snr_score_pw.m
+baredges = linspace(0,0.26,16); % edge_snr_score_pw.m
 
 dists = [];
 celltypeharm = [];
@@ -179,16 +152,68 @@ for isite = sites_all
     
     bar(baredges,histc(dists(celltypeharm == isite),baredges));
 
-    s = siteprop(isite,extension);
+    s = siteprop(isite);
     titstr = s.lig_name;
-    titstr = sprintf('%s %i',titstr,s.lig_dose);
-    titstr = sprintf('%s - %s',titstr,s.celltype);
+    titstr = sprintf('%s %g',titstr,s.lig_dose);
+    if s.inh_dose > 0
+%         titstr = sprintf('%s%s %i muM',titstr,s.inh_name,s.inh_dose);
+        titstr = sprintf('%s%s',titstr,s.inh_name);
+    end
     title(titstr)
     
     set(gca,'XLim',[-.002 1.1*max(baredges)])
 end
 
 %% -------------------------------------------------------------------------
+    
+% return
+% close all
+
+f2 = figure;
+
+xfac = 1;
+yfac = 1;
+fontsize = 4;
+
+setFigure(f2,xfac,yfac,fontsize)
+
+rowstocols = 0.5;
+nrows = 7;
+ncols = 10;
+
+first_n = 10; % Plot first_n data-sets colored
+
+for isite = sites_all
+    subplot(nrows,ncols,subplotpos(isite))
+    plot(repmat(timestamp,1,sum(celltype == isite)),c_signal(:,celltype == isite),'Color',[.7 .7 .7])
+    hold on
+    first_n = min(first_n,sum(celltype == isite));
+    tmpind = find(celltype == isite);
+    plot(repmat(timestamp,1,first_n),c_signal(:,tmpind(1:first_n)))
+    plot(timestamp,nanmean(c_signal(:,celltype == isite),2),'color','k','LineWidth',2)
+    
+    % Comment out soon:
+%     scores = fPCA(isite,extension,timeshift);
+%     inds = find(celltype == isite);
+%     plot(repmat(timestamp,1,length(inds(scores(3,:) < -.005))),c_signal(:,inds(scores(3,:) < -.005)))
+    
+    set(gca,'XLim',[50 200])
+    set(gca,'YLim',[-.04 .04])
+    plot([120 120],get(gca,'YLim'),'b--')
+    s = siteprop(isite);
+    titstr = s.lig_name;
+    titstr = sprintf('%s %g',titstr,s.lig_dose);
+    if s.inh_dose > 0
+%         titstr = sprintf('%s%s %i muM',titstr,s.inh_name,s.inh_dose);
+        titstr = sprintf('%s%s',titstr,s.inh_name);
+    end
+    title(titstr)
+end
+
+%% -------------------------------------------------------------------------
+    
+% return
+% close all
 
 f5 = figure;
 
@@ -199,7 +224,7 @@ fontsize = 4;
 setFigure(f5,xfac,yfac,fontsize)
 
 rowstocols = 0.5;
-nrows = 6;
+nrows = 7;
 ncols = 10;
 
 ncolor = 201;
@@ -227,7 +252,7 @@ for isite = sites_all
     
     set(gca,'XLim',[50 510])
     
-    plot([120 120],[-0.012 0.012],'b--')
+    plot([120 120],[-0.04 0.04],'b--')
     
     if subplotpos(isite) == (nrows-1)*ncols+1
         xlabel('time [min]')
@@ -235,10 +260,13 @@ for isite = sites_all
     if subplotpos(isite) == 2
         ylabel('log_{10} FOXO3a Cyt/Nuc ratio');
     end
-    set(gca,'YLim',[-0.012 0.012])
-    s = siteprop(isite,extension);
+    set(gca,'YLim',[-0.04 0.04])
+    s = siteprop(isite);
     titstr = s.lig_name;
-    titstr = sprintf('%s %i',titstr,s.lig_dose);
-    titstr = sprintf('%s - %s',titstr,s.celltype);
+    titstr = sprintf('%s %g',titstr,s.lig_dose);
+    if s.inh_dose > 0
+%         titstr = sprintf('%s%s %i muM',titstr,s.inh_name,s.inh_dose);
+        titstr = sprintf('%s%s',titstr,s.inh_name);
+    end
     title(titstr)
 end
