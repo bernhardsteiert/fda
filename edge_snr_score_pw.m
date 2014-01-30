@@ -1,4 +1,4 @@
-function [radial_dist c_signal_woNharm range_ind] = edge_snr_score_pw(isite,myextension,timeshift)
+function [radial_dist c_signal_woNharm range_ind nEdges SNR] = edge_snr_score_pw(isite,myextension,timeshift)
     if(~exist('myextension','var'))
         myextension = '';
     elseif(~isempty(myextension))

@@ -1,7 +1,7 @@
 %% Fourier Analysis of c_signal
 
 close all
-clear all
+% clear all
 clc
 
 remotepath = mypath();
@@ -15,7 +15,8 @@ addpath(grabdataPath)
 
 % plot_sites = [10 17 64];
 % plot_name = {'No Lig','IGF','BTC'};
-plot_sites = [64];
+plot_sites = [61];
+% plot_sites = [37]; % HRG
 plot_name = {'BTC'};
 
 times = cell(0);
@@ -51,6 +52,10 @@ c_signal_raw = cell2mat(signals_raw);
 dists = [];
 celltypeharm = [];
 
+nEdges = [];
+SNRs = [];
+c_signal_woNharm = [];
+
 clear radial_dist
 
 for isite = plot_sites
@@ -58,12 +63,16 @@ for isite = plot_sites
 %     radial_dists = radial_dist(isite);
 %     radial_dists = freq_analysis(isite);
 %     radial_dists = edge_snr_score(isite);
-    radial_dists = edge_snr_score_pw(isite);
+    [radial_dists c_signal_tmp tmp2 nEdge SNR] = edge_snr_score_pw(isite);
 %     radial_dists = radial_dist_pw(isite);
     
     dists = [dists radial_dists];
     
     celltypeharm = [celltypeharm ones(size(radial_dists))*isite];
+    
+    nEdges = [nEdges nEdge];
+    SNRs = [SNRs SNR];
+    c_signal_woNharm = [c_signal_woNharm c_signal_tmp];
     
 end
 
@@ -82,9 +91,10 @@ for ip = 1:length(plot_sites)
     
 %     c_signal_single = c_signal(:,ind_sort_radial);
     c_signal_single = c_signal_raw(:,ind_sort_radial);
+%     c_signal_single = c_signal_woNharm(:,ind_sort_radial);
     c_signal_single = c_signal_single(:,(celltypeharm(ind_sort_radial) == plot_sites(ip)));
     % Remove time mean
-    c_signal_single = c_signal_single - repmat(mean(c_signal_single,1),size(c_signal_single,1),1);
+%     c_signal_single = c_signal_single - repmat(mean(c_signal_single,1),size(c_signal_single,1),1);
     
     time_range = [200 500];
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
@@ -97,12 +107,16 @@ for ip = 1:length(plot_sites)
     for isig = 1:(nrows*ncols)
         subplot(nrows,ncols,isig)
         
-        plot(timestamp(range_ind),c_signal_single(range_ind,end-isig+1))
+        plot(timestamp(range_ind),c_signal_single(range_ind,end-isig+1)) % For c_signal and c_signal_raw
 %         plot(timestamp(range_ind),c_signal_single(range_ind,21-isig))
+
+%         plot(timestamp(tmp2),c_signal_single(:,end-isig+1))
         
         set(gca,'XLim',time_range)
         set(gca,'YLim',[-.02 .02])
 %         set(gca,'YLim',[.95 1.1])
+
+        title(sprintf('PulsStr = %g',radial_dist_sorted(end-isig+1)))
         
         if isig == (nrows-1)*ncols+1
             xlabel('time [min]')
@@ -113,6 +127,8 @@ for ip = 1:length(plot_sites)
     end
     
 end
+
+return
 
 
 for ip = 1:length(plot_sites)

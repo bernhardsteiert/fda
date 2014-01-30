@@ -24,6 +24,18 @@ switch extension
         x = 2:12;
         ic50 = 6;
         % timestamp(6) = 128min = IC50 at harm_basis_fPCA
+    case '01-22-2014'
+        x = 7:17;
+        ic50 = 12;
+        % timestamp(12) = 128min = IC50 at harm_basis_fPCA
+    case '01-26-2014'
+        x = 59:69;
+        ic50 = 64;
+        % timestamp(65) = 128min = IC50 at harm_basis_fPCA
+    case '01-27-2014'
+        x = 91:101;
+        ic50 = 96;
+        % timestamp(96) = 128min = IC50 at harm_basis_fPCA
     otherwise
         out_c_signal = c_signal;
         return
@@ -130,8 +142,9 @@ for i = 1:nsubplots
         deltaind(i) = -(ic50 - round(efposnorm(i)-1e-10));
         if deltaind(i) > 0
             out_c_signal(1:size(c_signal,1)-deltaind(i),i) = c_signal(deltaind(i)+1:size(c_signal,1),i);
-        elseif deltaind(i) < 0
-            out_c_signal(-deltaind(i)+1:size(c_signal,1),i) = c_signal(1:size(c_signal,1)+deltaind(i),i);
+            % Negative time-shift data looks always ugly --> artifact
+%         elseif deltaind(i) < 0
+%             out_c_signal(-deltaind(i)+1:size(c_signal,1),i) = c_signal(1:size(c_signal,1)+deltaind(i),i);
         end
 %         plot(x,c_signal(x+deltaind(i),i),'r')
     end

@@ -104,6 +104,86 @@ switch dataset
         s.inh_dose = inh_dose(inh_index);
         s.celltype = celltype{name_ind};
         
+    case '01-22-2014'
+        celltype = {'MCF10A','MCF10A','MCF10A','MCF10A','MCF10A','MCF10A','184A1','184A1','184A1','184A1','184A1','184A1'};
+        ligand_name = {'NS','EPR ','HGF ','EGF ','IGF ','BTC ','BTC ','IGF ','EGF ','HGF ','EPR ','NS'};
+        ligand_dose = [0 100 100 100 100 100 100 100 100 100 100 0];
+        drug_name = {'Boretezo','Boretezo','Boretezo','Boretezo','No Drug'};
+        drug_timing = {'6HR before','1HR before','30MIN after','60MIN after',''};
+        
+        row = ceil(site/12);
+        col = mod(site-1,12)+1;
+        if ~mod(row,2)
+            col = 13-col;
+        end
+        
+        s.lig_name = ligand_name{col};
+        % s.lig_index = lig_index;
+        s.lig_dose = ligand_dose(col);
+        s.drug_name = drug_name{row};
+        s.drug_timing = drug_timing{row};
+        s.celltype = celltype{col};
+        
+    case '01-26-2014'
+        ligand_name = {'EGF ','BTC ','EPR ','IGF '};
+        ligand_dose = 100;
+        drug_name = {' + MEKi ',' + AKTi '};
+        drug_dose = [0 0.01 0.1 1];
+        celltype = '184A1';
+        
+        row = ceil(site/12);
+        col = mod(site-1,12)+1;
+        if ~mod(row,2)
+            col = 13-col;
+        end
+        
+        lig_index = ceil(col / 4);
+        akti_ind = 5-(mod(col-1,4)+1);
+        meki_ind = 5-row;
+        if row == 5
+            meki_ind = 4 - lig_index + (lig_index < 3);
+            lig_index = 4;
+        end
+        
+        s.lig_name = ligand_name{lig_index};
+        s.lig_index = lig_index;
+        s.lig_dose = ligand_dose;
+        s.drug1_name = drug_name{1};
+        s.drug1_dose = drug_dose(meki_ind);
+        s.drug2_name = drug_name{2};
+        s.drug2_dose = drug_dose(akti_ind);
+        s.celltype = celltype;
+
+    case '01-27-2014'
+        ligand_name = {'EGF ','BTC ','EPR ','IGF '};
+        ligand_dose = 100;
+        drug_name = {' + MEKi ',' + AKTi '};
+        drug_dose = [0 0.01 0.1 1];
+        celltype = 'MCF10A';
+        
+        row = ceil(site/12);
+        col = mod(site-1,12)+1;
+        if ~mod(row,2)
+            col = 13-col;
+        end
+        
+        lig_index = ceil(col / 4);
+        akti_ind = 5-(mod(col-1,4)+1);
+        meki_ind = 5-row;
+        if row == 5
+            meki_ind = 4 - lig_index + (lig_index < 3);
+            lig_index = 4;
+        end
+        
+        s.lig_name = ligand_name{lig_index};
+        s.lig_index = lig_index;
+        s.lig_dose = ligand_dose;
+        s.drug1_name = drug_name{1};
+        s.drug1_dose = drug_dose(meki_ind);
+        s.drug2_name = drug_name{2};
+        s.drug2_dose = drug_dose(akti_ind);
+        s.celltype = celltype;
+        
     otherwise
         error('Unknown data-set!!')
         

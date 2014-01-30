@@ -122,7 +122,7 @@ set(gca,'CLim',[0 1])
 colormap(colmap)
 colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
 % return
-% -------------------------------------------------------------------------
+%% -------------------------------------------------------------------------
 
 f4 = figure;
 
@@ -137,20 +137,29 @@ nrows = 7;
 ncols = 10;
 
 % baredges = linspace(0,0.022,21); % radial_dist.m
-baredges = linspace(0,0.26,16); % edge_snr_score_pw.m
+% baredges = linspace(0,0.26,16); % edge_snr_score_pw.m dists
+% baredges = linspace(0,30,16); % edge_snr_score_pw.m SNRs
+baredges = linspace(0,10,11); % edge_snr_score_pw.m nEdges
 
 dists = [];
 celltypeharm = [];
+
+nEdges = [];
+SNRs = [];
 
 for isite = sites_all
     subplot(nrows,ncols,subplotpos(isite))
     
 %     radial_dists = radial_dist(isite,extension,timeshift);,
-    radial_dists = edge_snr_score_pw(isite,extension,timeshift);
+    [radial_dists tmp1 tmp2 nEdge SNR] = edge_snr_score_pw(isite,extension,timeshift);
+    nEdges = [nEdges nEdge];
+    SNRs = [SNRs SNR];
     dists = [dists radial_dists];
     celltypeharm = [celltypeharm ones(size(radial_dists))*isite];
     
-    bar(baredges,histc(dists(celltypeharm == isite),baredges));
+%     bar(baredges,histc(dists(celltypeharm == isite),baredges));
+%     bar(baredges,histc(SNRs(celltypeharm == isite),baredges));
+    bar(baredges,histc(nEdges(celltypeharm == isite),baredges));
 
     s = siteprop(isite);
     titstr = s.lig_name;
@@ -166,7 +175,7 @@ end
 
 %% -------------------------------------------------------------------------
     
-% return
+return
 % close all
 
 f2 = figure;
