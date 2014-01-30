@@ -13,6 +13,9 @@
 % 4. Do same analysis for inhibitor data (EGF and HGF): MEKi induces oscillations; AKTi represses oscillations
 %    (Counter-intuitive: EGF-MEKi population mean like IGF, oscillations however not suppressed as for IGF)
 
+% Save with:
+% export_fig -transparent -m2
+
 
 close all
 clear all
@@ -66,8 +69,7 @@ c_signal = cell2mat(signals);
 %% Register to mean value in time range
 close all
 
-time_range = [50 200];
-% time_range = [50 510]; % For comprehensive basis
+time_range = [50 510];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -129,8 +131,7 @@ end
 %% Generate spline fits to data-sets given in sites_for_harmonics
 % close all
 
-nbasis = 20;
-% nbasis = 61; % For comprehensive basis
+nbasis = 61;
 % time_range = [min(timestamp) max(timestamp)];
 
 ind_harm = ismember(celltype,sites_for_harmonics);
@@ -141,12 +142,12 @@ smoothed_data = smooth_basis(timestamp(range_ind),c_signal(range_ind,ind_harm),b
 
 % return
 
-f = figure;
-set(f,'DefaultAxesColorOrder',jet(size(c_signal(1,ind_harm),2)))
-hold on
-
-plot(smoothed_data)
-plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
+% f = figure;
+% set(f,'DefaultAxesColorOrder',jet(size(c_signal(1,ind_harm),2)))
+% hold on
+% 
+% plot(smoothed_data)
+% plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 
 %% Make FPCA with data generated in previous block
 % close all
@@ -167,27 +168,20 @@ c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); 
 close all
 
 % Define principal components to be plotted
-pcs = [2 3];
+pcs = [1 3];
 
 % Unregistered data - Harm 1: DC; Harm 2: Rise; Harm 3: Peak
 % angle1 = 20;
 % angle2 = 0;
 % angle3 = -10;
-angle1 = -25;
-angle2 = 5;
-angle3 = -5;
+angle1 = 33;
+angle2 = -3;
+angle3 = 15;
 % Registered data - Harm 1: SS_afterStim; Harm 2: SS_preStim; Harm 3: Peak
 % angle1 = 15;
 % angle2 = -7;
 % Old:
 % angle = -10; % rotation angle to right [degree]
-
-
-% Comprehensive basis
-% angle1 = 10;
-% angle2 = 0;
-% angle3 = 20;
-
 
 Rmat1 = [cos(2*pi*angle1/360)   sin(2*pi*angle1/360)   0; ...
          -sin(2*pi*angle1/360)  cos(2*pi*angle1/360)   0; ...
@@ -208,11 +202,11 @@ flipharm = ones(1,nharm);
 % flipharm(1:4) = [1 1 -1 1]; % Unregistered
 flipharm(1:3) = [1 1 -1]; % Unregistered
 
-
-% flipharm(1:3) = [-1 1 -1]; % Comprehensive basis
-
-
 unitypes = unique(celltype(ind_harm));
+
+% ligs_to_plot = 1:length(uni_lig); % Plot all
+ligs_to_plot = [2 4 5 1 7 6]; % Plot all but FGF
+% ligs_to_plot = [2 1 7];
 
 site_lig_ind = [];
 site_lig_name = {};
@@ -234,224 +228,329 @@ sites_remain = find(~site_inh_dose);
 uni_lig = unique(site_lig_ind(sites_remain));
 lig_min = min(site_lig_dose(sites_remain));
 lig_max = max(site_lig_dose(sites_remain));
-ncolor = 201;
-% colmap = flipud(jet(ncolor));
-colmap = flipud(winter(ncolor));
+ncolor = length(ligs_to_plot)-1;
+colmap = flipud(hsv(ncolor+1));
+% colmap = flipud(winter(ncolor));
 color_doses = 10.^linspace(max(log10([lig_min 1])),log10(lig_max),ncolor);
 
-% ligs_to_plot = 1:length(uni_lig); % Plot all
-ligs_to_plot = [2 7];
-
-% rowstocols = 0.3;
-rowstocols = 0;
-nrows = ceil((2*length(ligs_to_plot)+1)^rowstocols);
-ncols = ceil((2*length(ligs_to_plot)+1) / nrows);
+rowstocols = 0.3;
+% rowstocols = 0;
+nrows = 2;
+ncols = 6;
 
 figure
 
 posFig = get(gcf,'Position');
-posFig(4) = posFig(4)/2.5;
-% posFig(4) = posFig(4)/3;
+% posFig(4) = posFig(4);
+% posFig(3) = posFig(3)*2;
+posFig(4) = posFig(4)/1.5;
 set(gcf,'Position',posFig)
 set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./20);
 
 flipped_scores = repmat(flipharm,size(c_signal_pcastr.harmscr,1),1).*c_signal_pcastr.harmscr;
 
-STD = 1.5;                     %# 2 standard deviations
+STD = 1;                     %# 2 standard deviations
 conf = 2*normcdf(STD)-1;     %# covers around 95% of population
 scale = chi2inv(conf,2);     %# inverse chi-squared with dof=#dimensions
-
-for ilig_plot = 1:length(ligs_to_plot)
     
-    ilig = ligs_to_plot(ilig_plot);
-    subplot(nrows,ncols,(2*(ilig_plot-1)+1):(2*ilig_plot))
-    box on
-    hold on
-    tmpind = find(site_lig_ind(sites_remain) == uni_lig(ilig));
-    title(site_lig_name{sites_remain(tmpind(1))})
-    
-    x_scores = (Rmat(pcs(1),:) * flipped_scores(:,1:3)')';
-    y_scores = (Rmat(pcs(2),:) * flipped_scores(:,1:3)')';
-    plot(x_scores,y_scores,'.','Color',[.7 .7 .7]);
-    
-    for isite = tmpind
-        % Colored
-        [tmp color_ind] = min(abs(color_doses-site_lig_dose(sites_remain(isite))));
-        mycolor = colmap(color_ind,:);
-        plot(x_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:),y_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:),'.','Color',mycolor);
-        
-        %# substract mean
-        Mu = mean( [x_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:) y_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:)] );
-        X0 = bsxfun(@minus, [x_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:) y_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:)], Mu);
+subplot(1,2,1)
+box on
+hold on
 
-        %# eigen decomposition [sorted by eigen values]
-        Cov = cov(X0) * scale;
-        [V D] = eig(Cov);
-        [D order] = sort(diag(D), 'descend');
-        D = diag(D);
-        V = V(:, order);
+x_scores = (Rmat(pcs(1),:) * flipped_scores(:,1:3)')';
+y_scores = (Rmat(pcs(2),:) * flipped_scores(:,1:3)')';
+plot(x_scores,y_scores,'.','Color',[.7 .7 .7]);
 
-        t = linspace(0,2*pi,100);
-        e = [cos(t) ; sin(t)];        %# unit circle
-        VV = V*sqrt(D);               %# scale eigenvectors
-        e = bsxfun(@plus, VV*e, Mu'); %#' project circle back to orig space
+unstim = find(site_lig_dose == 0);
+unstim = unstim(1:end-1); % BTC just a copy of FGF
+x_scores_unstim = [];
+y_scores_unstim = [];
 
-        %# plot cov and major/minor axes
-%         plot(e(1,:), e(2,:), 'Color',mycolor);
-        
-        tmpx = e(1,:);
-        tmpy = e(2,:);
-%         ltmp = patch(tmpx, tmpy, ones(size(tmpx)), ones(size(tmpx)));
-%         set(ltmp, 'FaceColor', mycolor, 'EdgeColor', 'none', 'FaceAlpha', .3);
-
-        
-    end
-    
-    set(gca,'XLim',[min(x_scores) max(x_scores)]*1.1)
-    aspRatioFig = posFig(3)/posFig(4);
-    posSubplot = get(gca,'Position');
-    aspRatioSubplot = posSubplot(3)/posSubplot(4);
-%     set(gca,'YLim',get(gca,'XLim')/(aspRatioFig*aspRatioSubplot)-.03) % PC1 vs PC3
-%     set(gca,'YLim',get(gca,'XLim')/(aspRatioFig*aspRatioSubplot)+.03) % PC1 vs PC2
-
-    if ilig_plot == 1
-        ylabel(['PC ' num2str(pcs(2))])
-        arrow([-.13 -.1],[.2 -.1],'Width',.5,'Length',7)
-        set(gca,'YTick',-.1:.1:.2)
-    end
-    if ilig_plot == length(ligs_to_plot)-1
-        xlabel(['PC ' num2str(pcs(1))])
-%         set(gca,'YTickLabel',[])
-    end
-    if ilig_plot == length(ligs_to_plot)
-%         arrow([-.13 .08],[.05 .2],'Width',.5,'Length',7)
-        arrow([-.13 .06],[.02 .15],'Width',.5,'Length',7)
-        set(gca,'YTickLabel',[])
-    end
+for iunstim = unstim
+    x_scores_unstim = [x_scores_unstim; x_scores(celltype(ind_harm) == sites_for_harmonics(iunstim))];
+    y_scores_unstim = [y_scores_unstim; y_scores(celltype(ind_harm) == sites_for_harmonics(iunstim))];
 end
 
+x_med = median(x_scores_unstim);
+y_med = median(y_scores_unstim);
+
+leg_str = {};
+color_ind = 1;
+
+for isite = ligs_to_plot(end:-1:1)
+    tmpind = find(site_lig_ind(sites_remain) == uni_lig(isite));
+    leg_str{end+1} = site_lig_name{sites_remain(tmpind(1))};
+    iplot = find(site_lig_dose(tmpind) == 100); % Only high dose
+    
+    % Colored
+    mycolor = colmap(color_ind,:);
+    color_ind = color_ind + 1;
+%     plot(x_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:),y_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:),'o','MarkerFaceColor',mycolor,'MarkerEdgeColor','none','MarkerSize',4);
+
+    %# substract mean
+    Mu = mean( [x_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:) y_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:)] );
+    X0 = bsxfun(@minus, [x_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:) y_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:)], Mu);
+
+    %# eigen decomposition [sorted by eigen values]
+    Cov = cov(X0) * scale;
+    [V D] = eig(Cov);
+    [D order] = sort(diag(D), 'descend');
+    D = diag(D);
+    V = V(:, order);
+
+    t = linspace(0,2*pi,100);
+    e = [cos(t) ; sin(t)];        %# unit circle
+    VV = V*sqrt(D);               %# scale eigenvectors
+    e = bsxfun(@plus, VV*e, Mu'); %#' project circle back to orig space
+
+    %# plot cov and major/minor axes
+%         plot(e(1,:), e(2,:), 'Color',mycolor);
+
+    tmpx = e(1,:);
+    tmpy = e(2,:);
+    ltmp = patch(tmpx, tmpy, ones(size(tmpx)), ones(size(tmpx)));
+    set(ltmp, 'FaceColor', mycolor, 'EdgeColor', 'none', 'FaceAlpha', .5);
+
+
+end
+
+% set(gca,'XLim',[min(x_scores) max(x_scores)]*1.1)
+set(gca,'XLim',[min(x_scores) max(x_scores)]-.02)
+aspRatioFig = posFig(3)/posFig(4);
+posSubplot = get(gca,'Position');
+aspRatioSubplot = posSubplot(3)/posSubplot(4);
+% set(gca,'YLim',get(gca,'XLim')/(aspRatioFig*aspRatioSubplot)) % PC1 vs PC3
+%     set(gca,'YLim',get(gca,'XLim')/(aspRatioFig*aspRatioSubplot)+.03) % PC1 vs PC2
+% set(gca,'YLim',[-.06 .12])
+
+% if ilig_plot == 1
+    ylabel(['PC ' num2str(pcs(2))])
+%     arrow([-.13 -.1],[.2 -.1],'Width',.5,'Length',7)
+%     set(gca,'YTick',-.1:.1:.2)
+% end
+% if ilig_plot == length(ligs_to_plot)-1
+    xlabel(['PC ' num2str(pcs(1))])
+%     set(gca,'YTickLabel',[])
+% end
+% if ilig_plot == length(ligs_to_plot)
+%     arrow([-.13 .08],[.05 .2],'Width',.5,'Length',7)
+%     set(gca,'YTickLabel',[])
+% end
+
+% lline = .13;
+% plot([x_med x_med],get(gca,'YLim')*.95,'k-','LineWidth',2)
+% plot(x_med,y_med,'kx','LineWidth',3)
+% alpha = pi/4;
+% angles = linspace(0,alpha,51);
+% plot([x_med x_med+lline*sin(pi/4)],[y_med lline*cos(pi/4)],'k-','LineWidth',2)
+% plot(x_med+lline*sin(angles)/2,y_med+lline*cos(angles)/2,'k-','LineWidth',2)
+
+
+% set(gca,'children',flipud(get(gca,'children')))
+
 h = get(gca);
-subplot(nrows,ncols,2*ilig_plot+1)
-clim = log10([lig_min lig_max]);
-clim(1) = max([clim(1) 0]);
+subplot(1,2,2)
+clim = [0 1];
 set(gca,'CLim',clim)
 colormap(colmap)
 % colorbar('Location','North','XTick',log10([1 2.5 5 10 20 50 100]),'XTickLabel',[0 2.5 5 10 20 50 100]) % Horizontal colorbar
-colorbar('Location','West','YTick',log10([1 2.5 5 10 20 50 100]),'YTickLabel',[0 2.5 5 10 20 50 100]) % Vertical colorbar
+colorbar('Location','West','YTick',linspace(range(clim)./(2*length(ligs_to_plot)),1-range(clim)./(2*length(ligs_to_plot)),length(ligs_to_plot)),'YTickLabel',leg_str, 'TickLength', [0 0]) % Vertical colorbar
 set(gca,'Visible','off')
-text(0,-.05,'Ligand dose\newline[ng/ml]')
+% text(0,-.05,'Ligand')
+possubp = get(gca,'Position');
+set(gca,'Position',[possubp(1)-.03 possubp(2:4)])
 
-%% Plot same as above, but in one figure
-% colmap = flipud(hsv(3*ncolor));
-% colmap = colmap(1:ncolor,:);
-colmap = flipud(jet(ncolor));
-color_doses = 10.^linspace(max(log10([lig_min 1])),log10(lig_max),ceil(ncolor./2));
-color_doses = [-color_doses(end:-1:2) color_doses];
-
-% ligs_to_plot = 1:length(uni_lig); % Plot all
-ligs_to_plot = [2 7];
-
-% rowstocols = 0.3;
-rowstocols = 0;
-nrows = ceil((length(ligs_to_plot))^rowstocols);
-ncols = ceil((length(ligs_to_plot)) / nrows);
+return
 
 figure
 
 posFig = get(gcf,'Position');
-posFig(4) = posFig(4)/2;
-% posFig(4) = posFig(4)/3;
+% posFig(4) = posFig(4);
+% posFig(3) = posFig(3)*2;
+% posFig(4) = posFig(4)/1.5;
 set(gcf,'Position',posFig)
-set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./25);
+set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./20);
 
-flipped_scores = repmat(flipharm,size(c_signal_pcastr.harmscr,1),1).*c_signal_pcastr.harmscr;
-
-STD = 1.5;                     %# 2 standard deviations
-conf = 2*normcdf(STD)-1;     %# covers around 95% of population
-scale = chi2inv(conf,2);     %# inverse chi-squared with dof=#dimensions
-
-for ilig_plot = 1:length(ligs_to_plot)
+resp_strength = [];
+resp_angle = [];
+for isite = ligs_to_plot(end:-1:1)
+    tmpind = find(site_lig_ind(sites_remain) == uni_lig(isite));
+    iplot = find(site_lig_dose(tmpind) == 100); % Only high dose
     
-    ilig = ligs_to_plot(ilig_plot);
-    subplot(nrows,ncols,1)
-    box on
-    hold on
-    tmpind = find(site_lig_ind(sites_remain) == uni_lig(ilig));
-%     title(site_lig_name{sites_remain(tmpind(1))})
+    resp_strength = padconcatenation(resp_strength,sqrt((x_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:) - x_med).^2 + (y_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:) - y_med).^2),2);
+    resp_angle = padconcatenation(resp_angle,atan((x_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:) - x_med)./(y_scores(celltype(ind_harm) == sites_for_harmonics(tmpind(iplot)),:) - y_med)),2);
+end
+resp_angle(resp_angle < 0) = pi + resp_angle(resp_angle < 0);
+
+% Response strength plot
+% subplot(nrows,ncols,5)
+% boxplot(resp_strength)
+% possubp1 = get(gca,'Position');
+% % title('Response strength')
+% xlabel('Response strength')
+% hold on
+% set(gca,'XTick',1:6,'XTickLabel',leg_str)
+% midpoint = .1;
+% range_bars = .07;
+% plot(get(gca,'XLim'),[1 1]*midpoint,'k--')
+% plot(get(gca,'XLim'),[1 1]*(midpoint+range_bars),'k:')
+% plot(get(gca,'XLim'),[1 1]*(midpoint-range_bars),'k:')
+% % set(gca,'YLim',[pi/6 2/3*pi]) % Almost everything visible
+% set(gca,'YLim',[0 .2],'YTick',[midpoint-range_bars midpoint midpoint+range_bars],'YTickLabel',{'none','medium','high'})
+% set(gca,'Position',[.63 possubp1(2) .14 possubp1(4)])
+% 
+% % Response strength plot
+% sps = subplot(nrows,ncols,6);
+% hold on
+% legendstyles = [];
+% for ip = 1:size(resp_strength,2)
+% 
+%     baredges = linspace(0,.2,6);
+%     barheight = histc(resp_strength(:,ip),baredges)./sum(~isnan(resp_strength(:,ip)));
+%     legendstyles = [legendstyles plot(baredges,barheight,'Color',colmap(ip,:),'LineWidth',2)];
+% %     [f,xi] = ksdensity(resp_strength(:,ip));
+% %     legendstyles = [legendstyles plot(xi,f,'Color',colmap(ip,:))];
+% 
+% end
+% % title('Response strength')
+% ylabel('distribution')
+% 
+% % legend(sps,legendstyles,leg_str)
+% 
+% % set(gca,'XTick',1:6,'XTickLabel',leg_str)
+% midpoint = .1;
+% range_bars = .07;
+% % plot([1 1]*midpoint,get(gca,'YLim'),'k--')
+% % plot([1 1]*(midpoint+range_bars),get(gca,'YLim'),'k:')
+% % plot([1 1]*(midpoint-range_bars),get(gca,'YLim'),'k:')
+% % % set(gca,'YLim',[pi/6 2/3*pi]) % Almost everything visible
+% set(gca,'XLim',[0 .2],'XTick',[midpoint-range_bars midpoint midpoint+range_bars],'XTickLabel',{'none','medium','high'})
+% possubp1 = get(gca,'Position');
+% set(gca,'Position',[possubp1(1)+.04 possubp1(2) possubp1(3)+.03 possubp1(4)])
+
+% Response angle plot
+subplot(2,2,1)
+boxplot(resp_angle)
+possubp2 = get(gca,'Position');
+title('Response angle')
+hold on
+set(gca,'XTick',1:6,'XTickLabel',leg_str)
+% 3*pi/8 is middle??
+% midpoint = 7*pi/16;
+midpoint = 1.3;
+range_bars = 0.3;
+plot(get(gca,'XLim'),[1 1]*midpoint,'k--')
+plot(get(gca,'XLim'),[1 1]*(midpoint+range_bars),'k:')
+plot(get(gca,'XLim'),[1 1]*(midpoint-range_bars),'k:')
+% set(gca,'YLim',[pi/6 2/3*pi]) % Almost everything visible
+set(gca,'YLim',[.8 1.8],'YTick',[midpoint-range_bars midpoint midpoint+range_bars],'YTickLabel',{'transient','both','persistent'})
+% possubp2 = get(gca,'Position');
+% set(gca,'Position',[.63 possubp2(2) .14 possubp2(4)])
+% set(gca,'Position',possubp2-.01)
+
+% % Response angle plot
+% sps2 = subplot(nrows,ncols,12);
+% % boxplot(resp_angle)
+% hold on
+% legendstyles = [];
+% for ip = 1:size(resp_angle,2)
+% 
+%     baredges = linspace(0.8,1.8,6);
+%     barheight = histc(resp_angle(:,ip),baredges)./sum(~isnan(resp_angle(:,ip)));
+%     legendstyles = [legendstyles plot(baredges,barheight,'Color',colmap(ip,:),'LineWidth',2)];
+% %     [f,xi] = ksdensity(resp_strength(:,ip));
+% %     legendstyles = [legendstyles plot(xi,f,'Color',colmap(ip,:))];
+% 
+% end
+% 
+% % title('Response angle')
+% ylabel('distribution')
+% % hold on
+% % set(gca,'XTick',1:6,'XTickLabel',leg_str)
+% % % 3*pi/8 is middle??
+% % % midpoint = 7*pi/16;
+% midpoint = 1.3;
+% range_bars = 0.3;
+% % plot(get(gca,'XLim'),[1 1]*midpoint,'k--')
+% % plot(get(gca,'XLim'),[1 1]*(midpoint+range_bars),'k:')
+% % plot(get(gca,'XLim'),[1 1]*(midpoint-range_bars),'k:')
+% % % set(gca,'YLim',[pi/6 2/3*pi]) % Almost everything visible
+% set(gca,'XLim',[.8 1.8],'XTick',[midpoint-range_bars midpoint midpoint+range_bars],'XTickLabel',{'transient','both','persistent'})
+% possubp2 = get(gca,'Position');
+% set(gca,'Position',[possubp2(1)+.04 possubp2(2) possubp2(3)+.03 possubp2(4)])
+
+sites = [4 10 17 37 44 57 64];
+input_names = {'EGF','No Lig','IGF','HRG','HGF','EPR','BTC'};
+
+dists = [];
+celltypeharm = [];
+
+clear radial_dist
+
+dists_mat = [];
+
+for isite = sites
+    radial_dists = radial_dist(isite);
     
-    x_scores = (Rmat(pcs(1),:) * flipped_scores(:,1:3)')';
-    y_scores = (Rmat(pcs(2),:) * flipped_scores(:,1:3)')';
-    if ilig_plot == 1
-        plot(x_scores,y_scores,'.','Color',[.7 .7 .7]);
-    end
+    dists = [dists radial_dists];
     
-    for isite = tmpind
-        % Colored
-        rev_fac = 2*(ilig_plot == 1)-1;
-        [tmp color_ind] = min(abs(color_doses-rev_fac*site_lig_dose(sites_remain(isite))));
-        mycolor = colmap(color_ind,:);
-        plot(x_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:),y_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:),'.','Color',mycolor);
-        
-        %# substract mean
-        Mu = mean( [x_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:) y_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:)] );
-        X0 = bsxfun(@minus, [x_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:) y_scores(celltype(ind_harm) == sites_for_harmonics(sites_remain(isite)),:)], Mu);
-
-        %# eigen decomposition [sorted by eigen values]
-        Cov = cov(X0) * scale;
-        [V D] = eig(Cov);
-        [D order] = sort(diag(D), 'descend');
-        D = diag(D);
-        V = V(:, order);
-
-        t = linspace(0,2*pi,100);
-        e = [cos(t) ; sin(t)];        %# unit circle
-        VV = V*sqrt(D);               %# scale eigenvectors
-        e = bsxfun(@plus, VV*e, Mu'); %#' project circle back to orig space
-
-        %# plot cov and major/minor axes
-%         plot(e(1,:), e(2,:), 'Color',mycolor);
-        
-        tmpx = e(1,:);
-        tmpy = e(2,:);
-%         ltmp = patch(tmpx, tmpy, ones(size(tmpx)), ones(size(tmpx)));
-%         set(ltmp, 'FaceColor', mycolor, 'EdgeColor', 'none', 'FaceAlpha', .3);
-
-        
-    end
+    celltypeharm = [celltypeharm ones(size(radial_dists))*isite];
     
-    set(gca,'XLim',[min(x_scores) max(x_scores)]*1.1)
-    aspRatioFig = posFig(3)/posFig(4);
-    posSubplot = get(gca,'Position');
-    aspRatioSubplot = posSubplot(3)/posSubplot(4);
-    set(gca,'YLim',get(gca,'XLim')/(aspRatioFig*aspRatioSubplot)-.03) % PC1 vs PC3
-%     set(gca,'YLim',get(gca,'XLim')/(aspRatioFig*aspRatioSubplot)+.03) % PC1 vs PC2
+    dists_mat = padconcatenation(dists_mat,radial_dists,1);
 
-%     if ilig_plot == 1
-        ylabel(['PC ' num2str(pcs(2))])
-        arrow([-.13 -.1],[.2 -.1],'Width',.5,'Length',7)
-        set(gca,'YTick',-.1:.1:.2)
-%     end
-%     if ilig_plot == length(ligs_to_plot)-1
-        xlabel(['PC ' num2str(pcs(1))])
-%         set(gca,'YTickLabel',[])
-%     end
-%     if ilig_plot == length(ligs_to_plot)
-%         arrow([-.13 .08],[.05 .2],'Width',.5,'Length',7)
-        arrow([-.13 .06],[.02 .15],'Width',.5,'Length',7)
-%         set(gca,'YTickLabel',[])
-%     end
 end
 
-h = get(gca);
-subplot(nrows,ncols,2)
-clim = log10([lig_min lig_max]);
-clim(1) = max([clim(1) 0]);
-set(gca,'CLim',clim)
-colormap(colmap)
-% colorbar('Location','North','XTick',log10([1 2.5 5 10 20 50 100]),'XTickLabel',[0 2.5 5 10 20 50 100]) % Horizontal colorbar
-colorbar('Location','West','YTick',log10([1 10 100]),'YTickLabel',{'BTC','No Stim','IGF'}) % Vertical colorbar
-set(gca,'Visible','off')
-text(0,-.05,'Ligand dose')
+subplot(2,2,3)
+
+resort = [2 3 6 4 1 5 7];
+boxplot(dists_mat(resort,:)')
+title('Pulsatory strength')
+set(gca,'XTick',1:7,'XTickLabel',input_names(resort))
+set(gca,'YLim',[0 .04])
+
+
+
+x_score_sites = [];
+y_score_sites = [];
+
+for isite = sites
+    x_score_sites = [x_score_sites; x_scores(celltype(ind_harm) == isite,:)];
+    y_score_sites = [y_score_sites; y_scores(celltype(ind_harm) == isite,:)];
+
+end
+
+subplot(2,2,2)
+colmap2 = lines(length(sites));
+color_ind = 1;
+leghand = [];
+hold on
+for isite = sites
+    % Colored
+    mycolor = colmap2(color_ind,:);
+    color_ind = color_ind + 1;
+    leghand = [leghand plot(dists(celltypeharm == isite),x_score_sites(celltypeharm == isite),'o','Color',mycolor,'MarkerSize',3)];
+end
+legend(leghand,input_names)
+set(gca,'XLim',[0 .04])
+xlabel('Pulsatory strength')
+ylabel('PC2')
+
+subplot(2,2,4)
+color_ind = 1;
+leghand = [];
+hold on
+for isite = sites
+    % Colored
+    mycolor = colmap2(color_ind,:);
+    color_ind = color_ind + 1;
+    leghand = [leghand plot(dists(celltypeharm == isite),y_score_sites(celltypeharm == isite),'o','Color',mycolor,'MarkerSize',3)];
+end
+legend(leghand,input_names)
+set(gca,'XLim',[0 .04])
+set(gca,'YLim',[-.06 .12])
+xlabel('Pulsatory strength')
+ylabel('PC3')
+
 
 return
 
@@ -469,7 +568,7 @@ f = figure;
 posFig = get(gcf,'Position');
 posFig(4) = posFig(4)/1.5;
 set(gcf,'Position',posFig)
-set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./17);
+set(gcf,'PaperPosition', [0 0 posFig(3) posFig(4)]./25);
 
 nrows = 3;
 ncols = 5;
@@ -611,67 +710,4 @@ for iplot = 1:size(basis_eval,2)
     end
     
     set(gca,'YTick',[])
-end
-
-%% Figure 2B: Eigenfunctions (new - rotated)
-close all
-pcs = 1:3;
-
-angle1 = -25;
-angle2 = 5;
-angle3 = -5;
-% Comprehensive basis
-flipharm(1:3) = [-1 1 -1];
-angle1 = 10;
-angle2 = 0;
-angle3 = 20;
-
-Rmat1 = [cos(2*pi*angle1/360)   sin(2*pi*angle1/360)   0; ...
-         -sin(2*pi*angle1/360)  cos(2*pi*angle1/360)   0; ...
-         0                      0                      1];
-     
-Rmat2 = [cos(2*pi*angle2/360)   0  sin(2*pi*angle2/360); ...
-         0                      1  0; ...
-         -sin(2*pi*angle2/360)  0  cos(2*pi*angle2/360)];
-     
-Rmat3 = [1 0                      0; ...
-         0 cos(2*pi*angle3/360)   sin(2*pi*angle3/360); ...
-         0 -sin(2*pi*angle3/360)  cos(2*pi*angle3/360)];
-     
-Rmat = Rmat3 * Rmat2 * Rmat1;
-
-
-rowstocols = 1;
-nrows = ceil(nharm^rowstocols);
-ncols = ceil(nharm / nrows);
-
-[tmp range_ind_min] = min(abs(timestamp - time_range(1)));
-[tmp range_ind_max] = min(abs(timestamp - time_range(2)));
-range_ind = range_ind_min:range_ind_max;
-times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
-
-harm_eval = repmat(flipharm(1:nharm),length(times_fine),1) .* eval_fd(c_signal_pcastr.harmfd,times_fine);
-% <-- Why does Ramsay do that?? Destroys normalization and may not be done if harmonics are rotated!
-harm_eval_rescale = harm_eval;
-
-figure
-
-for iplot = 1:nharm
-    subplot(nrows,ncols,iplot)
-    
-    if iplot <= length(pcs)
-        tmpplot = sum(repmat(Rmat(iplot,:),size(harm_eval_rescale,1),1) .* harm_eval_rescale(:,pcs),2);
-    else
-        tmpplot = harm_eval_rescale(:,iplot);
-    end
-
-    
-    plot(times_fine,tmpplot)
-    xlabel(['Harmonic ' num2str(iplot)])
-    set(gca,'XLim',time_range)
-%     set(gca,'XLim',[50 200])
-    set(gca,'YLim',[min(min(harm_eval_rescale)) max(max(harm_eval_rescale))]*1.2)
-    
-    hold on
-    plot(time_range,[0 0],'--')
 end

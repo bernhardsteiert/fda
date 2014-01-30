@@ -698,7 +698,7 @@ for iplot = 1:size(basis_eval,2)
     hold on
     plot(time_range,[0 0],'--')
     
-%     title(['Variance explained: ' num2str(varper*100,3) '%'])
+    title(['Variance explained: ' num2str(varper*100,3) '%'])
     
     if iplot == nharm
 %         xlabel('time [min]')

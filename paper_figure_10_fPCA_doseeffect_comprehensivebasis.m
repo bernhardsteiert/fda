@@ -67,7 +67,7 @@ c_signal = cell2mat(signals);
 close all
 
 time_range = [50 200];
-% time_range = [50 510]; % For comprehensive basis
+time_range = [50 510]; % For comprehensive basis
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -130,7 +130,7 @@ end
 % close all
 
 nbasis = 20;
-% nbasis = 61; % For comprehensive basis
+nbasis = 61; % For comprehensive basis
 % time_range = [min(timestamp) max(timestamp)];
 
 ind_harm = ismember(celltype,sites_for_harmonics);
@@ -151,7 +151,7 @@ plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 %% Make FPCA with data generated in previous block
 % close all
 
-nharm = 3;
+nharm = 5;
 % c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0));
 c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 % c_signal_pcastr = varmx_pca(c_signal_pcastr);
@@ -167,7 +167,7 @@ c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); 
 close all
 
 % Define principal components to be plotted
-pcs = [2 3];
+pcs = [1 3];
 
 % Unregistered data - Harm 1: DC; Harm 2: Rise; Harm 3: Peak
 % angle1 = 20;
@@ -184,10 +184,11 @@ angle3 = -5;
 
 
 % Comprehensive basis
-% angle1 = 10;
-% angle2 = 0;
-% angle3 = 20;
+angle1 = 33;
+angle2 = -3;
+angle3 = 15;
 
+angle4 = 0;
 
 Rmat1 = [cos(2*pi*angle1/360)   sin(2*pi*angle1/360)   0; ...
          -sin(2*pi*angle1/360)  cos(2*pi*angle1/360)   0; ...
@@ -201,15 +202,18 @@ Rmat3 = [1 0                      0; ...
          0 cos(2*pi*angle3/360)   sin(2*pi*angle3/360); ...
          0 -sin(2*pi*angle3/360)  cos(2*pi*angle3/360)];
      
-Rmat = Rmat3 * Rmat2 * Rmat1;
+Rmat4 = [cos(2*pi*angle4/360)   0  sin(2*pi*angle4/360); ...
+         0                      1  0; ...
+         -sin(2*pi*angle4/360)  0  cos(2*pi*angle4/360)];
+     
+Rmat = Rmat4 * Rmat3 * Rmat2 * Rmat1;
 
 flipharm = ones(1,nharm);
 % Has to be adjusted according to angles
 % flipharm(1:4) = [1 1 -1 1]; % Unregistered
 flipharm(1:3) = [1 1 -1]; % Unregistered
 
-
-% flipharm(1:3) = [-1 1 -1]; % Comprehensive basis
+flipharm(1:3) = [1 1 -1];
 
 
 unitypes = unique(celltype(ind_harm));
@@ -621,10 +625,49 @@ angle1 = -25;
 angle2 = 5;
 angle3 = -5;
 % Comprehensive basis
-flipharm(1:3) = [-1 1 -1];
+
 angle1 = 10;
 angle2 = 0;
 angle3 = 20;
+
+% Following works OK and generates 20140130T145713_basis_after_rot.pdf
+% flipharm(1:3) = [1 1 -1];
+% angle1 = 15;
+% angle2 = 60;
+% angle3 = 20;
+% 
+% angle4 = -60;
+% 
+% Rmat1 = [cos(2*pi*angle1/360)   sin(2*pi*angle1/360)   0; ...
+%          -sin(2*pi*angle1/360)  cos(2*pi*angle1/360)   0; ...
+%          0                      0                      1];
+%      
+% Rmat2 = [cos(2*pi*angle2/360)   0  sin(2*pi*angle2/360); ...
+%          0                      1  0; ...
+%          -sin(2*pi*angle2/360)  0  cos(2*pi*angle2/360)];
+%      
+% Rmat3 = [1 0                      0; ...
+%          0 cos(2*pi*angle3/360)   sin(2*pi*angle3/360); ...
+%          0 -sin(2*pi*angle3/360)  cos(2*pi*angle3/360)];
+%      
+% Rmat4 = [cos(2*pi*angle4/360)   0  sin(2*pi*angle4/360); ...
+%          0                      1  0; ...
+%          -sin(2*pi*angle4/360)  0  cos(2*pi*angle4/360)];
+%      
+% Rmat = Rmat4 * Rmat3 * Rmat2 * Rmat1;
+
+% Following works just as the one above but with 3 angles --> 20140130T151326_basis_after_rot_3anglesa.pdf
+% flipharm(1:3) = [1 1 -1];
+% angle1 = 33;
+% angle2 = -3;
+% angle3 = 15;
+
+flipharm(1:5) = [1 1 -1 1 1];
+angle1 = 33;
+angle2 = -3;
+angle3 = 15;
+
+angle4 = 0;
 
 Rmat1 = [cos(2*pi*angle1/360)   sin(2*pi*angle1/360)   0; ...
          -sin(2*pi*angle1/360)  cos(2*pi*angle1/360)   0; ...
@@ -638,7 +681,11 @@ Rmat3 = [1 0                      0; ...
          0 cos(2*pi*angle3/360)   sin(2*pi*angle3/360); ...
          0 -sin(2*pi*angle3/360)  cos(2*pi*angle3/360)];
      
-Rmat = Rmat3 * Rmat2 * Rmat1;
+Rmat4 = [cos(2*pi*angle4/360)   0  sin(2*pi*angle4/360); ...
+         0                      1  0; ...
+         -sin(2*pi*angle4/360)  0  cos(2*pi*angle4/360)];
+     
+Rmat = Rmat4 * Rmat3 * Rmat2 * Rmat1;
 
 
 rowstocols = 1;
@@ -651,18 +698,31 @@ range_ind = range_ind_min:range_ind_max;
 times_fine = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),501);
 
 harm_eval = repmat(flipharm(1:nharm),length(times_fine),1) .* eval_fd(c_signal_pcastr.harmfd,times_fine);
-% <-- Why does Ramsay do that?? Destroys normalization and may not be done if harmonics are rotated!
 harm_eval_rescale = harm_eval;
 
-figure
+f3 = figure;
+hold on
+
+xfac = .4;
+yfac = 1;
+fontsize = 8;
+
+setFigure(f3,xfac,yfac,fontsize)
+
+harmscr = (Rmat * flipped_scores(:,1:3)')';
+propvar = squeeze(sum(harmscr.^2));
+propvar = propvar./sum(propvar);
+propvar = propvar.*sum(c_signal_pcastr.varprop(1:3));
 
 for iplot = 1:nharm
     subplot(nrows,ncols,iplot)
     
     if iplot <= length(pcs)
         tmpplot = sum(repmat(Rmat(iplot,:),size(harm_eval_rescale,1),1) .* harm_eval_rescale(:,pcs),2);
+        varper = propvar(iplot);
     else
         tmpplot = harm_eval_rescale(:,iplot);
+        varper = c_signal_pcastr.varprop(iplot);
     end
 
     
@@ -670,8 +730,10 @@ for iplot = 1:nharm
     xlabel(['Harmonic ' num2str(iplot)])
     set(gca,'XLim',time_range)
 %     set(gca,'XLim',[50 200])
-    set(gca,'YLim',[min(min(harm_eval_rescale)) max(max(harm_eval_rescale))]*1.2)
+%     set(gca,'YLim',[min(min(harm_eval_rescale)) max(max(harm_eval_rescale))]*1.2)
     
     hold on
     plot(time_range,[0 0],'--')
+    
+    title(['Variance explained: ' num2str(varper*100,3) '%'])
 end
