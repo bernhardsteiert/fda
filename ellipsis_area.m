@@ -6,6 +6,9 @@ if xsize(1) < xsize(2)
     y_scores = y_scores';
 end
 
+magic_factor = 2;
+y_scores = y_scores * magic_factor; 
+
 STD = 1;                     %# standard deviations
 conf = 2*normcdf(STD)-1;     %# covers around 95% of population (for STD = 2)
 scale = chi2inv(conf,2);     %# inverse chi-squared with dof=#dimensions

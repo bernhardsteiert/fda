@@ -64,6 +64,9 @@ all_type = [ones(1,length(pks)) -ones(1,length(pks2))];
 
 [locs_sorted ind_locs_sorted] = sort(all_locs);
 % --> all_type(ind_locs_sorted) is alternating by construction
+locs_sorted = [1; locs_sorted; size(c_signal,1)];
+types_sorted = [-types_sorted(1) types_sorted -types_sorted(end)];
+
 range_smoothed = max(c_smoothed_eval(:,end-isig+1))-min(c_smoothed_eval(:,end-isig+1));
 candidate_left = [c_smoothed_eval(1,end-isig+1); all_pks(ind_locs_sorted(1:end))];
 candidate_right = [all_pks(ind_locs_sorted(1:end)); c_smoothed_eval(end,end-isig+1)];

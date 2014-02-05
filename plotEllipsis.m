@@ -28,7 +28,8 @@ function plotEllipsis(x_scores,y_scores,mycolor,alpha)
 
     tmpx = e(1,:);
     tmpy = e(2,:);
-    ltmp = patch(tmpx, tmpy, ones(size(tmpx)), ones(size(tmpx)));
-    set(ltmp, 'FaceColor', mycolor, 'EdgeColor', 'none', 'FaceAlpha', alpha);
+%     ltmp = patch(tmpx, tmpy, ones(size(tmpx)), ones(size(tmpx)));
+%     set(ltmp, 'FaceColor', mycolor, 'EdgeColor', 'none', 'FaceAlpha', alpha);
+    plot(tmpx,tmpy,'Color',mycolor,'LineWidth',2)
     
 end

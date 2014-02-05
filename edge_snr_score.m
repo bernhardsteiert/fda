@@ -1,7 +1,7 @@
-function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw] = edge_snr_score_pw(isite,myextension,timeshift)
+function [radial_dist c_signal_woNharm range_ind] = edge_snr_score(isite,myextension,timeshift)
     if(~exist('myextension','var'))
         myextension = '';
-    elseif(~isempty(myextension))
+    else
         myextension = ['_' myextension];
     end
     if(~exist('timeshift','var'))
@@ -68,7 +68,7 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw] = edge_snr_s
     smoothed_data_woNharm = smooth_basis(timestamp(range_ind),c_signal_woNharm,basis);
     c_smoothed_eval = eval_fd(smoothed_data_woNharm,linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),201));
     
-    noise_thres = .6;
+    noise_thres = .5;
     
     c_smoothed_eval_data = eval_fd(smoothed_data_woNharm,timestamp(range_ind));
     rss_spline = nansum((c_signal_woNharm - c_smoothed_eval_data).^2,1);
@@ -86,11 +86,7 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw] = edge_snr_s
         all_type = [ones(1,length(pks)) -ones(1,length(pks2))];
         
         [locs_sorted ind_locs_sorted] = sort(all_locs);
-        types_sorted = all_type(ind_locs_sorted);
         % --> all_type(ind_locs_sorted) is alternating by construction
-        locs_sorted = [1; locs_sorted; size(c_signal,1)];
-        types_sorted = [-types_sorted(1) types_sorted -types_sorted(end)];
-        
         range_smoothed = max(c_smoothed_eval(:,isig))-min(c_smoothed_eval(:,isig));
         candidate_left = [c_smoothed_eval(1,isig); all_pks(ind_locs_sorted(1:end))];
         candidate_right = [all_pks(ind_locs_sorted(1:end)); c_smoothed_eval(end,isig)];
@@ -107,7 +103,6 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw] = edge_snr_s
             if blocklength(b) > 1
                 candidate_left = candidate_left(setdiff(1:length(candidate_left),blockstart(b)+1:blockend(b)-1));
                 candidate_right = candidate_right(setdiff(1:length(candidate_right),blockstart(b):blockend(b)-2));
-                
             else
                 % So not nicely done :(
                 if blockstart(b) > 1
@@ -140,23 +135,16 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw] = edge_snr_s
     max_nEdges = nbasis - 5;
     max_SNR = 40;
     max_amp = 0.05;
-    max_pw = 0.1;
     if ~log_trafo
         max_amp = 10.^max_amp;
     end
     
-    weight_edg = 2; % Weight between nEdges and SNR (Determine by PCA later?)
-    weight_snr = 1;
+    weight_edg = 4; % Weight between nEdges and SNR (Determine by PCA later?)
+    weight_snr = 1.5;
     weight_amp = 1.5;
-    weight_pw = 1.5;
-    
-    a = getcoef(smoothed_data_woNharm);
-    b = a(2:end,:);
-    
-    pw = sqrt(sum((a(1:end-1,:)-b).^2,1));
     
 %     princomp([log10(nEdges)' log10(SNR)' log10(amp)'])
     
-    radial_dist = (nEdges/(max_nEdges*1.05)).^weight_edg .* (SNR/(max_SNR*1.05)).^weight_snr .* (pw/(max_pw*1.05)).^weight_pw;
+    radial_dist = (nEdges/(max_nEdges*1.05)).^weight_edg .* (SNR/(max_SNR*1.05)).^weight_snr .* (amp/(max_amp*1.05)).^weight_amp;
     radial_dist = radial_dist.^.5; % To make distances smaller
 end

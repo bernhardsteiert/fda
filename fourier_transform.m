@@ -15,9 +15,15 @@ addpath(grabdataPath)
 
 % plot_sites = [10 17 64];
 % plot_name = {'No Lig','IGF','BTC'};
-plot_sites = [61];
-% plot_sites = [37]; % HRG
-plot_name = {'BTC'};
+% plot_sites = [64];
+plot_sites = [37 64]; % HRG and BTC
+plot_name = {'HRG','BTC'};
+
+% plot_sites = [65 64]; % HRG and BTC
+% plot_name = {'BTC 50','BTC 100'};
+
+% plot_sites = [17 64]; % IGF and BTC
+% plot_name = {'HRG','BTC'};
 
 times = cell(0);
 signals = cell(0);
@@ -54,7 +60,14 @@ celltypeharm = [];
 
 nEdges = [];
 SNRs = [];
+amps = [];
+pws = [];
 c_signal_woNharm = [];
+
+peakdur_means = [];
+peakdur_stds = [];
+peakdis_means = [];
+peakdis_stds = [];
 
 clear radial_dist
 
@@ -63,7 +76,7 @@ for isite = plot_sites
 %     radial_dists = radial_dist(isite);
 %     radial_dists = freq_analysis(isite);
 %     radial_dists = edge_snr_score(isite);
-    [radial_dists c_signal_tmp tmp2 nEdge SNR] = edge_snr_score_pw(isite);
+    [radial_dists c_signal_tmp tmp2 nEdge SNR amp pw peakdur_mean peakdur_std peakdis_mean peakdis_std] = edge_snr_score_pw_distdur(isite);
 %     radial_dists = radial_dist_pw(isite);
     
     dists = [dists radial_dists];
@@ -72,12 +85,116 @@ for isite = plot_sites
     
     nEdges = [nEdges nEdge];
     SNRs = [SNRs SNR];
+    amps = [amps amp];
+    pws = [pws pw];
     c_signal_woNharm = [c_signal_woNharm c_signal_tmp];
+    
+    peakdur_means = [peakdur_means peakdur_mean];
+    peakdur_stds = [peakdur_stds peakdur_std];
+    peakdis_means = [peakdis_means peakdis_mean];
+    peakdis_stds = [peakdis_stds peakdis_std];
     
 end
 
 [radial_dist_sorted ind_sort_radial] = sort(dists);
+% peakdis_means(peakdis_means>290) = 0;
+% [radial_dist_sorted ind_sort_radial] = sort(peakdis_means); % For checking IGF
 
+
+f = figure;
+
+xfac = 2;
+yfac = 1;
+fontsize = 12;
+
+setFigure(f,xfac,yfac,fontsize)
+
+dist_thres = .1;
+valid_dist_inds = find(dists > dist_thres);
+
+tested_score = nEdges; % SNRs or nEdges or anything else
+baredges = linspace(min(tested_score),max(tested_score),9);
+
+% tested_score = SNRs; % SNRs or nEdges or anything else
+baredges = linspace(min(tested_score),max(tested_score),9);
+
+% tested_score = amps; % SNRs or nEdges or anything else
+% tested_score = pws; % SNRs or nEdges or anything else
+% baredges = linspace(min(tested_score),max(tested_score),10);
+
+nrows = length(plot_sites);
+ncols = 9;
+
+for ip = 1:length(plot_sites)
+    tested_inds = find(dists > dist_thres & celltypeharm == plot_sites(ip));
+    
+    subplot(nrows,ncols,(ip-1)*ncols+1)
+    
+    baredges = linspace(min(dists),max(dists),9);
+    bar(baredges,histc(dists(tested_inds),baredges));
+    title('PulsStr')
+    ylabel(plot_name{ip})
+    set(gca,'XLim',[min(dists)-0.02 max(dists)]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+2)
+    
+    baredges = linspace(min(nEdges),max(nEdges),9);
+    bar(baredges,histc(nEdges(tested_inds),baredges));
+    title('nEdge')
+    set(gca,'XLim',[min(nEdges)+1 max(nEdges)]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+3)
+    
+    baredges = linspace(min(SNRs),max(SNRs),9);
+    bar(baredges,histc(SNRs(tested_inds),baredges));
+    title('SNR')
+    set(gca,'XLim',[min(SNRs)-5 max(SNRs)]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+4)
+    
+    baredges = linspace(min(amps),max(amps),9);
+    bar(baredges,histc(amps(tested_inds),baredges));
+    title('Amplitude')
+    set(gca,'XLim',[min(amps)-0.005 max(amps)]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+5)
+    
+    baredges = linspace(min(pws),max(pws),9);
+    bar(baredges,histc(pws(tested_inds),baredges));
+    title('Pairwise')
+    set(gca,'XLim',[min(pws) max(pws)]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+6)
+    
+    baredges = linspace(min(peakdur_means),150,9);
+    bar(baredges,histc(peakdur_means(tested_inds),baredges));
+    title('Peak duration (min)')
+    set(gca,'XLim',[min(peakdur_means)-20 150]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+7)
+    
+    baredges = linspace(min(peakdur_stds),max(peakdur_stds),9);
+    bar(baredges,histc(peakdur_stds(tested_inds),baredges));
+    title('Peak dur std')
+    set(gca,'XLim',[min(peakdur_stds)-10 max(peakdur_stds)]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+8)
+    
+    baredges = linspace(min(peakdis_means),150,9);
+    bar(baredges,histc(peakdis_means(tested_inds),baredges));
+    title('Peak distance')
+    set(gca,'XLim',[min(peakdis_means)-20 150]*1.1)
+    
+    subplot(nrows,ncols,(ip-1)*ncols+9)
+    
+    baredges = linspace(min(peakdis_stds),max(peakdis_stds),9);
+    bar(baredges,histc(peakdis_stds(tested_inds),baredges));
+    title('Peak dis std')
+    set(gca,'XLim',[min(peakdis_stds)-10 max(peakdis_stds)]*1.1)
+    
+end
+
+% return
 
 for ip = 1:length(plot_sites)
     isite = plot_sites(ip);
@@ -104,6 +221,8 @@ for ip = 1:length(plot_sites)
     nrows = 5;
     ncols = 4;
     
+    mydists = radial_dist_sorted(celltypeharm(ind_sort_radial) == plot_sites(ip));
+    
     for isig = 1:(nrows*ncols)
         subplot(nrows,ncols,isig)
         
@@ -113,10 +232,10 @@ for ip = 1:length(plot_sites)
 %         plot(timestamp(tmp2),c_signal_single(:,end-isig+1))
         
         set(gca,'XLim',time_range)
-        set(gca,'YLim',[-.02 .02])
+        set(gca,'YLim',[-.02 .03])
 %         set(gca,'YLim',[.95 1.1])
 
-        title(sprintf('PulsStr = %g',radial_dist_sorted(end-isig+1)))
+        title(sprintf('PulsStr = %g',mydists(end-isig+1)))
         
         if isig == (nrows-1)*ncols+1
             xlabel('time [min]')
