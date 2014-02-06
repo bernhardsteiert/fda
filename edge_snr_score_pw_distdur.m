@@ -241,4 +241,7 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
 
     radial_dist = radial_dist.^(1/3); % To make distances smaller
     
+    peakdur_mean(peakdur_mean == 300) = nan;
+    peakdis_mean(peakdis_mean == 300) = nan;
+    
 end

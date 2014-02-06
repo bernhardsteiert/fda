@@ -184,6 +184,31 @@ switch dataset
         s.drug2_dose = drug_dose(akti_ind);
         s.celltype = celltype;
         
+    case '02-02-2014'
+        ligand_name = {'EGF ','EGF ','EGF ','EGF ','BTC ','BTC ','BTC ','BTC ','HRG ','HRG ','HRG ','HRG ','NS'};
+        lig_index = [1 1 1 1 2 2 2 2 3 3 3 3 4];
+        ligand_dose = [100 50 20 10 100 50 20 10 100 50 20 10 0];
+        drug_name = ' + MEKi ';
+        drug_dose = [10 2.5 2.5/4 2.5/16 0 0];
+        celltype = 'MCF10A';
+        
+        row = ceil(site/12);
+        col = mod(site-1,12)+1;
+        if ~mod(row,2)
+            col = 13-col;
+        end
+        
+        if row == 6
+            col = 13;
+        end
+        
+        s.lig_name = ligand_name{col};
+        s.lig_index = lig_index(col);
+        s.lig_dose = ligand_dose(col);
+        s.drug_name = drug_name;
+        s.drug_dose = drug_dose(row);
+        s.celltype = celltype;
+        
     otherwise
         error('Unknown data-set!!')
         

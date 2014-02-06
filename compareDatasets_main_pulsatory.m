@@ -1,3 +1,7 @@
+% Set puls_thres = 0 if gating should be off
+% puls_thres = .5;
+puls_thres = 0.5;
+
 sites_all = [4:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 64:70];
 names_all = {'EGF','IGF','FGF','HRG','HGF','EPR','BTC'};
 reorder = [4 7 1 6 5 2 3];
@@ -7,12 +11,13 @@ colmap = flipud(winter(length(doses)));
 
 nrows = 7;
 % ncols = 9; % nEdge; SNR; ...
-ncols = 7;
+ncols = 8;
 
 medians = nan(length(doses),nrows,ncols);
 singles = [];
-features = {'Final score','nEdge','SNR','Amplitude','Pairwise','Peak duration','Peak distance'};
-single_features = {'Final score','nEdge','SNR','Amplitude','Pairwise','Peak duration','Peak distance'};
+features = {'Final score','nEdge','SNR','Amplitude','Pairwise','Peak duration','Peak distance','Ratio pulsing cells'};
+single_features = {'Final score','nEdge','SNR','Amplitude','Pairwise','Peak duration','Peak distance','Ratio pulsing cells'};
+celltype = [];
 
 for isite = sites_all
     
@@ -21,13 +26,27 @@ for isite = sites_all
     s = siteprop(isite);
     
     doseind = s.lig_dose == doses;
-    medians(doseind,reorder(s.lig_index),1) = median(radial_dists);
-    medians(doseind,reorder(s.lig_index),2) = median(nEdge);
-    medians(doseind,reorder(s.lig_index),3) = median(SNR);
-    medians(doseind,reorder(s.lig_index),4) = median(amp);
-    medians(doseind,reorder(s.lig_index),5) = median(pw);
-    medians(doseind,reorder(s.lig_index),6) = median(peakdur_mean);
-    medians(doseind,reorder(s.lig_index),7) = median(peakdis_mean);
+    medians(doseind,reorder(s.lig_index),1) = median(radial_dists(radial_dists > puls_thres));
+    medians(doseind,reorder(s.lig_index),2) = median(nEdge(radial_dists > puls_thres));
+    medians(doseind,reorder(s.lig_index),3) = median(SNR(radial_dists > puls_thres));
+    medians(doseind,reorder(s.lig_index),4) = median(amp(radial_dists > puls_thres));
+    medians(doseind,reorder(s.lig_index),5) = median(pw(radial_dists > puls_thres));
+    medians(doseind,reorder(s.lig_index),6) = median(peakdur_mean(~isnan(peakdur_mean) & (radial_dists > puls_thres)));
+    medians(doseind,reorder(s.lig_index),7) = median(peakdis_mean(~isnan(peakdis_mean) & (radial_dists > puls_thres)));
+    medians(doseind,reorder(s.lig_index),8) = sum(radial_dists > puls_thres)/length(radial_dists);
+    
+    peakdur_mean(isnan(peakdur_mean)) = nanmean(peakdur_mean);
+    peakdis_mean(isnan(peakdis_mean)) = nanmean(peakdis_mean);
+    
+    % Gating for PCA (if differences of pulsing cells are investigated)
+    radial_dists = radial_dists(radial_dists > puls_thres);
+    nEdge = nEdge(radial_dists > puls_thres);
+    SNR = SNR(radial_dists > puls_thres);
+    amp = amp(radial_dists > puls_thres);
+    pw = pw(radial_dists > puls_thres);
+    peakdur_mean = peakdur_mean(radial_dists > puls_thres);
+    peakdis_mean = peakdis_mean(radial_dists > puls_thres);
+    celltype = [celltype; ones(sum(radial_dists > puls_thres),1)*isite];
     
     singles = [singles; [radial_dists' nEdge' SNR' amp' pw' peakdur_mean' peakdis_mean']];
     
@@ -62,8 +81,11 @@ for irow = 1:nrows
         end
         tmpmed = medians(:,:,icol);
         tmpmed = tmpmed(:);
-        ylim = [min(tmpmed) max(tmpmed)]+[-1 1]*range(tmpmed)*0.1;
-        set(gca,'XLim',[.5 length(doses)+.5],'YLim',ylim)
+        ylim = [min(tmpmed) max(tmpmed)]+[-1 1]*(range(tmpmed)+1e-10)*0.1;
+        if ~isnan(ylim)
+            set(gca,'YLim',ylim)
+        end
+        set(gca,'XLim',[.5 length(doses)+.5])
         set(gca,'XTick',1:length(doses),'XTickLabel',doses)
         
         plot([1.5 1.5],ylim,'r:')
@@ -102,6 +124,67 @@ for i = 1:size(singles,2)-1
     title(single_features{i+1})
     subplot(size(singles,2)-1,size(singles,2)-1,(size(singles,2))*(i-1)+1)
     ylabel(single_features{i})
+end
+
+%% PCA for pulsatory behavior
+close all
+
+figure
+hold on
+
+inds = [2 3 4 6 7];
+% inds = [2 3 4]; % wo Peak dur / Peak dist
+[coeff scores latent] = princomp(singles(:,inds)./repmat(max(singles(:,inds),[],1),size(singles,1),1));
+
+pcs = [2 3];
+
+highdoses = [4 24 37 44 57 64 30];
+% highdoses = [37 64 30];
+
+color_ind = 1;
+colmap = hsv(length(highdoses));
+legstr = {};
+for isite = highdoses
+    s = siteprop(isite);
+    titstr = s.lig_name;
+    titstr = sprintf('%s %g',titstr,s.lig_dose);
+    if s.inh_dose > 0
+%         titstr = sprintf('%s%s %i muM',titstr,s.inh_name,s.inh_dose);
+        titstr = sprintf('%s%s',titstr,s.inh_name);
+    end
+    legstr{end+1} = titstr;
+
+    plot(scores(celltype == isite,pcs(1)),scores(celltype == isite,pcs(2)),'o','Color',colmap(isite == highdoses,:),'MarkerFaceColor',colmap(isite == highdoses,:))
+    plotEllipsis(scores(celltype == isite,pcs(1)),scores(celltype == isite,pcs(2)),colmap(isite == highdoses,:),.5);
+end
+
+% xlim = [-.16 .24];
+% set(gca,'XLim',xlim)
+
+% axisEqual(get(gcf,'Position'))
+
+ylabel(['PC ' num2str(pcs(2))])
+% set(gca,'YTick',-.1:.1:.2)
+xlabel(['PC ' num2str(pcs(1))])
+% arrow([-.13 .06],[.02 .15],'Width',.5,'Length',7)
+
+set(gca,'CLim',[0 1])
+colormap(colmap)
+colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
+% return
+
+%%
+close all
+figure
+
+for ipc = 1:4
+    
+    subplot(2,2,ipc)
+    plot(singles(:,1),scores(:,ipc),'k.')
+    
+    xlabel('Pulsatory strength')
+    ylabel(['PC ' num2str(ipc)])
+    
 end
 
 return
