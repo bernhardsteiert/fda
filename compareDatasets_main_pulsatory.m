@@ -1,10 +1,13 @@
 % Set puls_thres = 0 if gating should be off
-% puls_thres = .5;
-puls_thres = 0.5;
+puls_thres = .5;
+% puls_thres = 0;
 
 sites_all = [4:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 64:70];
 names_all = {'EGF','IGF','FGF','HRG','HGF','EPR','BTC'};
 reorder = [4 7 1 6 5 2 3];
+
+% Comment the following in if EGF / BTC shall be replaced by MEKi variants
+% sites_all = [1 5:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 61 65:70]; % EGF / BTC with MEKi
 
 doses = [0 2.5 5 10 20 50 100];
 colmap = flipud(winter(length(doses)));
@@ -96,6 +99,42 @@ for irow = 1:nrows
     end
 end
 
+%% Plotting (Densities)
+close all
+
+f3 = figure;
+
+xfac = 1;
+yfac = 1;
+fontsize = 6;
+
+setFigure(f3,xfac,yfac,fontsize)
+
+for isite = sites_all
+    s = siteprop(isite);
+    irow = reorder(s.lig_index);
+    for icol = 1:size(singles,2)
+        
+        subplot(nrows,ncols,(irow-1)*ncols+icol)
+        hold on
+        [f,xi] = ksdensity(singles(celltype == isite,icol),'width',range());
+        plot(xi,f,'Color',colmap(s.lig_dose == doses,:))
+        
+        if irow == 1
+            title(features{icol})
+        end
+        if icol == 1
+            ylabel(names_all{irow == reorder})
+        end
+        tmpmed = medians(:,:,icol);
+        tmpmed = tmpmed(:);
+        
+        if irow == nrows && icol == 1
+            xlabel('Ligand dose')
+        end
+    end
+end
+
 %% Plotting (Correlations)
 close all
 
@@ -125,6 +164,34 @@ for i = 1:size(singles,2)-1
     subplot(size(singles,2)-1,size(singles,2)-1,(size(singles,2))*(i-1)+1)
     ylabel(single_features{i})
 end
+
+%% Specifically investigate peak duration
+close all
+
+f2 = figure;
+
+xfac = 1;
+yfac = 1;
+fontsize = 6;
+
+setFigure(f2,xfac,yfac,fontsize)
+
+for isite = sites_all
+    s = siteprop(isite);
+    irow = reorder(s.lig_index);
+    icol = find(s.lig_dose == doses);
+    subplot(length(names_all),length(doses),(irow-1)*length(doses) + icol)
+    
+    plot(singles(:,6),singles(:,1),'.','Color',[.7 .7 .7])
+    hold on
+    plot(singles(celltype == isite,6),singles(celltype == isite,1),'r.')
+    
+    ylabel('Pulsatory strength')
+    xlabel(single_features{6})
+    title(sprintf('%s %g',s.lig_name,s.lig_dose))
+    
+end
+
 
 %% PCA for pulsatory behavior
 close all

@@ -120,7 +120,7 @@ set(gca,'CLim',[0 1])
 colormap(colmap)
 colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
 % return
-% -------------------------------------------------------------------------
+%% -------------------------------------------------------------------------
 
 f4 = figure;
 
@@ -160,7 +160,7 @@ for isite = sites_all
     set(gca,'XLim',[-.002 1.1*max(baredges)])
 end
 
-% -------------------------------------------------------------------------
+%% -------------------------------------------------------------------------
     
 % return
 % close all
@@ -193,7 +193,7 @@ for isite = sites_all
 %     inds = find(celltype == isite);
 %     plot(repmat(timestamp,1,length(inds(scores(3,:) < -.005))),c_signal(:,inds(scores(3,:) < -.005)))
     
-    set(gca,'XLim',[50 200])
+    set(gca,'XLim',[50 300])
     set(gca,'YLim',[-.02 .02])
     plot([120 120],get(gca,'YLim'),'b--')
     s = siteprop(isite,extension);

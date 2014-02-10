@@ -1,58 +1,8 @@
 % function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur peakdur_std peakdis peakdis_std] = edge_snr_score_pw_distdur(isite,myextension,timeshift)
-function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean peakdur_std peakdis_mean peakdis_std] = edge_snr_score_pw_distdur(isite,myextension,timeshift)
-    if(~exist('myextension','var'))
-        myextension = '';
-    elseif(~isempty(myextension))
-        myextension = ['_' myextension];
-    end
-    if(~exist('timeshift','var'))
-        timeshift = 0;
-    end
-    
+function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean peakdur_std peakdis_mean peakdis_std] = edge_snr_score_pw_distdur_sim(timestamp,c_signal)
     load('harm_basis.mat') % Contains only harm_basis from all data-sets
     
-    remotepath = mypath();
-    
-    warning('off','MATLAB:dispatcher:pathWarning')
-    
-    fdaMPath = [remotepath 'fda'];
-    addpath(fdaMPath)
-
-    grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
-    addpath(grabdataPath)
-
-    log_trafo = 1; % log-transform signal
-    register = 1; % register IC50
-    time_range = getbasisrange(harm_basis);
-    
-    if exist(remotepath,'dir')
-        [timestamp,intensity] = grabdata_new(isite,myextension(2:end));
-    else
-        load(['./Workspaces/site_' num2str(isite) myextension])
-    end
-
-    if log_trafo
-        c_signal = log10(intensity);
-    else
-        c_signal = intensity;
-    end
-    timestamp = timestamp - timeshift;
-    
-    if register
-        c_signal = register_signal(c_signal,myextension(2:end));
-    end
-    c_signal = c_signal - repmat(nanmean(c_signal,2),1,size(c_signal,2));
-    
-    [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
-    [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
-    range_ind = range_ind_min:range_ind_max;
-    
-    if timestamp(range_ind(1)) < time_range(1)
-        range_ind = range_ind(2:end);
-    end
-    if timestamp(range_ind(end)) > time_range(2)
-        range_ind = range_ind(1:end-1);
-    end
+    range_ind = 1:length(timestamp);
     
     smoothed_additional = smooth_basis(timestamp(range_ind),c_signal(range_ind,:),harm_basis);
     
@@ -141,8 +91,7 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
             end
         end
 
-        edge_heights = candidate_left(ind_edge_start)-candidate_right(ind_edge_end);
-        ispeak = abs(edge_heights) > noise_thres*range_smoothed;
+        ispeak = abs(candidate_left(ind_edge_start)-candidate_right(ind_edge_end)) > noise_thres*range_smoothed;
 
         peak_duration = [];
         peak_distance = [];
@@ -178,11 +127,7 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
         nEdges = [nEdges sum(ispeak)];
         range_smoothed = max(c_smoothed_eval(:,isig))-min(c_smoothed_eval(:,isig));
         SNR = [SNR range_smoothed./sqrt(rss_spline(isig)./(size(c_signal_woNharm,1)-1))];
-        if ~isnan(median(edge_heights(ispeak)))
-            amp = [amp median(edge_heights(ispeak))];
-        else
-            amp = [amp range_smoothed]; % Only amplitude
-        end
+        amp = [amp range_smoothed]; % Only amplitude
         
 %         if isig == 80
 %             close all
@@ -221,9 +166,6 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
     max_peakdis = 300;
     peakdur_mean(isnan(peakdur_mean)) = max_peakdur;
     peakdis_mean(isnan(peakdis_mean)) = max_peakdis;
-    if ~log_trafo
-        max_amp = 10.^max_amp;
-    end
     nEdges(nEdges == 0) = .5;
     
     weight_edg = 1; % Weight between nEdges and SNR (Determine by PCA later?)
