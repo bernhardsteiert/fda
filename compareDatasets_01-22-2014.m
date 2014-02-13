@@ -6,8 +6,10 @@ timestamp = timestamp - timeshift; % Shift to main data set
 
 extension = '01-22-2014';
 
-sites_all = [1:57 59 60];
-sites_colored = [49:54]; % No Boretezo
+% sites_all = [1:57 59 60];
+sites_all = [1:12 49:57 59 60];
+% sites_colored = [49:54]; % No Boretezo
+sites_colored = [1:12];
 
 
 pcs = [2 3];
@@ -16,7 +18,7 @@ pcs = [2 3];
 % 
 xfac = 1;
 yfac = 1;
-fontsize = 20;
+fontsize = 14;
 % 
 % setFigure(f1,xfac,yfac,fontsize)
 % 
@@ -88,7 +90,9 @@ end
 
 
 % highdoses = [4 17 24 21]; % BTC EGF IGF NS
-highdoses = [49:54]; % No Boretezo
+% highdoses = [49:54]; % No Boretezo
+% highdoses = [5 1 3 4 6 2];
+highdoses = 7:12;
 
 color_ind = 1;
 colmap = hsv(length(highdoses));
@@ -102,12 +106,12 @@ for isite = highdoses
     
     scores = fPCA(isite,extension,timeshift);
     plot(scores(2,:),scores(3,:),'o','Color',colmap(isite == highdoses,:),'MarkerFaceColor',colmap(isite == highdoses,:))
-%     plotEllipsis(scores(2,:),scores(3,:),colmap(isite == highdoses,:),.5);
+    plotEllipsis(scores(2,:),scores(3,:),colmap(isite == highdoses,:),.5);
 end
 
-% xlim = [-.16 .24];
-% set(gca,'XLim',xlim)
-% set(gca,'YLim',[-.05 .03])
+xlim = [-.5 .3];
+set(gca,'XLim',xlim)
+set(gca,'YLim',[-.2 .3])
 
 % axisEqual(get(gcf,'Position'))
 
@@ -135,7 +139,8 @@ nrows = 5;
 ncols = 12;
 
 % baredges = linspace(0,0.022,21); % radial_dist.m
-baredges = linspace(0,0.12,16); % edge_snr_score_pw.m
+% baredges = linspace(0,0.12,16); % edge_snr_score_pw.m
+baredges = linspace(0,2,16);
 
 dists = [];
 celltypeharm = [];
@@ -144,7 +149,8 @@ for isite = sites_all
     subplot(nrows,ncols,subplotpos(isite,ncols))
     
 %     radial_dists = radial_dist(isite,extension,timeshift);,
-    radial_dists = edge_snr_score_pw(isite,extension,timeshift);
+%     radial_dists = edge_snr_score_pw(isite,extension,timeshift);
+    radial_dists = edge_snr_score_pw_distdur(isite,extension,timeshift,1/60);
     dists = [dists radial_dists];
     celltypeharm = [celltypeharm ones(size(radial_dists))*isite];
     
@@ -260,7 +266,7 @@ for isite = sites_all
     if subplotpos(isite) == 2
         ylabel('log_{10} FOXO3a Cyt/Nuc ratio');
     end
-    set(gca,'YLim',[-0.06 0.04])
+%     set(gca,'YLim',[-0.06 0.04])
     s = siteprop(isite,extension);
     titstr = [s.celltype '\newline' s.lig_name];
     if s.lig_dose > 0

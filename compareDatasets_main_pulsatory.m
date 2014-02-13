@@ -29,13 +29,25 @@ for isite = sites_all
     s = siteprop(isite);
     
     doseind = s.lig_dose == doses;
-    medians(doseind,reorder(s.lig_index),1) = median(radial_dists(radial_dists > puls_thres));
-    medians(doseind,reorder(s.lig_index),2) = median(nEdge(radial_dists > puls_thres));
-    medians(doseind,reorder(s.lig_index),3) = median(SNR(radial_dists > puls_thres));
-    medians(doseind,reorder(s.lig_index),4) = median(amp(radial_dists > puls_thres));
-    medians(doseind,reorder(s.lig_index),5) = median(pw(radial_dists > puls_thres));
-    medians(doseind,reorder(s.lig_index),6) = median(peakdur_mean(~isnan(peakdur_mean) & (radial_dists > puls_thres)));
-    medians(doseind,reorder(s.lig_index),7) = median(peakdis_mean(~isnan(peakdis_mean) & (radial_dists > puls_thres)));
+%     medians(doseind,reorder(s.lig_index),1) = median(radial_dists(radial_dists > puls_thres));
+%     medians(doseind,reorder(s.lig_index),2) = median(nEdge(radial_dists > puls_thres));
+%     medians(doseind,reorder(s.lig_index),3) = median(SNR(radial_dists > puls_thres));
+%     medians(doseind,reorder(s.lig_index),4) = median(amp(radial_dists > puls_thres));
+%     medians(doseind,reorder(s.lig_index),5) = median(pw(radial_dists > puls_thres));
+%     medians(doseind,reorder(s.lig_index),6) = median(peakdur_mean(~isnan(peakdur_mean) & (radial_dists > puls_thres)));
+%     medians(doseind,reorder(s.lig_index),7) = median(peakdis_mean(~isnan(peakdis_mean) & (radial_dists > puls_thres)));
+
+
+    medians(doseind,reorder(s.lig_index),1) = median(radial_dists);
+    medians(doseind,reorder(s.lig_index),2) = median(nEdge);
+    medians(doseind,reorder(s.lig_index),3) = median(SNR);
+    medians(doseind,reorder(s.lig_index),4) = median(amp);
+    medians(doseind,reorder(s.lig_index),5) = median(pw);
+    medians(doseind,reorder(s.lig_index),6) = median(peakdur_mean(~isnan(peakdur_mean)));
+    medians(doseind,reorder(s.lig_index),7) = median(peakdis_mean(~isnan(peakdis_mean)));
+
+
+
     medians(doseind,reorder(s.lig_index),8) = sum(radial_dists > puls_thres)/length(radial_dists);
     
     peakdur_mean(isnan(peakdur_mean)) = nanmean(peakdur_mean);
@@ -65,6 +77,107 @@ yfac = 1;
 fontsize = 6;
 
 setFigure(f1,xfac,yfac,fontsize)
+
+for irow = 1:nrows
+    for icol = 1:ncols
+        
+        subplot(nrows,ncols,(irow-1)*ncols+icol)
+        hold on
+        plot(medians(:,irow,icol),'x')
+        
+        [axb s] = polyfit(2:length(doses),medians(2:end,irow,icol)',1);
+        plot(1:length(doses),(1:length(doses))*axb(1) + axb(2),'k--')
+        
+        if irow == 1
+            title(features{icol})
+        end
+        if icol == 1
+            ylabel(names_all{irow == reorder})
+        end
+        tmpmed = medians(:,:,icol);
+        tmpmed = tmpmed(:);
+        ylim = [min(tmpmed) max(tmpmed)]+[-1 1]*(range(tmpmed)+1e-10)*0.1;
+        if ~isnan(ylim)
+            set(gca,'YLim',ylim)
+        end
+        set(gca,'XLim',[.5 length(doses)+.5])
+        set(gca,'XTick',1:length(doses),'XTickLabel',doses)
+        
+        plot([1.5 1.5],ylim,'r:')
+        
+        if irow == nrows && icol == 1
+            xlabel('Ligand dose')
+        end
+    end
+end
+
+%% Plotting Regression only for ratio; Puls Dist; Amplitude
+close all
+
+f2 = figure;
+
+xfac = 1;
+yfac = .5;
+fontsize = 10;
+
+setFigure(f2,xfac,yfac,fontsize)
+
+subplot(1,3,1)
+hold on
+icol = 8;
+mycolor = lines(nrows);
+legh = [];
+for irow = 1:nrows
+    plot(0:length(doses)-1,medians(:,irow,icol),'x','Color',mycolor(irow,:))
+
+    [axb s] = polyfitZero(1:length(doses)-1,medians(2:end,irow,icol)'-mean(medians(1,:,icol)),1);
+    legh = [legh plot(0:length(doses)-1,(0:length(doses)-1)*axb(1) + mean(medians(1,:,icol)),'-','Color',mycolor(irow,:))];
+end
+title(features{icol})
+set(gca,'XLim',[-.5 length(doses)-.5])
+set(gca,'XTick',0:length(doses)-1,'XTickLabel',doses)
+set(gca,'YLim',[0 .5])
+xlabel('Ligand dose')
+legend(legh(reorder),names_all,'Location','NorthWest')
+
+subplot(1,3,2)
+hold on
+icol = 4;
+mycolor = lines(nrows);
+legh = [];
+for irow = 1:nrows
+    plot(0:length(doses)-1,medians(:,irow,icol),'x','Color',mycolor(irow,:))
+
+    [axb s] = polyfitZero(1:length(doses)-1,medians(2:end,irow,icol)'-mean(medians(1,:,icol)),1);
+    legh = [legh plot(0:length(doses)-1,(0:length(doses)-1)*axb(1) + mean(medians(1,:,icol)),'-','Color',mycolor(irow,:))];
+end
+title(features{icol})
+set(gca,'XLim',[-.5 length(doses)-.5])
+set(gca,'XTick',0:length(doses)-1,'XTickLabel',doses)
+% set(gca,'YLim',[7 10]*1e-3)
+xlabel('Ligand dose')
+% legend(legh(reorder),names_all,'Location','NorthWest')
+
+subplot(1,3,3)
+hold on
+icol = 6;
+mycolor = lines(nrows);
+legh = [];
+for irow = 1:nrows
+    plot(0:length(doses)-1,medians(:,irow,icol),'x','Color',mycolor(irow,:))
+
+    [axb s] = polyfit(1:length(doses)-1,medians(2:end,irow,icol)',1);
+    legh = [legh plot(0:length(doses)-1,(0:length(doses)-1)*axb(1) + axb(2),'-','Color',mycolor(irow,:))];
+end
+title(features{icol})
+set(gca,'XLim',[-.5 length(doses)-.5])
+set(gca,'XTick',0:length(doses)-1,'XTickLabel',doses)
+% set(gca,'YLim',[7 10]*1e-3)
+xlabel('Ligand dose')
+% legend(legh(reorder),names_all,'Location','NorthWest')
+
+return
+
 
 for irow = 1:nrows
     for icol = 1:ncols

@@ -14,6 +14,8 @@ sites_colored = [22:24 21 2 4]; % BTC vs. IGF Native
 % sites_colored = [2:4 21]; % only BTC
 % sites_colored = [16:19 21]; % only EGF
 
+clear('subplotpos')
+
 pcs = [2 3];
 
 f1 = figure;

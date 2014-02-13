@@ -12,27 +12,17 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
         range_smoothed_in = 1/120; % absolute --> edge only counted when > 0.05
     end
     
-    load('harm_basis.mat') % Contains only harm_basis from all data-sets
-    
-    remotepath = mypath();
+    load('./Workspaces/harm_basis.mat') % Contains only harm_basis from all data-sets
     
     warning('off','MATLAB:dispatcher:pathWarning')
     
-    fdaMPath = [remotepath 'fda'];
-    addpath(fdaMPath)
-
-    grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
-    addpath(grabdataPath)
+    addpath('../fda/')
 
     log_trafo = 1; % log-transform signal
     register = 1; % register IC50
     time_range = getbasisrange(harm_basis);
     
-    if exist(remotepath,'dir')
-        [timestamp,intensity] = grabdata_new(isite,myextension(2:end));
-    else
-        load(['./Workspaces/site_' num2str(isite) myextension])
-    end
+    load(['./Workspaces/site_' num2str(isite) myextension])
 
     if log_trafo
         c_signal = log10(intensity);

@@ -112,7 +112,7 @@ xlabel(['PC ' num2str(pcs(1))])
 set(gca,'CLim',[0 1])
 colormap(colmap)
 colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
-return
+% return
 % -------------------------------------------------------------------------
 
 f2 = figure;

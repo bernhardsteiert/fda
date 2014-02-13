@@ -9,7 +9,7 @@ names_all = {'EGF 100','EGF 50','EGF 20','EGF 10'};
 % sites_all = [57 40 33 16 9 58 39 34 15 10 59 38 35 14 11 60 13 12];
 % names_all = {'HRG 100','HRG 50','HRG 20','HRG 10'};
 
-puls_thres = .3;
+puls_thres = .5;
 
 reorder = [1 2 3 4];
 
@@ -28,7 +28,7 @@ single_features = {'Final score','nEdge','SNR','Amplitude','Pairwise','Peak dura
 
 for isite = sites_all
     
-    [radial_dists c_signal_tmp tmp2 nEdge SNR amp pw peakdur_mean peakdur_std peakdis_mean peakdis_std] = edge_snr_score_pw_distdur(isite,extension);
+    [radial_dists c_signal_tmp tmp2 nEdge SNR amp pw peakdur_mean peakdur_std peakdis_mean peakdis_std] = edge_snr_score_pw_distdur(isite,extension,0,1/180);
     
     s = siteprop(isite,extension);
     

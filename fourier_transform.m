@@ -16,7 +16,7 @@ addpath(grabdataPath)
 % plot_sites = [10 17 64];
 % plot_name = {'No Lig','IGF','BTC'};
 % plot_sites = [64];
-plot_sites = [37 64]; % HRG and BTC
+% plot_sites = [37 64]; % HRG and BTC
 plot_name = {'HRG','BTC'};
 
 % plot_sites = [65 64]; % HRG and BTC
@@ -24,6 +24,8 @@ plot_name = {'HRG','BTC'};
 
 % plot_sites = [17 64]; % IGF and BTC
 % plot_name = {'HRG','BTC'};
+
+plot_sites = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:70];
 
 times = cell(0);
 signals = cell(0);
@@ -87,7 +89,7 @@ for isite = plot_sites
     SNRs = [SNRs SNR];
     amps = [amps amp];
     pws = [pws pw];
-    c_signal_woNharm = [c_signal_woNharm c_signal_tmp];
+%     c_signal_woNharm = [c_signal_woNharm c_signal_tmp];
     
     peakdur_means = [peakdur_means peakdur_mean];
     peakdur_stds = [peakdur_stds peakdur_std];
@@ -100,7 +102,7 @@ end
 % peakdis_means(peakdis_means>290) = 0;
 % [radial_dist_sorted ind_sort_radial] = sort(peakdis_means); % For checking IGF
 
-
+%%
 f = figure;
 
 xfac = 2;
@@ -249,7 +251,7 @@ end
 
 return
 
-
+%%
 for ip = 1:length(plot_sites)
     isite = plot_sites(ip);
     figure
@@ -300,18 +302,25 @@ for ip = 1:length(plot_sites)
     end
 end
 
+
+%%
+
 nsignal = 40; % #signals to be used for mean calculation
-for ip = 1:length(plot_sites)
+% for ip = 1:length(plot_sites)
+ind_sort_radial_top1000 = ind_sort_radial(4280:end);
+ip = 1;
     isite = plot_sites(ip);
     figure
     
-    c_signal_single = c_signal(:,ind_sort_radial);
-    c_signal_single = c_signal_single(:,(celltypeharm(ind_sort_radial) == plot_sites(ip)));
+    c_signal_single = c_signal(:,ind_sort_radial_top1000);
+%     c_signal_single = c_signal_single(:,(celltypeharm(ind_sort_radial) == plot_sites(ip)));
 
     time_range = [200 500];
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
     [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
     range_ind = range_ind_min:range_ind_max;
+    
+%     c_signal_single = c_signal_single-repmat(mean(c_signal_single(range_ind,:),1),size(c_signal_single,1),1);
     
     Fs = 1./((timestamp(2)-timestamp(1))*60); % Sampling every 5 min
     L = length(range_ind);
@@ -319,7 +328,8 @@ for ip = 1:length(plot_sites)
     NFFT = 2^nextpow2(L);
     
     c_signal_fft = [];
-    for i = 1:nsignal
+%     for i = 1:nsignal
+    for i = 1:size(c_signal_single,2)
         Y = fft(c_signal_single(range_ind,end-i+1),NFFT)/L;
 
         f = Fs/2*linspace(0,1,NFFT/2+1);
@@ -334,7 +344,8 @@ for ip = 1:length(plot_sites)
     plot([2e-4 2e-4],get(gca,'YLim'),'k:') % equals 83min period
 %     [fi xi] = ksdensity(mean(c_signal_fft,2));
 %     plot(xi,fi)
-    title(sprintf('Single-Sided Amplitude Spectrum of y(t); Mean spectrum of %i signals',nsignal))
+%     title(sprintf('Single-Sided Amplitude Spectrum of y(t); Mean spectrum of %i signals',nsignal))
+    title(sprintf('Single-Sided Amplitude Spectrum of y(t); Mean spectrum of %i signals',size(c_signal_single,2)))
     xlabel('Frequency (Hz)')
     ylabel('log10 |Y(f)|')
-end
+% end

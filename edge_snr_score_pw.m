@@ -89,7 +89,9 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw] = edge_snr_s
         types_sorted = all_type(ind_locs_sorted);
         % --> all_type(ind_locs_sorted) is alternating by construction
         locs_sorted = [1; locs_sorted; size(c_signal,1)];
-        types_sorted = [-types_sorted(1) types_sorted -types_sorted(end)];
+        if ~isempty(types_sorted)
+            types_sorted = [-types_sorted(1) types_sorted -types_sorted(end)];
+        end
         
         range_smoothed = max(c_smoothed_eval(:,isig))-min(c_smoothed_eval(:,isig));
         candidate_left = [c_smoothed_eval(1,isig); all_pks(ind_locs_sorted(1:end))];
