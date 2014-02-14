@@ -1,6 +1,5 @@
-% Analysis of WesternBlot data
-clear all
-close all
+% Figure 2a: Linear correlation of pERK/pAKT vs. pS294/pS253
+addpath('./Functions/')
 
 [westerndata,description] = xlsread('./Workspaces/westernBlotData');
 liglabels = {'NS','EGF','IGF','FGF','HRG','HGF','EPR','BTC'};
