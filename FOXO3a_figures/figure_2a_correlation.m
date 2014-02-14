@@ -102,6 +102,7 @@ for ilig = uni_ligs(2:end)' % Ignore NS case
         h = herrorbar(scaledData(myind,1)-scaledData(myind,2),scaledData(myind,3)-scaledData(myind,4),sqrt(sum(scaledStd(myind,1:2).^2,2)));
         set(h,'Color',colmap(colcount,:))
         set(h(2),'LineStyle', 'none')
+        errorbar_tick(legh(end),0)
         colcount = colcount + 1;
     end
 end

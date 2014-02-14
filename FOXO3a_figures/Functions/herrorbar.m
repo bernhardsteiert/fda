@@ -100,7 +100,8 @@ if ~isequal(size(x),size(y)) | ~isequal(size(x),size(l)) | ~isequal(size(x),size
     error('The sizes of X, Y, L and U must be the same.');
 end
 
-tee = (max(y(:))-min(y(:)))/100; % make tee .02 x-distance for error bars
+tee = 0;
+% (max(y(:))-min(y(:)))/100; % make tee .02 x-distance for error bars
 % changed from errorbar.m
 xl = x - l;
 xr = x + u;
