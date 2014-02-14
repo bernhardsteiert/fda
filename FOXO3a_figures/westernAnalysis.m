@@ -2,7 +2,7 @@
 clear all
 close all
 
-[westerndata,description] = xlsread('westernBlotData');
+[westerndata,description] = xlsread('./Workspaces/westernBlotData');
 liglabels = {'NS','EGF','IGF','FGF','HRG','HGF','EPR','BTC'};
 exind = 1;
 timeind = 2;
