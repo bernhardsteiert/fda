@@ -135,20 +135,28 @@ for irow = 1:length(highdoses)
     isite = highdoses(resort2(irow));
     sprop = siteprop(isite);
     legstr{isite == highdoses} = sprop.lig_name(1:3);
-    plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)
+    legh(irow) = plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6);
 
     [axb s] = polyfit(1:length(possible_doses)-1,medians(2:end,irow,icol)',1);
-    legh = [legh plot(0:length(possible_doses)-1,(0:length(possible_doses)-1)*axb(1) + axb(2),'-','Color',colmap(irow,:),'LineWidth',2)];
+    plot(0:length(possible_doses)-1,(0:length(possible_doses)-1)*axb(1) + axb(2),'-','Color',colmap(irow,:),'LineWidth',2);
 end
+
+h = legend(legh,legstr);
+ch = get(h,'child');
+for ileg = 1:length(ch)/3
+    ilegch = (ileg-1)*3+2;
+    set(ch(ilegch),'LineStyle','-','LineWidth',2,'Color',colmap(size(colmap,1)-ileg+1,:)); 
+end
+
 title([features{icol} ' [min]'])
 set(gca,'XLim',[-.5 length(possible_doses)-.5])
 set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
 xlabel('Ligand dose [ng/ml]')
 
-subplotpos = get(s5,'Position');
-set(gca,'CLim',[0 1])
-colormap(colmap)
-colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0],'Position',[subplotpos(1)+subplotpos(3) subplotpos(2) .01 subplotpos(4)],'units','normalized') % Vertical colorbar
+% subplotpos = get(s5,'Position');
+% set(gca,'CLim',[0 1])
+% colormap(colmap)
+% colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0],'Position',[subplotpos(1)+subplotpos(3) subplotpos(2) .01 subplotpos(4)],'units','normalized') % Vertical colorbar
 
 % Schematic of how amplitude is determined
 ylim = get(gca,'YLim');
