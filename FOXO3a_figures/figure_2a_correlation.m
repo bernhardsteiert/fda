@@ -114,7 +114,7 @@ legend(legh,liglabels{2:end-1},'Location','NorthWest')
 xlabel(['log_{2} ' description{myobs(1)} '/' description{myobs(2)}])
 ylabel(['log_{2} ' description{myobs(3)} '/' description{myobs(4)}])
 
-set(gca,'XLim',[-6 4],'YLim',[-2 4])
+set(gca,'XLim',[-7.5 5],'YLim',[-3 4.5],'XTick',[-6:2:4])
 
 text(1,-1,['\chi^2/N = ' num2str(chi2/(2*length(erkaktratio(:))))])
 

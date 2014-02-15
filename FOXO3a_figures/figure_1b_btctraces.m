@@ -37,4 +37,4 @@ text(125,.033,{'non-stationary','(deterministic)'},'HorizontalAlignment','center
 text(355,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
 
 set(gca,'XLim',time_range,'YLim',ylim)
-set(gca,'XTick',50:50:500)
+set(gca,'XTick',100:100:500)

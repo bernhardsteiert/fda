@@ -65,8 +65,11 @@ for iplot = 1:length(sites_all)-1
 %     text(125,.033,{'non-stationary','(deterministic)'},'HorizontalAlignment','center')
 %     text(355,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
 
-    set(gca,'XLim',time_range,'YLim',ylim)
-    set(gca,'XTick',50:50:500)
+    set(gca,'XLim',time_range,'YLim',ylim);
+    if mod(iplot,2)==0
+        set(gca,'YAxisLocation','right');
+    end
+    set(gca,'XTick',0:100:500,'YTick',[-0.02 0 0.02])
 end
 
 subplot(nrows,ncols,6)
@@ -79,5 +82,5 @@ for iplot = 1:length(sites_all)
 end
 title('Averaged')
 set(gca,'XLim',time_range,'YLim',ylim/2)
-set(gca,'XTick',50:50:500)
+set(gca,'XTick',0:100:500,'YTick',[-0.01 0 0.01],'YAxisLocation','right')
 legend(legh(resort),legstr)
