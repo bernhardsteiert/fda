@@ -18,7 +18,12 @@ experiments_investigated = 2:3; % Write 2:3 to ignore experiment 1
 
 westerndata = westerndata(ismember(westerndata(:,exind),experiments_investigated),:);
 data = westerndata;
-data(:,obsind) = log2(westerndata(:,obsind)./repmat(westerndata(:,normind),1,length(obsind)));
+data(:,obsind) = westerndata(:,obsind)./repmat(westerndata(:,normind),1,length(obsind));
+for iexp = experiments_investigated
+    tmpdata = data(data(:,exind) == iexp,obsind);
+    data(data(:,exind) == iexp,obsind) = data(data(:,exind) == iexp,obsind)./repmat(max(tmpdata,[],1),sum(data(:,exind) == iexp),1);
+end
+data(:,obsind) = log2(data(:,obsind));
 
 rowstocols = 0.5;
 nrows = ceil(length(obsind)^rowstocols);
@@ -61,26 +66,27 @@ ncols = ceil(size(scaledData,2) / nrows);
 colmap = [linspace(0,1,length(uni_ligs)-1)' ones(length(uni_ligs)-1,1) ones(length(uni_ligs)-1,1)*.9];
 colmap = hsv2rgb(colmap(1:end-1,:));
 % close all
-figure
-for iplot = 1:size(scaledData,2)
-    subplot(nrows,ncols,iplot)
-    hold on
-    colcount = 1;
-    for ilig = uni_ligs(2:end)'
-        myind = logical([1; scaledLigs(2:end) == ilig]); % Plot common timepoint zero for all ligands
-        if sum(~isnan(scaledData(myind,iplot))) > 1 % not only NaN
-            plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))
-            errorbar(scaledTime(myind),scaledData(myind,iplot),scaledStd(myind,iplot)./2,'Color',colmap(colcount,:))
-            colcount = colcount + 1;
-        end
-    end
-    title(description{myobs(iplot)})
-    ylabel('log_2 fold change [au]')
-    xlabel('time [min]')
-    set(gca,'XLim',[-10 490])
-end
+% figure
+% for iplot = 1:size(scaledData,2)
+%     subplot(nrows,ncols,iplot)
+%     hold on
+%     colcount = 1;
+%     for ilig = uni_ligs(2:end)'
+%         myind = logical([1; scaledLigs(2:end) == ilig]); % Plot common timepoint zero for all ligands
+%         if sum(~isnan(scaledData(myind,iplot))) > 1 % not only NaN
+%             plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))
+%             errorbar(scaledTime(myind),scaledData(myind,iplot),scaledStd(myind,iplot)./2,'Color',colmap(colcount,:))
+%             colcount = colcount + 1;
+%         end
+%     end
+%     title(description{myobs(iplot)})
+%     ylabel('log_2 fold change [au]')
+%     xlabel('time [min]')
+%     set(gca,'XLim',[-10 490])
+% end
 
 figure
+legh = [];
 for iplot = 1:size(scaledData,2)
     subplot(nrows,ncols,iplot)
     hold on
@@ -97,7 +103,7 @@ for iplot = 1:size(scaledData,2)
             set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', colmap(colcount,:)*0.3+0.7);
                                     
                                     
-            plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))
+            legh = [legh plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))];
 %             errorbar(scaledTime(myind),scaledData(myind,iplot),scaledStd(myind,iplot)./2,'Color',colmap(colcount,:))
             colcount = colcount + 1;
         end
@@ -106,7 +112,10 @@ for iplot = 1:size(scaledData,2)
     ylabel('log_2 fold change [au]')
     xlabel('time [min]')
     set(gca,'XLim',[-10 490])
+%     set(gca,'YLim',[-7 1])
 end
+
+legend(legh,liglabels{2:end-1})
 
 % Plotting correlation diagram
 markers = {'o','s','v','d','^','>'};
