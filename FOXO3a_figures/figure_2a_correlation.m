@@ -103,7 +103,7 @@ for iplot = 1:size(scaledData,2)
             set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', colmap(colcount,:)*0.3+0.7);
                                     
                                     
-            legh = [legh plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))];
+            legh = [legh plot(scaledTime(myind),scaledData(myind,iplot),'x-','Color',colmap(colcount,:))];
 %             errorbar(scaledTime(myind),scaledData(myind,iplot),scaledStd(myind,iplot)./2,'Color',colmap(colcount,:))
             colcount = colcount + 1;
         end
@@ -112,7 +112,7 @@ for iplot = 1:size(scaledData,2)
     ylabel('log_2 fold change [au]')
     xlabel('time [min]')
     set(gca,'XLim',[-10 490])
-%     set(gca,'YLim',[-7 1])
+     set(gca,'YLim',[-7 1],'YTick',[-6:2:0])
 end
 
 legend(legh,liglabels{2:end-1})
