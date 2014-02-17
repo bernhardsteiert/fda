@@ -53,33 +53,6 @@ set(gca,'YTick',0:.05:.40,'YTickLabel',0:5:40)
 set(gca,'YLim',[0 .40])
 xlabel('Ligand dose [ng/ml]')
 
-% Schematic of how fraction is determined
-ylim = get(gca,'YLim');
-inlay_x1 = .3; % absolute
-inlay_x2 = 4; % absolute
-inlay_yscale1 = .8; % relative
-inlay_yscale2 = .98; % relative
-plot([inlay_x1 inlay_x1],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale2],'k')
-plot([inlay_x2 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale2],'k')
-plot([inlay_x1 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale1],'k')
-plot([inlay_x1 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale2 inlay_yscale2],'k')
-
-nnorm = 201;
-xnorm = linspace(-5,5,nnorm);
-ynorm = normpdf(xnorm,-1.5,1)+.5*normpdf(xnorm,2,1);
-ycut = .5; % at .5 when looked at plot(xnorm,ynorm)
-% With distribution shifted up
-% plot(linspace(inlay_x1,inlay_x2,nnorm),ylim(1) + range(ylim)*(inlay_yscale1+.035) + ynorm/max(ynorm)*range(ylim)*(inlay_yscale2-inlay_yscale1-.05),'k')
-% plot(inlay_x1+(ycut-min(xnorm))/range(xnorm)*(inlay_x2-inlay_x1)*[1 1],ylim(1) + range(ylim)*[inlay_yscale1+.035 inlay_yscale2])
-% plot([inlay_x1 inlay_x2],ylim(1) + range(ylim)*(inlay_yscale1+.035) + [0 0])
-% With distribution in full box
-plot(linspace(inlay_x1,inlay_x2,nnorm),ylim(1) + range(ylim)*(inlay_yscale1) + ynorm/max(ynorm)*range(ylim)*(inlay_yscale2-inlay_yscale1)*.95,'k')
-plot(inlay_x1+(ycut-min(xnorm))/range(xnorm)*(inlay_x2-inlay_x1)*[1 1],ylim(1) + range(ylim)*[inlay_yscale1 inlay_yscale2])
-
-fontsize = 6;
-text(inlay_x1+(0-min(xnorm))/range(xnorm)*(inlay_x2-inlay_x1),ylim(1)+range(ylim)*inlay_yscale1*0.99,'pulsatory strength','FontSize',fontsize,'HorizontalAlignment','center')
-text(inlay_x1-.3,ylim(1) + range(ylim)*mean([inlay_yscale1 inlay_yscale2]),'distribution','FontSize',fontsize,'HorizontalAlignment','center', 'Rotation' ,90)
-
 subplot(nrows,ncols,2)
 hold on
 icol = 4;
@@ -96,33 +69,6 @@ set(gca,'XLim',[-.5 length(possible_doses)-.5])
 set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
 xlabel('Ligand dose [ng/ml]')
 
-% Schematic of how amplitude is determined
-ylim = get(gca,'YLim');
-plot([inlay_x1 inlay_x1],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale2],'k')
-plot([inlay_x2 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale2],'k')
-plot([inlay_x1 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale1],'k')
-plot([inlay_x1 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale2 inlay_yscale2],'k')
-
-xpuls = linspace(.5,3.8*pi,nnorm);
-ypuls = -cos(xpuls) + xpuls*0.05 - sin(xpuls*.25);
-ypuls = ypuls-min(ypuls)+.2*range(ypuls);
-inlay_puls_x = linspace(inlay_x1,inlay_x2,nnorm);
-inlay_puls_y = ylim(1) + range(ylim)*(inlay_yscale1) + ypuls/max(ypuls)*range(ylim)*(inlay_yscale2-inlay_yscale1)*.80;
-[miny minindx] = min(inlay_puls_y);
-[maxy maxindx] = max(inlay_puls_y);
-plot(inlay_puls_x,inlay_puls_y,'k')
-plot(inlay_puls_x([minindx maxindx]),[miny miny])
-plot(inlay_puls_x([minindx maxindx]),[maxy maxy])
-
-axPos = get(gca,'Position');
-xMinMax = get(gca,'XLim');
-yMinMax = ylim;
-xAnnotation = axPos(1) + ((mean(inlay_puls_x([minindx maxindx]))*[1 1] - xMinMax(1))/(xMinMax(2)-xMinMax(1))) * axPos(3);
-yAnnotation = axPos(2) + (([miny maxy] - yMinMax(1))/(yMinMax(2)-yMinMax(1))) * axPos(4);
-annotation('doublearrow',xAnnotation,yAnnotation,'Color','b')
-
-text(inlay_x1+(mean(xpuls)-min(xpuls))/range(xpuls)*(inlay_x2-inlay_x1),ylim(1)+range(ylim)*inlay_yscale1*0.99,'time','FontSize',fontsize,'HorizontalAlignment','center')
-text(inlay_x1-.3,ylim(1) + range(ylim)*mean([inlay_yscale1 inlay_yscale2]),'signal','FontSize',fontsize,'HorizontalAlignment','center', 'Rotation' ,90)
 
 s5 = subplot(nrows,ncols,3);
 hold on
@@ -158,27 +104,83 @@ xlabel('Ligand dose [ng/ml]')
 % colormap(colmap)
 % colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0],'Position',[subplotpos(1)+subplotpos(3) subplotpos(2) .01 subplotpos(4)],'units','normalized') % Vertical colorbar
 
-% Schematic of how amplitude is determined
-ylim = get(gca,'YLim');
-plot([inlay_x1 inlay_x1],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale2],'k')
-plot([inlay_x2 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale2],'k')
-plot([inlay_x1 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale1 inlay_yscale1],'k')
-plot([inlay_x1 inlay_x2],ylim(1)+range(ylim)*[inlay_yscale2 inlay_yscale2],'k')
 
-inlay_puls_y = ylim(1) + range(ylim)*(inlay_yscale1) + ypuls/max(ypuls)*range(ylim)*(inlay_yscale2-inlay_yscale1)*.80;
-[tmp minindx] = min(abs(xpuls-3));
-miny = inlay_puls_y(minindx);
-[maxy maxindx] = max(inlay_puls_y);
-plot(inlay_puls_x,inlay_puls_y,'k')
-plot(inlay_puls_x([minindx minindx]),[miny maxy])
-plot(inlay_puls_x([maxindx maxindx]),[miny maxy])
+
+
+figure
+
+subplot(nrows,ncols,1)
+hold on
+
+% Schematic of how fraction is determined
+nnorm = 201;
+xnorm = linspace(-5,5,nnorm);
+ynorm = normpdf(xnorm,-1.5,1)+.5*normpdf(xnorm,2,1);
+ycut = .5; % at .5 when looked at plot(xnorm,ynorm)
+% With distribution shifted up
+% plot(linspace(inlay_x1,inlay_x2,nnorm),ylim(1) + range(ylim)*(inlay_yscale1+.035) + ynorm/max(ynorm)*range(ylim)*(inlay_yscale2-inlay_yscale1-.05),'k')
+% plot(inlay_x1+(ycut-min(xnorm))/range(xnorm)*(inlay_x2-inlay_x1)*[1 1],ylim(1) + range(ylim)*[inlay_yscale1+.035 inlay_yscale2])
+% plot([inlay_x1 inlay_x2],ylim(1) + range(ylim)*(inlay_yscale1+.035) + [0 0])
+% With distribution in full box
+plot(xnorm,ynorm,'k')
+ylim = [0 .45];
+plot([ycut ycut],ylim)
+
+xlabel('pulsatory strength')
+ylabel('distribution')
+
+set(gca,'XTick',[])
+set(gca,'YTick',[])
+
+subplot(nrows,ncols,2)
+hold on
+
+% Schematic of how amplitude is determined
+xpuls = linspace(.5,3.8*pi,nnorm);
+ypuls = -cos(xpuls) + xpuls*0.05 - sin(xpuls*.25);
+ypuls = ypuls-min(ypuls)+.2*range(ypuls);
+[miny minindx] = min(ypuls);
+[maxy maxindx] = max(ypuls);
+plot(xpuls,ypuls,'k')
+plot(xpuls([minindx maxindx]),[miny miny])
+plot(xpuls([minindx maxindx]),[maxy maxy])
+
+set(gca,'XLim',[xpuls(1) xpuls(end)])
 
 axPos = get(gca,'Position');
 xMinMax = get(gca,'XLim');
-yMinMax = ylim;
-xAnnotation = axPos(1) + ((inlay_puls_x([minindx maxindx]) - xMinMax(1))/(xMinMax(2)-xMinMax(1))) * axPos(3);
+yMinMax = get(gca,'YLim');
+xAnnotation = axPos(1) + ((mean(xpuls([minindx maxindx]))*[1 1] - xMinMax(1))/(xMinMax(2)-xMinMax(1))) * axPos(3);
+yAnnotation = axPos(2) + (([miny maxy] - yMinMax(1))/(yMinMax(2)-yMinMax(1))) * axPos(4);
+annotation('doublearrow',xAnnotation,yAnnotation,'Color','b')
+
+xlabel('time')
+ylabel('signal')
+
+set(gca,'XTick',[])
+set(gca,'YTick',[])
+
+subplot(nrows,ncols,3)
+hold on
+
+% Schematic of how frequency is determined
+plot(xpuls,ypuls,'k')
+[tmp minindx] = min(abs(xpuls-3));
+miny = ypuls(minindx);
+plot(xpuls([minindx minindx]),[miny maxy])
+plot(xpuls([maxindx maxindx]),[miny maxy])
+
+set(gca,'XLim',[xpuls(1) xpuls(end)])
+
+axPos = get(gca,'Position');
+xMinMax = get(gca,'XLim');
+yMinMax = get(gca,'YLim');
+xAnnotation = axPos(1) + ((xpuls([minindx maxindx]) - xMinMax(1))/(xMinMax(2)-xMinMax(1))) * axPos(3);
 yAnnotation = axPos(2) + ((mean([miny maxy])*[1 1] - yMinMax(1))/(yMinMax(2)-yMinMax(1))) * axPos(4);
 annotation('doublearrow',xAnnotation,yAnnotation,'Color','b')
 
-text(inlay_x1+(mean(xpuls)-min(xpuls))/range(xpuls)*(inlay_x2-inlay_x1),ylim(1)+range(ylim)*inlay_yscale1*0.99,'time','FontSize',fontsize,'HorizontalAlignment','center')
-text(inlay_x1-.3,ylim(1) + range(ylim)*mean([inlay_yscale1 inlay_yscale2]),'signal','FontSize',fontsize,'HorizontalAlignment','center', 'Rotation' ,90)
+xlabel('time')
+ylabel('signal')
+
+set(gca,'XTick',[])
+set(gca,'YTick',[])
