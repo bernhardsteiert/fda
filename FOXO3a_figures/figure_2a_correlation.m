@@ -81,7 +81,7 @@ colmap = hsv2rgb(colmap(1:end-1,:));
 % end
 
 % Plotting correlation diagram
-markers = {'o','s','p','d','^','o'};
+markers = {'o','s','v','d','^','>'};
 legh = [];
 figure
 hold on

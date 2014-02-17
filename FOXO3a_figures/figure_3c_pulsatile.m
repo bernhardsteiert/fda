@@ -39,7 +39,7 @@ icol = 8;
 legh = [];
 colmap = [linspace(0,1,length(highdoses)+1)' ones(length(highdoses)+1,1) ones(length(highdoses)+1,1)*.9];
 colmap = hsv2rgb(colmap(1:end-1,:));
-markers = {'o','s','p','d','^','o'};
+markers = {'o','s','v','d','^','>'};
 for irow = 1:length(highdoses)
     plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)
 

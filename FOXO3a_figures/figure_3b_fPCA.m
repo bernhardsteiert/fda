@@ -5,10 +5,7 @@ sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:70]; % Without FGF
 
 load('./Workspaces/scores_early')
 
-figure;
 
-plot(scores_early(2,:),scores_early(3,:),'.','Color',[.7 .7 .7])
-hold on
 
 highdoses = [];
 for isite = sites_all
@@ -23,12 +20,17 @@ resort = [2 3 4 1 6 5];
 
 highdoses = highdoses(resort);
 
+figure;
+
+plot(scores_early(2,~ismember(celltypes,highdoses)),scores_early(3,~ismember(celltypes,highdoses)),'.','Color',[.7 .7 .7])
+hold on
+
 color_ind = 1;
 colmap = [linspace(0,1,length(highdoses)+1)' ones(length(highdoses)+1,1) ones(length(highdoses)+1,1)*.9];
 colmap = hsv2rgb(colmap(1:end-1,:));
 legstr = cell(length(highdoses),1);
 legh = [];
-markers = {'o','s','p','d','^','o'};
+markers = {'o','s','v','d','^','>'};
 for isite = highdoses([6 2 3 4 5 1])
     sprop = siteprop(isite);
     legstr{isite == highdoses} = sprop.lig_name(1:3);
