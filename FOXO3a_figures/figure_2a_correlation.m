@@ -80,6 +80,34 @@ for iplot = 1:size(scaledData,2)
     set(gca,'XLim',[-10 490])
 end
 
+figure
+for iplot = 1:size(scaledData,2)
+    subplot(nrows,ncols,iplot)
+    hold on
+    colcount = 1;
+    for ilig = uni_ligs(2:end)'
+        myind = logical([1; scaledLigs(2:end) == ilig]); % Plot common timepoint zero for all ligands
+        if sum(~isnan(scaledData(myind,iplot))) > 1 % not only NaN
+            tmpx = [scaledTime(myind); flipud(scaledTime(myind))];
+            tmpy = [scaledData(myind,iplot) + scaledStd(myind,iplot)./2; flipud(scaledData(myind,iplot) - scaledStd(myind,iplot)./2)];
+            
+            ltmp = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpx)));
+            set(ltmp, 'FaceColor', colmap(colcount,:)*0.1+0.9, 'EdgeColor', colmap(colcount,:)*0.1+0.9);
+            ltmp2 = patch(tmpx, tmpy, -ones(size(tmpx)), ones(size(tmpx)));
+            set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', colmap(colcount,:)*0.3+0.7);
+                                    
+                                    
+            plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))
+%             errorbar(scaledTime(myind),scaledData(myind,iplot),scaledStd(myind,iplot)./2,'Color',colmap(colcount,:))
+            colcount = colcount + 1;
+        end
+    end
+    title(description{myobs(iplot)})
+    ylabel('log_2 fold change [au]')
+    xlabel('time [min]')
+    set(gca,'XLim',[-10 490])
+end
+
 % Plotting correlation diagram
 markers = {'o','s','v','d','^','>'};
 legh = [];
