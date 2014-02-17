@@ -22,7 +22,7 @@ highdoses = highdoses(resort);
 
 figure;
 
-plot(scores_early(2,~ismember(celltypes,highdoses)),scores_early(3,~ismember(celltypes,highdoses)),'o','MarkerSize',2,'MarkerFaceColor',[.7 .7 .7],'MarkerEdgeColor','none')
+plot(scores_early(2,~ismember(celltypes,highdoses)),scores_early(3,~ismember(celltypes,highdoses)),'o','MarkerSize',1,'MarkerFaceColor',[.7 .7 .7],'MarkerEdgeColor','none')
 hold on
 
 color_ind = 1;
@@ -40,8 +40,8 @@ for isite = highdoses([6 2 3 4 5 1])
     plotEllipsis(scores(2,:),scores(3,:),colmap(isite == highdoses,:),.5);
 end
 
-xlim = [-.16 .24];
-ylim = [-.1 .14];
+xlim = [-.15 .25];
+ylim = [-.05 .15];
 set(gca,'XLim',xlim,'YLim',ylim)
 
 h = legend(legh,legstr);
@@ -51,8 +51,8 @@ for ileg = 1:length(ch)/3
     set(ch(ilegch),'LineStyle','-','LineWidth',1,'Color',colmap(size(colmap,1)-ileg+1,:)); 
 end
 
-ylabel('score transient')
-xlabel('score sustained')
+ylabel('score of transient harmonic')
+xlabel('score of sustained harmonic')
 
 % set(gca,'CLim',[0 1])
 % subplotpos = get(gca,'Position');
