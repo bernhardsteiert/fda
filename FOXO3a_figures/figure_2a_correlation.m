@@ -61,24 +61,24 @@ ncols = ceil(size(scaledData,2) / nrows);
 colmap = [linspace(0,1,length(uni_ligs)-1)' ones(length(uni_ligs)-1,1) ones(length(uni_ligs)-1,1)*.9];
 colmap = hsv2rgb(colmap(1:end-1,:));
 % close all
-% figure
-% for iplot = 1:size(scaledData,2)
-%     subplot(nrows,ncols,iplot)
-%     hold on
-%     colcount = 1;
-%     for ilig = uni_ligs(2:end)'
-%         myind = logical([1; scaledLigs(2:end) == ilig]); % Plot common timepoint zero for all ligands
-%         if sum(~isnan(scaledData(myind,iplot))) > 1 % not only NaN
-%             plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))
-%             errorbar(scaledTime(myind),scaledData(myind,iplot),scaledStd(myind,iplot),'Color',colmap(colcount,:))
-%             colcount = colcount + 1;
-%         end
-%     end
-%     title(description{myobs(iplot)})
-%     ylabel('log_2 fold change [au]')
-%     xlabel('time [min]')
-%     set(gca,'XLim',[-10 490])
-% end
+figure
+for iplot = 1:size(scaledData,2)
+    subplot(nrows,ncols,iplot)
+    hold on
+    colcount = 1;
+    for ilig = uni_ligs(2:end)'
+        myind = logical([1; scaledLigs(2:end) == ilig]); % Plot common timepoint zero for all ligands
+        if sum(~isnan(scaledData(myind,iplot))) > 1 % not only NaN
+            plot(scaledTime(myind),scaledData(myind,iplot),'o-','Color',colmap(colcount,:))
+            errorbar(scaledTime(myind),scaledData(myind,iplot),scaledStd(myind,iplot)./2,'Color',colmap(colcount,:))
+            colcount = colcount + 1;
+        end
+    end
+    title(description{myobs(iplot)})
+    ylabel('log_2 fold change [au]')
+    xlabel('time [min]')
+    set(gca,'XLim',[-10 490])
+end
 
 % Plotting correlation diagram
 markers = {'o','s','v','d','^','>'};
@@ -98,8 +98,8 @@ for ilig = uni_ligs(2:end)' % Ignore NS case
         erkaktratio_std = [erkaktratio_std sqrt(sum(scaledStd(myind,3:4).^2,2))];
         foxositesratio_std = [foxositesratio_std sqrt(sum(scaledStd(myind,1:2).^2,2))];
 %         plot(scaledData(myind,1)-scaledData(myind,2),scaledData(myind,3)-scaledData(myind,4)];
-        legh = [legh errorbar(scaledData(myind,1)-scaledData(myind,2),scaledData(myind,3)-scaledData(myind,4),sqrt(sum(scaledStd(myind,3:4).^2,2)),markers{colcount},'MarkerFaceColor',colmap(colcount,:),'MarkerEdgeColor',colmap(colcount,:),'Color',colmap(colcount,:))];
-        h = herrorbar(scaledData(myind,1)-scaledData(myind,2),scaledData(myind,3)-scaledData(myind,4),sqrt(sum(scaledStd(myind,1:2).^2,2)));
+        legh = [legh errorbar(scaledData(myind,1)-scaledData(myind,2),scaledData(myind,3)-scaledData(myind,4),sqrt(sum(scaledStd(myind,3:4).^2./2,2)),markers{colcount},'MarkerFaceColor',colmap(colcount,:),'MarkerEdgeColor',colmap(colcount,:),'Color',colmap(colcount,:))];
+        h = herrorbar(scaledData(myind,1)-scaledData(myind,2),scaledData(myind,3)-scaledData(myind,4),sqrt(sum(scaledStd(myind,1:2).^2./2,2)));
         set(h,'Color',colmap(colcount,:))
         set(h(2),'LineStyle', 'none')
         errorbar_tick(legh(end),0)

@@ -7,7 +7,7 @@ load('./Workspaces/harm_basis_fPCA')
 load('./Workspaces/scores_early')
 
 sites_all = [17 57 64];
-sigs = [26 6 75]; % IGF 26 looks OK; EPR 6 looks OK; BTC 32 has transient shape + pulsing (75 is maybe better)
+sigs = [26 6 17]; % IGF 26 looks OK; EPR 6 looks OK; BTC 32 has transient shape + pulsing (75 is maybe better; 17 has some of everything)
 colind = [1 6 5];
 
 legstr = cell(1,length(sites_all));
@@ -59,22 +59,22 @@ xlim = get(gca,'XLim');
 annotation('rectangle',[axpos(1:2) (times_fine(end)-xlim(1))./range(xlim) * axpos(3) axpos(4)])
 
 
-% figure
-% hold on
-% legh = [];
-% for iplot = 1:size(basis_eval,2)
-%     legh = [legh plot(timestamp,c_signal_single(:,iplot),markers{colind(iplot)},'Color',colmap(colind(iplot),:))];
-%     plot(timestamp,timestamp*0,'k:')
-%     plot(times_fine,basis_eval*scores_single(:,iplot),'Color',colmap(colind(iplot),:))
-% end
-% set(gca,'XLim',[50 200])
-% 
-% h = legend(legh,legstr);
-% ch = get(h,'child');
-% for ileg = 1:length(ch)/3
-%     ilegch = (ileg-1)*3+2;
-%     set(ch(ilegch),'LineStyle','-','Color',colmap(colind(end-ileg+1),:)); 
-% end
+figure
+hold on
+legh = [];
+for iplot = 1:size(basis_eval,2)
+    legh = [legh plot(timestamp,c_signal_single(:,iplot),markers{colind(iplot)},'Color',colmap(colind(iplot),:))];
+    plot(timestamp,timestamp*0,'k:')
+    plot(times_fine,basis_eval*scores_single(:,iplot),'Color',colmap(colind(iplot),:))
+end
+set(gca,'XLim',[50 200])
+
+h = legend(legh,legstr);
+ch = get(h,'child');
+for ileg = 1:length(ch)/3
+    ilegch = (ileg-1)*3+2;
+    set(ch(ilegch),'LineStyle','-','Color',colmap(colind(end-ileg+1),:)); 
+end
 
 figure
 
