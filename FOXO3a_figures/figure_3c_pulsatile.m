@@ -99,12 +99,105 @@ set(gca,'XLim',[-.5 length(possible_doses)-.5])
 set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
 xlabel('Ligand dose [ng/ml]')
 
-% subplotpos = get(s5,'Position');
-% set(gca,'CLim',[0 1])
-% colormap(colmap)
-% colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', [0 0],'Position',[subplotpos(1)+subplotpos(3) subplotpos(2) .01 subplotpos(4)],'units','normalized') % Vertical colorbar
+figure
+
+subplot(nrows,ncols,1)
+
+hold on
+icol = 8;
+legh = [];
+colmap = [linspace(0,1,length(highdoses)+1)' ones(length(highdoses)+1,1) ones(length(highdoses)+1,1)*.9];
+colmap = hsv2rgb(colmap(1:end-1,:));
+markers = {'o','s','v','d','^','>'};
+f = @(p,x) p(1) + (p(2)-p(1)) ./ (1 + 10.^((p(3)-x)*p(4)));
+for irow = 1:length(highdoses)
+    plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)
+    
+    % Fix lower asymptotic to mean(medians)
+%     qFit = logical([0 1 1 1]);
+%     pFix = mean(medians(1,:,icol));
+%     pinit = [medians(end,irow,icol) length(possible_doses)/2 .1];
+%     optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf .2],[Inf Inf Inf],optimset('Display','off'));
+
+    % Fill all parameters
+    qFit = logical([1 1 1 1]);
+    pFix = [];
+    pinit = [medians(1,irow,icol) medians(end,irow,icol) length(possible_doses)/2 .1];
+    optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf -Inf .2],[Inf Inf Inf Inf],optimset('Display','off'));
+    
+    % Plotting
+    p = nan(size(qFit));
+    p(qFit) = optRes;
+    p(~qFit) = pFix;
+    legh = [legh plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2)];
+end
+title('Fraction cells [%]')
+set(gca,'XLim',[-.5 length(possible_doses)-.5])
+set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
+set(gca,'YTick',0:.05:.40,'YTickLabel',0:5:40)
+set(gca,'YLim',[0 .40])
+xlabel('Ligand dose [ng/ml]')
+
+subplot(nrows,ncols,2)
+hold on
+icol = 4;
+mycolor = lines(nrows);
+legh = [];
+for irow = 1:length(highdoses)
+    plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)
+
+    % Fix lower asymptotic to mean(medians)
+    qFit = logical([0 1 1 1]);
+    pFix = mean(medians(1,:,icol));
+    pinit = [medians(end,irow,icol) length(possible_doses)/2 .1];
+    optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf .2],[Inf Inf Inf],optimset('Display','off'));
+
+    % Fill all parameters
+%     qFit = logical([1 1 1 1]);
+%     pFix = [];
+%     pinit = [medians(1,irow,icol) medians(end,irow,icol) length(possible_doses)/2 .1];
+%     optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf -Inf .2],[Inf Inf Inf Inf],optimset('Display','off'));
+    
+    % Plotting
+    p = nan(size(qFit));
+    p(qFit) = optRes;
+    p(~qFit) = pFix;
+    legh = [legh plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2)];
+end
+title([features{icol} ' [log_{10} Cyt/Nuc]'])
+set(gca,'XLim',[-.5 length(possible_doses)-.5])
+set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
+xlabel('Ligand dose [ng/ml]')
 
 
+s5 = subplot(nrows,ncols,3);
+hold on
+icol = 6;
+mycolor = lines(nrows);
+legh = [];
+legstr = cell(length(highdoses),1);
+resort2 = [6 2 3 4 5 1];
+for irow = 1:length(highdoses)
+    isite = highdoses(resort2(irow));
+    sprop = siteprop(isite);
+    legstr{isite == highdoses} = sprop.lig_name(1:3);
+    legh(irow) = plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6);
+
+    [axb s] = polyfit(1:length(possible_doses)-1,medians(2:end,irow,icol)',1);
+    plot(0:length(possible_doses)-1,(0:length(possible_doses)-1)*axb(1) + axb(2),'-','Color',colmap(irow,:),'LineWidth',2);
+end
+
+h = legend(legh,legstr);
+ch = get(h,'child');
+for ileg = 1:length(ch)/3
+    ilegch = (ileg-1)*3+2;
+    set(ch(ilegch),'LineStyle','-','LineWidth',2,'Color',colmap(size(colmap,1)-ileg+1,:)); 
+end
+
+title([features{icol} ' [min]'])
+set(gca,'XLim',[-.5 length(possible_doses)-.5])
+set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
+xlabel('Ligand dose [ng/ml]')
 
 
 figure
@@ -117,11 +210,6 @@ nnorm = 201;
 xnorm = linspace(-5,5,nnorm);
 ynorm = normpdf(xnorm,-1.5,1)+.5*normpdf(xnorm,2,1);
 ycut = .5; % at .5 when looked at plot(xnorm,ynorm)
-% With distribution shifted up
-% plot(linspace(inlay_x1,inlay_x2,nnorm),ylim(1) + range(ylim)*(inlay_yscale1+.035) + ynorm/max(ynorm)*range(ylim)*(inlay_yscale2-inlay_yscale1-.05),'k')
-% plot(inlay_x1+(ycut-min(xnorm))/range(xnorm)*(inlay_x2-inlay_x1)*[1 1],ylim(1) + range(ylim)*[inlay_yscale1+.035 inlay_yscale2])
-% plot([inlay_x1 inlay_x2],ylim(1) + range(ylim)*(inlay_yscale1+.035) + [0 0])
-% With distribution in full box
 plot(xnorm,ynorm,'k')
 ylim = [0 .45];
 plot([ycut ycut],ylim)
