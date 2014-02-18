@@ -101,6 +101,104 @@ set(gca,'XLim',[-.5 length(possible_doses)-.5])
 set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
 xlabel('Ligand dose [ng/ml]')
 
+figure
+
+setFigure(gcf,1,.5,12)
+
+subplot(nrows,ncols,1)
+
+hold on
+icol = 1;
+legh = [];
+colmap = [linspace(0,1,length(highdoses)+1)' ones(length(highdoses)+1,1) ones(length(highdoses)+1,1)*.9];
+colmap = hsv2rgb(colmap(1:end-1,:));
+markers = {'o','s','v','d','^','>'};
+for irow = 1:length(highdoses)
+    plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)
+
+    % Fill all parameters
+    qFit = logical([1 1 1 1]);
+    pFix = [];
+    pinit = [medians(1,irow,icol) medians(end,irow,icol) length(possible_doses)/2 .01];
+    optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf -Inf -Inf],[Inf Inf Inf Inf],optimset('Display','off'));
+    
+    % Plotting
+    p = nan(size(qFit));
+    p(qFit) = optRes;
+    p(~qFit) = pFix;
+    legh = [legh plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2)];
+end
+title('Harmonic 1')
+set(gca,'XLim',[-.5 length(possible_doses)-.5])
+set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
+% set(gca,'YTick',0:.05:.40,'YTickLabel',0:5:40)
+% set(gca,'YLim',[0 .40])
+xlabel('Ligand dose [ng/ml]')
+
+
+subplot(nrows,ncols,2)
+hold on
+icol = 2;
+mycolor = lines(nrows);
+legh = [];
+for irow = 1:length(highdoses)
+    plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)
+
+    % Fill all parameters
+    qFit = logical([1 1 1 1]);
+    pFix = [];
+    pinit = [medians(1,irow,icol) medians(end,irow,icol) length(possible_doses)/2 .01];
+    optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf -Inf -Inf],[Inf Inf Inf Inf],optimset('Display','off'));
+    
+    % Plotting
+    p = nan(size(qFit));
+    p(qFit) = optRes;
+    p(~qFit) = pFix;
+    legh = [legh plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2)];
+end
+title('Harmonic 2')
+set(gca,'XLim',[-.5 length(possible_doses)-.5])
+set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
+xlabel('Ligand dose [ng/ml]')
+
+
+s5 = subplot(nrows,ncols,3);
+hold on
+icol = 3;
+mycolor = lines(nrows);
+legh = [];
+legstr = cell(length(highdoses),1);
+resort2 = [6 2 3 4 5 1];
+for irow = 1:length(highdoses)
+    isite = highdoses(resort2(irow));
+    sprop = siteprop(isite);
+    legstr{isite == highdoses} = sprop.lig_name(1:3);
+    legh(irow) = plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6);
+
+    % Fill all parameters
+    qFit = logical([1 1 1 1]);
+    pFix = [];
+    pinit = [medians(1,irow,icol) medians(end,irow,icol) length(possible_doses)/2 .01];
+    optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf -Inf -Inf],[Inf Inf Inf Inf],optimset('Display','off'));
+    
+    % Plotting
+    p = nan(size(qFit));
+    p(qFit) = optRes;
+    p(~qFit) = pFix;
+    plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2);
+end
+
+h = legend(legh,legstr,'Location','NorthWest');
+ch = get(h,'child');
+for ileg = 1:length(ch)/3
+    ilegch = (ileg-1)*3+2;
+    set(ch(ilegch),'LineStyle','-','LineWidth',2,'Color',colmap(size(colmap,1)-ileg+1,:)); 
+end
+
+title('Harmonic 3')
+set(gca,'XLim',[-.5 length(possible_doses)-.5])
+set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
+xlabel('Ligand dose [ng/ml]')
 
 sites_colored = [11:17 64:70];
 

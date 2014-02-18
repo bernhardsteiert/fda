@@ -65,6 +65,7 @@ ncols = ceil(size(scaledData,2) / nrows);
 % Plotting time-courses
 colmap = [linspace(0,1,length(uni_ligs)-1)' ones(length(uni_ligs)-1,1) ones(length(uni_ligs)-1,1)*.9];
 colmap = hsv2rgb(colmap(1:end-1,:));
+colmap = [colmap; [0 0 0]];
 % close all
 % figure
 % for iplot = 1:size(scaledData,2)
@@ -118,7 +119,7 @@ end
 legend(legh,liglabels{2:end-1})
 
 % Plotting correlation diagram
-markers = {'o','s','v','d','^','>'};
+markers = {'o','s','v','d','^','>','<'};
 legh = [];
 figure
 hold on
@@ -147,7 +148,7 @@ axb = lsqnonlin(@(axb) [(erkaktratio(:)-(foxositesratio(:)-axb(2))./axb(1))./(er
 plot([min(min(erkaktratio)) max(max(erkaktratio))],[min(min(erkaktratio)) max(max(erkaktratio))]*axb(1) + axb(2),'k--','LineWidth',2)
 chi2 = sum(([(erkaktratio(:)-(foxositesratio(:)-axb(2))./axb(1))./(erkaktratio_std(:)); (foxositesratio(:)-axb(1)*foxositesratio(:)-axb(2))./(foxositesratio_std(:))]).^2);
 
-legend(legh,liglabels{2:end-1},'Location','NorthWest')
+legend(legh,liglabels{2:end},'Location','NorthWest')
 xlabel(['log_{2} ' description{myobs(1)} '/' description{myobs(2)}])
 ylabel(['log_{2} ' description{myobs(3)} '/' description{myobs(4)}])
 
