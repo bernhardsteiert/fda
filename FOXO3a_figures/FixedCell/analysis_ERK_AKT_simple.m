@@ -37,7 +37,7 @@ for ic = 1:length(cell_name)
         medians = nan(length(timepoints),nrows,ncols);
         iqrs = nan(length(timepoints),nrows,ncols);
 
-        data = load([cell_name{ic} '_' obs{iobs}]);
+        data = load(['./Workspaces' cell_name{ic} '_' obs{iobs}]);
         mydata = getfield(data,['single_' obs{iobs}]);
 
         for ilig = 1:nrows
