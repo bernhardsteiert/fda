@@ -1,6 +1,6 @@
 %% Immunostaining data of fixed parental cells
 % cell_name = {'184A1','BT20','HCC1806','HS578T','MCF7','MCF10A','MDA231','SKBR3','T47D'}; % FOXO3a of MDA231 seems not to be normalized
-cell_name = {'184A1','BT20','HCC1806','HS578T','MCF7','MCF10A','SKBR3','T47D'};
+cell_name = {'184A1','BT20','HCC1806','HS578T','MCF7','MCF10A12202013','SKBR3','T47D'};
 % cell_name = {'184A1','BT20','HCC1806','HS578T','MCF7','MCF10A','MCF10A12202013','SKBR3','T47D'};
 
 Ligand = {'EGF';'IGF1';'FGF1';'HRG';'HGF';'EPR';'BTC';'NS'}; %row 1-8
