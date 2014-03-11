@@ -18,7 +18,8 @@ figure
 
 hold on
 
-colmap = lines(2*nColor);
+% colmap = lines(2*nColor);
+colmap = jet(length(Ligand));
 legh = [];
 
 nrows = length(Ligand);
@@ -32,6 +33,9 @@ highlight_ligs = 1:length(Ligand); % this condition is needed for counting to wo
 
 % puls_ligands = nan(length(cell_name),nrows); % Decide for each celltype & ligand combination whether pulsing is possible
 puls_ligands = [];
+
+markers = {'o','s','^'};
+
 % counter = 0;
 for ic = 1:length(cell_name)
 % for ic = 1
@@ -74,8 +78,8 @@ for ic = 1:length(cell_name)
 %                     counter = counter +1;
                 end
                 
-%                 if idrug == 1 && ismember(ilig,highlight_ligs)
-                if ismember(ilig,highlight_ligs)
+                if idrug < 4 && ismember(ilig,highlight_ligs)
+%                 if ismember(ilig,highlight_ligs)
                     highlightinds = [highlightinds length(medians)-length(timepoints)+1+tlt80:length(medians)];
                     highlighttype = [highlighttype ones(1,length(timepoints)-tlt80)*ilig];
                     highlightdrug = [highlightdrug ones(1,length(timepoints)-tlt80)*idrug];
@@ -124,19 +128,21 @@ for ic = 1:length(cell_name)
         
         
 %         legh = [legh plot(medians,iqrs,'o','Color',colmap(ic,:))];
-        plot(medians,iqrs,'ko')
-        title(cell_name{ic})
-        hold on
+%         plot(medians,iqrs,'ko')
         x = linspace(0,1,201);
         iqrcut = iqrs > max(iqrs)*.2;
         b = lsqnonlin(@(b) b*medians(iqrcut).^2-b*medians(iqrcut) - iqrs(iqrcut),-.5,-Inf,0,optimset('Display','off'));
         y = b*x.^2-b*x;
-        plot(x,y,'Color',colmap(ic,:))
+%         plot(x,y,'Color',colmap(ic,:))
+        plot(x,y,'Color','k')
+        title(cell_name{ic})
+        hold on
+        % Plot cone
         xgate = .2; % must be between 0 and .5
         [tmp ind] = min(abs(x-xgate));
         center = .5;
-        plot([center x(ind)],[0 y(ind)],'k-')
-        plot([center 2*center-x(ind)],[0 y(ind)],'k-')
+%         plot([center x(ind)],[0 y(ind)],'k-')
+%         plot([center 2*center-x(ind)],[0 y(ind)],'k-')
         
         % Detecting conditions that lie within 'cone'
         slope = abs(y(ind)./(center-x(ind)));
@@ -144,12 +150,19 @@ for ic = 1:length(cell_name)
 %         legh = [legh plot(medians(indpuls),iqrs(indpuls),'o','MarkerEdgeColor','k','MarkerFaceColor',colmap(ic,:))];
         indpuls = find(indpuls);
         
+        % This does not plot all data, because not all highlightinds are
+        % plotted!!
+        myinds = ~ismember(1:length(medians),highlightinds);
+        plot(medians(myinds),iqrs(myinds),'ko')
+        
         % Highlighting late behavior (t > 80min) for defined ligands
         for itype = 1:length(highlight_ligs)
             for idrug = 1:ncols
                 myinds = highlighttype == highlight_ligs(itype) & highlightdrug == idrug;
                 if idrug == 1
-                    legh = [legh plot(medians(highlightinds(myinds)),iqrs(highlightinds(myinds)),'o','MarkerFaceColor',colmap(itype,:))];
+                    legh = [legh plot(medians(highlightinds(myinds)),iqrs(highlightinds(myinds)),markers{idrug},'MarkerFaceColor',colmap(itype,:))];
+                elseif idrug < 4
+                    plot(medians(highlightinds(myinds)),iqrs(highlightinds(myinds)),markers{idrug},'MarkerFaceColor',colmap(itype,:))
                 end
 
                 members = ismember(indpuls,highlightinds(myinds));
