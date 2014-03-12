@@ -10,17 +10,16 @@ obs = {'FOXO3a', 'pERK', 'pAKT'};
 timepoints_184a1 = [0, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 300, 480];
 timepoints_all   = [0,        15,     30,     60, 90, 120, 180, 240];
 
-close all
+% highlight_ligs = [1 3 7 8]; % EGF; FGF1; BTC; NS
+highlight_ligs = [2 4 8]; % EGF; FGF1; BTC; NS
 
-nColor = length(cell_name);
+close all
 
 figure
 
 hold on
 
-% colmap = lines(2*nColor);
-colmap = jet(length(Ligand));
-legh = [];
+colmap = jet(length(highlight_ligs));
 
 nrows = length(Ligand);
 ncols = length(Tx);
@@ -28,28 +27,18 @@ ncols = length(Tx);
 nrowssp = 2;
 ncolssp = 4;
 
-% highlight_ligs = [1 5 7];
-highlight_ligs = 1:length(Ligand); % this condition is needed for counting to work; others just for plotting
-
-% puls_ligands = nan(length(cell_name),nrows); % Decide for each celltype & ligand combination whether pulsing is possible
-puls_ligands = [];
-
 markers = {'o','s','^'};
 
-% counter = 0;
 for ic = 1:length(cell_name)
-% for ic = 1
+
     subplot(nrowssp,ncolssp,ic)
 
     if ic == 1
         timepoints = timepoints_184a1;
-        tlt80 = 8;
     else
         timepoints = timepoints_all;
-        tlt80 = 4;
     end
     
-%     for iobs = 1:length(obs)
     for iobs = 1 % Only FOXO3a
 
         medians = [];
@@ -63,9 +52,10 @@ for ic = 1:length(cell_name)
         igfhighmedians = [];
         igfhighiqrs = [];
 
-        highlightinds = [];
-        highlighttype = [];
-        highlightdrug = [];
+        allind = [];
+        alltype = [];
+        alldrug = [];
+        alltime = [];
         for ilig = 1:nrows
             
             for idrug = 1:ncols
@@ -75,15 +65,13 @@ for ic = 1:length(cell_name)
                     medians = [medians median(data)];
                     iqrs = [iqrs iqr(data)];
                     
+                    allind = [allind length(allind)+1];
+                    alltype = [alltype ilig];
+                    alldrug = [alldrug idrug];
+                    alltime = [alltime timepoints(it)];
 %                     counter = counter +1;
                 end
                 
-                if idrug < 4 && ismember(ilig,highlight_ligs)
-%                 if ismember(ilig,highlight_ligs)
-                    highlightinds = [highlightinds length(medians)-length(timepoints)+1+tlt80:length(medians)];
-                    highlighttype = [highlighttype ones(1,length(timepoints)-tlt80)*ilig];
-                    highlightdrug = [highlightdrug ones(1,length(timepoints)-tlt80)*idrug];
-                end
                 
 %                 if idrug == 4 % Both
 %                     shiftmedians = [shiftmedians medians(end-length(timepoints)+1:end)]; % all timepoints
@@ -150,32 +138,36 @@ for ic = 1:length(cell_name)
 %         legh = [legh plot(medians(indpuls),iqrs(indpuls),'o','MarkerEdgeColor','k','MarkerFaceColor',colmap(ic,:))];
         indpuls = find(indpuls);
         
-        % This does not plot all data, because not all highlightinds are
-        % plotted!!
-        myinds = ~ismember(1:length(medians),highlightinds);
-        plot(medians(myinds),iqrs(myinds),'ko')
         
         % Highlighting late behavior (t > 80min) for defined ligands
+        legh = [];
+        legstr = {};
+        plottedinds = [];
         for itype = 1:length(highlight_ligs)
-            for idrug = 1:ncols
-                myinds = highlighttype == highlight_ligs(itype) & highlightdrug == idrug;
-                if idrug == 1
-                    legh = [legh plot(medians(highlightinds(myinds)),iqrs(highlightinds(myinds)),markers{idrug},'MarkerFaceColor',colmap(itype,:))];
-                elseif idrug < 4
-                    plot(medians(highlightinds(myinds)),iqrs(highlightinds(myinds)),markers{idrug},'MarkerFaceColor',colmap(itype,:))
-                end
-
-                members = ismember(indpuls,highlightinds(myinds));
-    %             puls_ligands(ic,itype) = sum(members) > (sum(highlighttype == highlight_ligs(itype))*.5);
-                puls_ligands = [puls_ligands; sum(members) > (sum(myinds)*.8)];
-            end
+            idrug = 1;
+            myinds = allind(alltype == highlight_ligs(itype) & alldrug == idrug & alltime > 80);
+            legh = [legh plot(medians(myinds),iqrs(myinds),markers{idrug},'MarkerFaceColor',colmap(itype,:),'MarkerEdgeColor',colmap(itype,:))];
+            legstr{end+1} = Ligand{highlight_ligs(itype)};
+            plottedinds = [plottedinds myinds];
         end
         
-        legend(legh,Ligand{highlight_ligs})
+        idrug = 2;
+        myinds = allind(alldrug == idrug);
+        legh = [legh plot(medians(myinds),iqrs(myinds),markers{idrug},'MarkerFaceColor',[.7 .7 .7],'MarkerEdgeColor',[.7 .7 .7])];
+        legstr{end+1} = Tx{idrug};
+        plottedinds = [plottedinds myinds];
+        
+        myinds = ~ismember(1:length(medians),plottedinds);
+        plot(medians(myinds),iqrs(myinds),'ko')
+        uistack(legh,'top')
+        
+        if ic == 1
+            legend(legh,legstr)
+        end
 
     end
     
     set(gca,'XLim',[-.2 1.2],'YLim',[-.05 .35])
 
 end
-% legend(legh,cell_name)
+
