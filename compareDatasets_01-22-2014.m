@@ -1,10 +1,25 @@
+extension = '01-22-2014';
+
+% Initialize timestamp
+remotepath = mypath();
+    
+warning('off','MATLAB:dispatcher:pathWarning')
+
+fdaMPath = [remotepath 'fda'];
+addpath(fdaMPath)
+
+grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
+addpath(grabdataPath)
+
+if exist(remotepath,'dir')
+    timestamp = grabdata_new(isite,extension);
+end
+
 close all
 
-load('Workspaces/site_1_01-22-2014.mat')
+% load('Workspaces/site_1_01-22-2014.mat')
 timeshift = -70;
 timestamp = timestamp - timeshift; % Shift to main data set
-
-extension = '01-22-2014';
 
 % sites_all = [1:57 59 60];
 sites_all = [1:12 49:57 59 60];
