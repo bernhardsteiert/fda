@@ -123,14 +123,14 @@ end
 % Choose data that is used for regression
 
 % Use both AKT + ERK data for regression
-% regressvecs = [ones(size(alllevels,1),1) alllevels(:,:,2) alllevels(:,:,3)];
-% regressvecs_iqr = [ones(length([iqrinds iqrinds+2]),1) alllevels([iqrinds iqrinds+2],:,2) alllevels([iqrinds iqrinds+2],:,3)];
-% titstr = 'ERK + AKT';
+regressvecs = [ones(size(alllevels,1),1) alllevels(:,:,2) alllevels(:,:,3)];
+regressvecs_iqr = [ones(length([iqrinds iqrinds+2]),1) alllevels([iqrinds iqrinds+2],:,2) alllevels([iqrinds iqrinds+2],:,3)];
+titstr = 'ERK + AKT';
 
 % Use only AKT data for regression
-regressvecs = [ones(size(alllevels,1),1) alllevels(:,:,3)];
-regressvecs_iqr = [ones(length(regressiqrs)*length(iqrinds),1) alllevels(choseniqrs,:,3)];
-titstr = 'Only AKT';
+% regressvecs = [ones(size(alllevels,1),1) alllevels(:,:,3)];
+% regressvecs_iqr = [ones(length(regressiqrs)*length(iqrinds),1) alllevels(choseniqrs,:,3)];
+% titstr = 'Only AKT';
 
 % Use only ERK data for regression
 % regressvecs = [ones(size(alllevels,1),1) alllevels(:,:,2)];
@@ -159,6 +159,10 @@ for iplot = 1:size(par,2)
     title(titstr)
     ylabel(ylabels{iplot})
     xlabel('predictor')
+    
+    if iplot < 4
+        text(.1,.8,['R^2 = ' num2str(corr(tmpx,alllevels(:,iplot,1))^2,4)],'units','normalized')
+    end
 end
 
 % Color by ligand:
@@ -183,6 +187,7 @@ for ic = 1:length(cell_name)
 end
 legend(legh,cell_name)
 
+text(.1,.8,['R^2 = ' num2str(corr(tmpx(choseniqrs),alliqrs(choseniqrs)')^2,4)],'units','normalized')
 
 % Scoring function: (from diagonal)
 % 0deg optimal; 90deg neutral; 180deg worst case
