@@ -97,7 +97,7 @@
 %% Plot
 load('./Workspaces/fourier_signals')
 
-labels = {'Main dataset', sprintf('Only %i%% highest scores',thres_sorted*100), sprintf('Only %i%% lowest scores',thres_sorted*100), 'White noise \\w Sinus', 'Pink noise'};
+labels = {'Main dataset', sprintf('Only %i%% highest scores',thres_sorted*100), sprintf('Only %i%% lowest scores',thres_sorted*100), 'White noise \\w Sinusoidal', 'Pink noise'};
 colmap = lines(length(labels));
 colmap(1,:) = [0 0 0];
 

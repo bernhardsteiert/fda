@@ -1,6 +1,6 @@
 %% Immunostaining data of fixed parental cells
 % cell_name = {'184A1','BT20','HCC1806','HS578T','MCF7','MCF10A','MDA231','SKBR3','T47D'}; % FOXO3a of MDA231 seems not to be normalized
-cell_name = {'184A1','BT20','HCC1806','HS578T','MCF7','MCF10A11292013','SKBR3','T47D'};
+cell_name = {'184A1','MCF10A11292013','SKBR3','HCC1806','HS578T','MDA231','BT20','MCF7','T47D'};
 % cell_name = {'184A1','BT20','HCC1806','HS578T','MCF7','MCF10A','MCF10A12202013','MDA231','SKBR3','T47D'};
 % 'MCF10A11292013' == 'MCF10A'
 
@@ -11,12 +11,12 @@ timepoints_184a1 = [0, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 300, 480];
 timepoints_all   = [0,        15,     30,     60, 90, 120, 180, 240];
 
 highlight_ligs = [1 3 6 7]; % EGF; FGF1; BTC; NS
-%highlight_ligs = [2 4]; % IGF1 HRG NS
+%highlight_ligs = [2 4 5]; % IGF1 HRG NS
 
 close all
 
 figure
-
+set(gcf,'Position',[100 100 984 638]);
 hold on
 
 colmap = [hsv(length(highlight_ligs))];
@@ -24,8 +24,8 @@ colmap = [hsv(length(highlight_ligs))];
 nrows = length(Ligand);
 ncols = length(Tx);
 
-nrowssp = 2;
-ncolssp = 4;
+nrowssp = 3;
+ncolssp = 3;
 
 markers = {'o','s','^'};
 
@@ -145,21 +145,21 @@ for ic = 1:length(cell_name)
         plottedinds = [];
         for itype = 1:length(highlight_ligs)
             idrug = 1;
-            myinds = allind(alltype == highlight_ligs(itype) & alldrug == idrug & alltime > 80);
-            legh = [legh plot(medians(myinds),iqrs(myinds),markers{idrug},'MarkerFaceColor','none','MarkerEdgeColor',colmap(itype,:))];
+            myinds = allind(alltype == highlight_ligs(itype) & alldrug == idrug & alltime > 0);
+            legh = [legh plot(medians(myinds),iqrs(myinds),markers{idrug},'MarkerFaceColor',colmap(itype,:),'MarkerEdgeColor','none')];
             legstr{end+1} = Ligand{highlight_ligs(itype)};
             plottedinds = [plottedinds myinds];
         end
         
         
         idrug = 1;
-        myinds = allind(alltype == 8 & alldrug == idrug & alltime > 80);
+        myinds = allind(alltype == 8 & alldrug == idrug & alltime > 0);
         legh = [legh plot(medians(myinds),iqrs(myinds),'s','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor','none')];
         legstr{end+1} = Tx{idrug};
         plottedinds = [plottedinds myinds];
         
         idrug = 2;
-        myinds = allind( alldrug == idrug & alltime > 80);
+        myinds = allind( alldrug == idrug & alltime > 0);
         legh = [legh plot(medians(myinds),iqrs(myinds),'s','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none')];
         legstr{end+1} = Tx{idrug};
         plottedinds = [plottedinds myinds];
