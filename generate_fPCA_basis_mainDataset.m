@@ -17,11 +17,8 @@ flipharm = ones(1,nharm);
 Rmat = diag(ones(1,nharm));
 
 
-load(sprintf('Workspaces/site_%i.mat',sites(1)))
-timestamp = timestamp - timeshift; % Shift to main data set
-
-time_range = [0 timestamp(end)];
-
+% load(sprintf('Workspaces/site_%i.mat',sites(1)))
+% timestamp = timestamp - timeshift; % Shift to main data set
 
 remotepath = mypath();
 
@@ -37,12 +34,12 @@ signals = cell(0);
 celltype = [];
 
 for isite = sites
-%     if exist(remotepath,'dir')
-%         [times{end+1},intensity] = grabdata(isite,myextension);
-%     else
+    if exist(remotepath,'dir')
+        [times{end+1},intensity] = grabdata(isite);
+    else
         load(['./Workspaces/site_' num2str(isite)])
         times{end+1} = timestamp;
-%     end
+    end
 
     log_trafo = 1; % log-transform signal
 
@@ -71,6 +68,8 @@ for i = 1:size(c_signal,2)
         c_signal(end-rl(end)+1:end,i) = c_signal(end-rl(end),i);
     end
 end
+
+time_range = [0 timestamp(end)];
 
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));

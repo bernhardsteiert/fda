@@ -209,6 +209,65 @@ switch dataset
         s.drug_dose = drug_dose(row);
         s.celltype = celltype;
         
+    case '02-12-2014-wtAkt'
+        ligand_name = {'BTC','EPR','EGF','HGF','HRG','IGF','NS'};
+        celltype = {'Native', 'ERKmut'};
+        ligand_dose = [6.25 12.5 25 50 100 100 50 25 12.5 6.25 0];
+        
+        row = ceil(site/10);
+        col = mod(site-1,10)+1;
+        if ~mod(row,2)
+            col = 11-col;
+        end
+        if row == 7
+            col = 11;
+        end
+        
+        s.lig_name = ligand_name{row};
+        s.lig_index = row;
+        s.lig_dose = ligand_dose(col);
+        s.celltype = celltype{(col>5)+1};
+        
+    case '02-26-2014'
+        ligand_name = {'BTC','EPR','EGF','HGF','HRG','IGF','NS'};
+        celltype = {'Native', 'ERKmut'};
+        ligand_dose = [6.25 12.5 25 50 100 100 50 25 12.5 6.25 0];
+        
+        row = ceil(site/10);
+        col = mod(site-1,10)+1;
+        if ~mod(row,2)
+            col = 11-col;
+        end
+        if row == 7
+            col = 11;
+            celltype{2} = celltype{1};
+        end
+        
+        s.lig_name = ligand_name{row};
+        s.lig_index = row;
+        s.lig_dose = ligand_dose(col);
+        s.celltype = celltype{(col>5)+1};
+        
+    case '02-15-2014'
+        ligand_name = {'BTC','EPR','EGF','HGF','HRG','IGF','NS'};
+        ligand_dose = [4 20 100 4 20 100 4 20 100 0];
+        sensor_name = {'EKAREV','EKAREV','EKAREV','FOXO3a','FOXO3a','FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a'};
+        
+        row = ceil(site/9);
+        col = mod(site-1,9)+1;
+        if ~mod(row,2)
+            col = 10-col;
+        end
+        col_bak = col;
+        if row == 7
+            col = 10;
+        end
+        
+        s.lig_name = ligand_name{row};
+        s.lig_index = row;
+        s.lig_dose = ligand_dose(col);
+        s.sensor_name = sensor_name{col_bak};
+        
     otherwise
         error('Unknown data-set!!')
         
