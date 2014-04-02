@@ -11,6 +11,7 @@ sigs = [1:50];
 colmap = jet(length(sigs));
 colind = sigs;
 sorted_inds = sigs;
+harmonicsRemoved = [1]; % specify harmonics that shall be removed from signal, e.g. for trend effects
 
 % myscores = scores_puls(ismember(celltypes,sites_all),1);
 % myscores = myscores(sigs);
@@ -49,8 +50,12 @@ harm_eval = eval_basis(harm_basis,timestamp(range_ind));
 harm_eval_fine = eval_basis(harm_basis,times_fine_late);
 fitcoef = getcoef(smoothed_additional);
 data_fpca_repr = fitcoef'*harm_eval';
-data_fpca_repr_fine = fitcoef'*harm_eval_fine';
+remainingHarm = setdiff(1:nharm,harmonicsRemoved);
+data_fpca_repr_fine = fitcoef(remainingHarm,:)'*harm_eval_fine(:,remainingHarm)';
 c_signal_woNharm = c_signal_single(range_ind,:)-data_fpca_repr';
+
+data_fpca_repr = fitcoef(remainingHarm,:)'*harm_eval(:,remainingHarm)';
+c_signal_single(range_ind,:) = c_signal_single(range_ind,:)-data_fpca_repr';
 
 figure
 setFigure(gcf,xfac,yfac,fontsize)
