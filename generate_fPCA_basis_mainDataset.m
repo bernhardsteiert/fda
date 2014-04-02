@@ -2,23 +2,21 @@ close all
 clear all
 clc
 
-nharm = 5;
+nharm = 8;
 
-% myextension = '02-12-2014-wtAkt';
-% sites = [1:3 5:60];
-% timeshift = 9;
-% flipharm = [1 1 1];
-% Rmat = diag(ones(1,3));
-
-% myextension = '02-26-2014';
-sites = [1:70];
-timeshift = -75;
+sites = [4	5	6	7	8	9	10,...
+         17	16	15	14	13	12	11,...
+         24	25	26	27	28	29	30,...
+         37	36	35	34	33	32	31,...
+         44	45	46	47	48	49	50,...
+         57	56	55	54	53	52	51,...
+         64	65	66	67	68	69];
+timeshift = 0;
 flipharm = ones(1,nharm);
 Rmat = diag(ones(1,nharm));
 
-
-% load(sprintf('Workspaces/site_%i.mat',sites(1)))
-% timestamp = timestamp - timeshift; % Shift to main data set
+load(sprintf('FOXO3a_figures/Workspaces/site_%i.mat',sites(1)))
+timestamp = timestamp - timeshift; % Shift to main data set
 
 remotepath = mypath();
 
