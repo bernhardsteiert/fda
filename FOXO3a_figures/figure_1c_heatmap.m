@@ -101,7 +101,7 @@ xlabel('time [min]')
 ylabel('log_{10} FOXO3a [Cyt/Nuc]');
 
 figure
-h2 = heatmap(c_signal_woNharm(:,sorted_inds)', timestamp(range_ind), [],-.01,.01,[],'Colormap','money','UseFigureColormap',false);
+h2 = heatmap(c_signal_woNharm(:,sorted_inds)', timestamp(range_ind), [],-.008,.008,[],'Colormap','money','UseFigureColormap',false);
 
 drawnow
 xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'linear','extrap');
