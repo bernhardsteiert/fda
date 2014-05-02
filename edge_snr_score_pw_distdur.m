@@ -1,5 +1,5 @@
 % function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur peakdur_std peakdis peakdis_std] = edge_snr_score_pw_distdur(isite,myextension,timeshift)
-function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean peakdur_std peakdis_mean peakdis_std] = edge_snr_score_pw_distdur(isite,myextension,timeshift,range_smoothed_in)
+function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean peakdur_std peakdis_mean peakdis_std data_fpca_repr] = edge_snr_score_pw_distdur(isite,myextension,timeshift,range_smoothed_in,basis_name,interpolate)
     if(~exist('myextension','var'))
         myextension = '';
     elseif(~isempty(myextension))
@@ -9,10 +9,16 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
         timeshift = 0;
     end
     if(~exist('range_smoothed_in','var'))
-        range_smoothed_in = 1/120; % absolute --> edge only counted when > 0.05
+        range_smoothed_in = 1/120; % absolute --> edge only counted when > 0.005
+    end
+    if(~exist('basis_name','var'))
+        basis_name = 'harm_basis';
+    end
+    if(~exist('interpolate','var'))
+        interpolate = 0;
     end
     
-    load('harm_basis.mat') % Contains only harm_basis from all data-sets
+    load(basis_name) % Contains only harm_basis from all data-sets
     
     remotepath = mypath();
     
@@ -28,11 +34,11 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
     register = 1; % register IC50
     time_range = getbasisrange(harm_basis);
     
-    if exist(remotepath,'dir')
-        [timestamp,intensity] = grabdata_new(isite,myextension(2:end));
-    else
+%     if exist(remotepath,'dir')
+%         [timestamp,intensity] = grabdata_new(isite,myextension(2:end));
+%     else
         load(['./Workspaces/site_' num2str(isite) myextension])
-    end
+%     end
 
     if log_trafo
         c_signal = log10(intensity);
@@ -45,6 +51,72 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
         c_signal = register_signal(c_signal,myextension(2:end));
     end
     c_signal = c_signal - repmat(nanmean(c_signal,2),1,size(c_signal,2));
+    
+    if interpolate
+        c_signal(isinf(c_signal)) = nan;
+        for i = 1:size(c_signal,2)
+            if sum(isnan(c_signal(:,i))) > length(c_signal(:,i))-2
+                c_signal(:,i) = 0;
+            end
+            c_signal(:,i) = interp1(timestamp(~isnan(c_signal(:,i))),c_signal(~isnan(c_signal(:,i)),i),timestamp);
+            vec = ~isnan(c_signal(:,i))';
+            rl = find(vec ~= [vec(2:end), vec(end)+1]);
+            data =  vec(rl);
+            rl(2:end) = rl(2:end) - rl(1:end-1);
+            if ~data(1)
+                c_signal(1:rl(1),i) = c_signal(rl(1)+1,i);
+            end
+            if ~data(end)
+                c_signal(end-rl(end)+1:end,i) = c_signal(end-rl(end),i);
+            end
+            
+            % Outlier correction
+            mysignal = c_signal(:,i);
+            testdiff = diff(c_signal(:,i));
+            
+            win = 15;
+
+            allranges = nan(1,length(testdiff)-win);
+            for islide = 1:length(testdiff)-win
+                allranges(islide) = range(testdiff(islide:islide+win-1));
+            end
+
+            range_sorted = sort(allranges);
+            range_thres = range_sorted(round(length(range_sorted)*.5));
+
+            outliers = find(allranges > 4*range_thres);
+            cleaned_inds = ones(1,length(mysignal));
+
+            if ~isempty(outliers)
+                outlier_bd = find(diff(outliers) > 1);
+
+                outlier_lb = [outliers(1) outliers(outlier_bd+1)];
+                outlier_ub = [outliers(outlier_bd) outliers(end)];
+
+                for iout = 1:length(outlier_lb)
+                    cleaned_inds(round((outlier_lb(iout):outlier_ub(iout))+win/2)) = 0;
+                end
+            end
+            cleaned_inds = logical(cleaned_inds);
+            c_signal(~cleaned_inds,i) = nan;
+            
+            % Interpolate again
+            if sum(isnan(c_signal(:,i))) > length(c_signal(:,i))-2
+                c_signal(:,i) = 0;
+            end
+            c_signal(:,i) = interp1(timestamp(~isnan(c_signal(:,i))),c_signal(~isnan(c_signal(:,i)),i),timestamp);
+            vec = ~isnan(c_signal(:,i))';
+            rl = find(vec ~= [vec(2:end), vec(end)+1]);
+            data =  vec(rl);
+            rl(2:end) = rl(2:end) - rl(1:end-1);
+            if ~data(1)
+                c_signal(1:rl(1),i) = c_signal(rl(1)+1,i);
+            end
+            if ~data(end)
+                c_signal(end-rl(end)+1:end,i) = c_signal(end-rl(end),i);
+            end
+        end
+    end
     
     [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
     [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -67,7 +139,7 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
     c_signal_woNharm = c_signal(range_ind,:)-data_fpca_repr';
     
     % Generate spline fit to data-set given in isite (for remaining variation)
-    nbasis = 20;
+    nbasis = round(length(range_ind)/3.15);
     basis = create_bspline_basis([timestamp(range_ind(1)) timestamp(range_ind(end))], nbasis);
     smoothed_data_woNharm = smooth_basis(timestamp(range_ind),c_signal_woNharm,basis);
     c_smoothed_eval = eval_fd(smoothed_data_woNharm,linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),201));
@@ -102,7 +174,11 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
         % --> all_type(ind_locs_sorted) is alternating by construction
         locs_sorted = [1; locs_sorted; length(xs)];
         types_sorted = all_type(ind_locs_sorted);
-        types_sorted = [-types_sorted(1) types_sorted -types_sorted(end)];
+        if ~isempty(types_sorted)
+            types_sorted = [-types_sorted(1) types_sorted -types_sorted(end)];
+        else
+            types_sorted = nan;
+        end
 
 %         range_smoothed = max(c_smoothed_eval(:,isig))-min(c_smoothed_eval(:,isig)); % relative
 %         range_smoothed = 1/60; % absolute --> edge only counted when > 0.01
@@ -187,7 +263,7 @@ function [radial_dist c_signal_woNharm range_ind nEdges SNR amp pw peakdur_mean 
             amp = [amp range_smoothed]; % Only amplitude
 %         end
         
-%         if isig == 31
+%         if isig == 1
 %             close all
 %             figure
 %             subplot(1,3,[1 2])
