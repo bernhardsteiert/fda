@@ -1,10 +1,19 @@
 % Figure 3b: fPCA of early response in 184A1
 addpath('./Functions/')
 
-sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:70]; % Without FGF
+sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:69]; % Without FGF
 
-load('./Workspaces/scores_early')
+% load('./Workspaces/scores_early')
+load('./Workspaces/scores_early_corrected_all')
 
+
+outliers = logical(zeros(size(celltypes)));
+outlier_thres = .05;
+nNeighbours = 8;
+for iscore = 1:length(scores_early)
+    sorted_dists = sort(sqrt(sum((repmat(scores_early(2:3,iscore),1,size(scores_early,2))-scores_early(2:3,:)).^2,1)));
+    outliers(iscore) = sorted_dists(nNeighbours+1) > outlier_thres;
+end
 
 
 highdoses = [];
@@ -22,7 +31,8 @@ highdoses = highdoses(resort);
 
 figure;
 
-plot(scores_early(2,~ismember(celltypes,highdoses)),scores_early(3,~ismember(celltypes,highdoses)),'o','MarkerSize',1,'MarkerFaceColor',[.7 .7 .7],'MarkerEdgeColor','none')
+plot(scores_early(2,~ismember(celltypes,highdoses) & ~outliers),scores_early(3,~ismember(celltypes,highdoses) & ~outliers),'o','MarkerSize',1,'MarkerFaceColor',[.7 .7 .7],'MarkerEdgeColor','none')
+
 hold on
 
 color_ind = 1;
@@ -36,11 +46,12 @@ for isite = highdoses([6 2 3 4 5 1])
     legstr{isite == highdoses} = sprop.lig_name(1:3);
     
     scores = scores_early(:,celltypes == isite);
-    legh(isite == highdoses) = plot(scores(2,:),scores(3,:),markers{isite == highdoses},'MarkerSize',5,'MarkerFaceColor',colmap(isite == highdoses,:),'MarkerEdgeColor','none');
-    plotEllipsis(scores(2,:),scores(3,:),colmap(isite == highdoses,:),.5);
+    legh(isite == highdoses) = plot(scores(2,~outliers(celltypes == isite)),scores(3,~outliers(celltypes == isite)),markers{isite == highdoses},'MarkerSize',5,'MarkerFaceColor',colmap(isite == highdoses,:),'MarkerEdgeColor','none');
+    plotEllipsis(scores(2,~outliers(celltypes == isite)),scores(3,~outliers(celltypes == isite)),colmap(isite == highdoses,:),.5);
 end
 
-xlim = [-.15 .25];
+
+xlim = [-.25 .35];
 ylim = [-.05 .15];
 set(gca,'XLim',xlim,'YLim',ylim)
 
