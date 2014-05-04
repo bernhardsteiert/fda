@@ -11,11 +11,11 @@ function plotEllipsis(x_scores,y_scores,mycolor,alpha)
     scale = chi2inv(conf,2);     %# inverse chi-squared with dof=#dimensions
 
     %# substract mean
-    Mu = mean([x_scores y_scores]);
+    Mu = nanmean([x_scores y_scores]);
     X0 = bsxfun(@minus, [x_scores y_scores], Mu);
 
     %# eigen decomposition [sorted by eigen values]
-    Cov = cov(X0) * scale;
+    Cov = nancov(X0) * scale;
     [V D] = eig(Cov);
     [D order] = sort(diag(D), 'descend');
     D = diag(D);
