@@ -2,15 +2,15 @@ close all
 clear all
 clc
 
-nharm = 8;
+nharm = 5;
 
-sites = [4	5	6	7	8	9	10,...
-         17	16	15	14	13	12	11,...
-         24	25	26	27	28	29	30,...
-         37	36	35	34	33	32	31,...
-         44	45	46	47	48	49	50,...
-         57	56	55	54	53	52	51,...
-         64	65	66	67	68	69];
+sites = [4	5	6	7	8	9,...
+17	16	15	14	13	12,...
+24	25	26	27	28	29,...
+37	36	35	34	33	32,...
+44	45	46	47	48	49,...
+57	56	55	54	53	52,...
+64	65	66	67	68	69]; % 
 timeshift = 0;
 flipharm = ones(1,nharm);
 Rmat = diag(ones(1,nharm));
@@ -23,8 +23,8 @@ remotepath = mypath();
 fdaMPath = [remotepath 'fda'];
 addpath(fdaMPath)
 
-grabdataPath = [remotepath 'Code + Stage and Outputsignal'];
-addpath(grabdataPath)
+
+grabdataPath = 'C:\Users\SS240\Dropbox (Somponnat workspace)\Bernhard-Pat H5 file sharing\130722';
 
 
 times = cell(0);
@@ -32,8 +32,8 @@ signals = cell(0);
 celltype = [];
 
 for isite = sites
-    if exist(remotepath,'dir')
-        [times{end+1},intensity] = grabdata(isite);
+    if exist(grabdataPath,'dir')
+        [timestamp,intensity] = grabdata_new(isite);
     else
         load(['./Workspaces/site_' num2str(isite)])
         times{end+1} = timestamp;
@@ -67,7 +67,7 @@ for i = 1:size(c_signal,2)
     end
 end
 
-time_range = [0 timestamp(end)];
+time_range = [50 220];
 
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
@@ -95,6 +95,6 @@ harm_fPCA = fd(newcoef,basisobj,{'time','Rotated harmonics','Rotated harmonics f
 harm_basis = create_fd_basis(harm_fPCA);
 plot(harm_basis)
 
-myextension = '50_to_end';
+myextension = '';
 % return
 save(sprintf('harm_basis_%s',myextension),'harm_basis')

@@ -28,8 +28,8 @@ range_ind = range_ind_min:range_ind_max;
 
 figure
 
-ncols = 2;
-nrows = 3;
+ncols = 3;
+nrows = 2;
 
 colmap = [linspace(0,1,length(sites_all)+1)' ones(length(sites_all)+1,1) ones(length(sites_all)+1,1)*.9];
 colmap = hsv2rgb(colmap(1:end-1,:));
@@ -66,9 +66,9 @@ for iplot = 1:length(sites_all)-1
 %     text(355,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
 
     set(gca,'XLim',time_range,'YLim',ylim);
-    if mod(iplot,2)==0
-        set(gca,'YAxisLocation','right');
-    end
+%     if mod(iplot,2)==0
+%         set(gca,'YAxisLocation','right');
+%     end
     set(gca,'XTick',0:100:500,'YTick',[-0.02 0 0.02])
 end
 
@@ -82,5 +82,5 @@ for iplot = 1:length(sites_all)
 end
 title('Averaged')
 set(gca,'XLim',time_range,'YLim',ylim/2)
-set(gca,'XTick',0:100:500,'YTick',[-0.01 0 0.01],'YAxisLocation','right')
+set(gca,'XTick',0:100:500,'YTick',[-0.01 0 0.01])
 legend(legh(resort),legstr)

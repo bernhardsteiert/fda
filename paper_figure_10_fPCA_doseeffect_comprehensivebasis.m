@@ -29,7 +29,7 @@ addpath(grabdataPath)
 % Get properties of sites by calling siteprop(site)
 % All ligands + EGF with Inhibitors
 % sites = [1 2 4:10 17:-1:11 24:30 37:-1:31 41 42 44:50 57:-1:51 64:69];
-sites_for_harmonics = [4:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 64:70];
+sites_for_harmonics = [4:10 17:-1:11 24:30 37:-1:31 44:50 57:-1:51 64:69];
 sites = sites_for_harmonics;
 
 % sites = [1 4];
@@ -40,7 +40,7 @@ celltype = [];
 
 for isite = sites
     if exist(remotepath,'dir')
-        [times{end+1},intensity] = grabdata(isite);
+        [timestamp,intensity] = grabdata_new(isite,'Images and Data');
     else
         load(['./Workspaces/site_' num2str(isite)])
         times{end+1} = timestamp;
@@ -57,7 +57,7 @@ for isite = sites
     celltype = [celltype ones(1,size(intensity,2))*isite];
 end
 
-timestamp = times{1}; % same time sampling for all data sets
+%timestamp = times{1}; % same time sampling for all data sets
 c_signal = cell2mat(signals);
 
 % return
@@ -152,7 +152,7 @@ plot(timestamp(range_ind),c_signal(range_ind,ind_harm),'o')
 % close all
 
 nharm = 5;
-% c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0));
+%c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0));
 c_signal_pcastr = pca_fd(smoothed_data, nharm, fdPar(basis, int2Lfd(2), 0), 0); % WITHOUT CENTERING!!
 % c_signal_pcastr = varmx_pca(c_signal_pcastr);
 
