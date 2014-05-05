@@ -1,4 +1,5 @@
 % Figure 3c: pulsatile late response in 184A1
+close all;
 addpath('./Functions/')
 
 sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:69]; % Without FGF
@@ -6,7 +7,7 @@ nCelltype = 6;
 possible_doses = [0 2.5 5 10 20 50 100];
 
 % puls_thres = .1;
-puls_thres = .75;
+puls_thres = 0.7;
 
 % load('./Workspaces/scores_puls')
 load('./Workspaces/scores_puls_corrected_all')
@@ -53,8 +54,8 @@ end
 title('Fraction cells [%]')
 set(gca,'XLim',[-.5 length(possible_doses)-.5])
 set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
-set(gca,'YTick',0:.05:.40,'YTickLabel',0:5:40)
-set(gca,'YLim',[0 .40])
+set(gca,'YTick',0:.05:.60,'YTickLabel',0:5:60)
+set(gca,'YLim',[0 .60])
 xlabel('Ligand dose [ng/ml]')
 
 % subplot(nrows,ncols,2)
