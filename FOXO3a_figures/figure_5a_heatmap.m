@@ -1,4 +1,5 @@
 % Figure 5a: Heatmap EGF vs. MEKi
+close all; clear all
 addpath('./Functions/')
 load('Workspaces/dists_04182014')
 extension = '04-18-2014';
@@ -6,8 +7,6 @@ sites_all = [1:39 41:72];
 
 nrows = 6;
 ncols = 12;
-
-figure
 
 puls_thres = .55;
 
@@ -96,6 +95,8 @@ ylabel('MEKi dose')
 set(gca,'XTick',1:6,'XTickLabel',[100 20 4 .8 .16 0])
 set(gca,'YTick',1:6,'YTickLabel',[.1 .1/4 .1/4^2 .1/4^3 .1/4^4 0])
 colorbar
+
+figure
 
 valid = ~isnan(mean_peakdur_mat); 
 M = griddata(X(valid),Y(valid),mean_peakdur_mat(valid),X,Y); 
