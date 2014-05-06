@@ -34,7 +34,7 @@ for isite = fixedEGF
         subplot(2,2,1)
         hold on
         legh = [legh plot(timestamp,mean_signal(:,isite),'Color',colmap(sprop.drug_dose == drug_dose,:))];
-        legstr{end+1} = sprintf('MEKi %g',drug_dose(sprop.drug_dose == drug_dose));
+        legstr{end+1} = sprintf('MEKi %0.2f',1000*drug_dose(sprop.drug_dose == drug_dose));
     else
         subplot(2,2,2)
         hold on
