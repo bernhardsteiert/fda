@@ -1,10 +1,30 @@
 % Figure 1b (eyecatcher): Traces of BTC 100ng/ml in 184A1
 addpath('./Functions/')
 
-isite = 64;
+% isite = 64;
+isite = 4;
 
 load(['./Workspaces/site_' num2str(isite)])
 c_signal = log10(intensity);
+
+% % Interpolate (looks a bit weird --> switched off)
+% c_signal(isinf(c_signal)) = nan;
+% for i = 1:size(c_signal,2)
+%     if sum(isnan(c_signal(:,i))) > length(c_signal(:,i))-2
+%         c_signal(:,i) = 0;
+%     end
+%     c_signal(:,i) = interp1(timestamp(~isnan(c_signal(:,i))),c_signal(~isnan(c_signal(:,i)),i),timestamp);
+%     vec = ~isnan(c_signal(:,i))';
+%     rl = find(vec ~= [vec(2:end), vec(end)+1]);
+%     data =  vec(rl);
+%     rl(2:end) = rl(2:end) - rl(1:end-1);
+%     if ~data(1)
+%         c_signal(1:rl(1),i) = c_signal(rl(1)+1,i);
+%     end
+%     if ~data(end)
+%         c_signal(end-rl(end)+1:end,i) = c_signal(end-rl(end),i);
+%     end
+% end
 
 time_range = [50 510];
 
@@ -18,7 +38,7 @@ s = siteprop(isite);
 
 first_n = 7; % Plot first_n traces colored (2 times)
 
-tmp_puls_strengths = edge_snr_score_pw_distdur(isite);
+tmp_puls_strengths = edge_snr_score_pw_distdur(isite,[],0,1/120,'harm_basis_130722_corrected_retracked_all_cleaned_late',1);
 [tmp ind_tmp_pul_str] = sort(tmp_puls_strengths);
 ind_isite = [ind_tmp_pul_str(end:-1:end-first_n+1) ind_tmp_pul_str(round(linspace(1,(length(ind_tmp_pul_str)-first_n),first_n)))];
 

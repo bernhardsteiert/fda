@@ -1,7 +1,8 @@
 % Figure 2b: Traces of all ligands at 100ng/ml in 184A1
 addpath('./Functions/')
 
-sites_all = [17 37 44 4 57 64];
+% sites_all = [17 37 44 4 57 64];
+sites_all = [17 37 44 64 57 4];
 
 times = cell(0);
 signals = cell(0);
@@ -44,7 +45,7 @@ for iplot = 1:length(sites_all)-1
 
     first_n = 7; % Plot first_n traces colored (2 times)
 
-    tmp_puls_strengths = edge_snr_score_pw_distdur(isite);
+    tmp_puls_strengths = edge_snr_score_pw_distdur(isite,[],0,1/120,'harm_basis_130722_corrected_retracked_all_cleaned_late',1);
     [tmp ind_tmp_pul_str] = sort(tmp_puls_strengths);
     ind_isite = [ind_tmp_pul_str(end:-1:end-first_n+1) ind_tmp_pul_str(round(linspace(1,(length(ind_tmp_pul_str)-first_n),first_n)))];
 
@@ -60,7 +61,7 @@ for iplot = 1:length(sites_all)-1
         ylabel('log_{10} FOXO3a [Cyt/Nuc]')
     end
 
-    ylim = [-1 1]*.04;
+    ylim = [-1 1]*.05;
 %     plot([200 200],ylim,'k--')
 %     text(125,.033,{'non-stationary','(deterministic)'},'HorizontalAlignment','center')
 %     text(355,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
@@ -74,7 +75,8 @@ end
 
 subplot(nrows,ncols,6)
 hold on
-resort = [1 2 3 4 6 5];
+% resort = [1 2 3 4 6 5];
+resort = [1 2 3 6 4 5];
 legh = [];
 for iplot = 1:length(sites_all)
     isite = sites_all(resort(iplot));
@@ -83,4 +85,4 @@ end
 title('Averaged')
 set(gca,'XLim',time_range,'YLim',ylim/2)
 set(gca,'XTick',0:100:500,'YTick',[-0.01 0 0.01])
-legend(legh(resort),legstr)
+legend(legh,legstr{resort})
