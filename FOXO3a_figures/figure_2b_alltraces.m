@@ -21,11 +21,11 @@ end
 timestamp = times{1}; % same time sampling for all data sets
 c_signal = cell2mat(signals);
 
-time_range = [50 510];
+time_range = [50 605];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
-range_ind = range_ind_min:range_ind_max;
+range_ind = range_ind_min:range_ind_max+1;
 
 figure
 
@@ -66,11 +66,11 @@ for iplot = 1:length(sites_all)-1
 %     text(125,.033,{'non-stationary','(deterministic)'},'HorizontalAlignment','center')
 %     text(355,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
 
-    set(gca,'XLim',time_range,'YLim',ylim);
+    set(gca,'XLim',[50 600],'YLim',ylim);
 %     if mod(iplot,2)==0
 %         set(gca,'YAxisLocation','right');
 %     end
-    set(gca,'XTick',0:100:500,'YTick',[-0.02 0 0.02])
+    set(gca,'XTick',120:100:520,'XTickLabel',0:100:400,'YTick',[-0.04 -0.02 0 0.02 0.04])
 end
 
 subplot(nrows,ncols,6)
@@ -84,5 +84,5 @@ for iplot = 1:length(sites_all)
 end
 title('Averaged')
 set(gca,'XLim',time_range,'YLim',ylim/2)
-set(gca,'XTick',0:100:500,'YTick',[-0.01 0 0.01])
+set(gca,'XTick',0:200:time_range(2),'YTick',[-0.01 0 0.01])
 legend(legh,legstr{resort})

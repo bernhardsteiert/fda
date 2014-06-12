@@ -8,7 +8,7 @@ load('./Workspaces/harm_basis_50_to_end')
 
 % sites_all = [64];
 sites_all = [4];
-sigs = [1:60];
+sigs = [1:40];
 colmap = jet(length(sigs));
 colind = sigs;
 sorted_inds = sigs;
@@ -101,7 +101,7 @@ xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'li
 hold on;plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),200);
 plot([xtick_new xtick_new],get(gca,'YLim'),':k');
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),500);
+xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),600);
 plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xlabel('time [min]')
 ylabel('Localization');
@@ -130,7 +130,7 @@ xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'li
 hold on;plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),200);
 plot([xtick_new xtick_new],get(gca,'YLim'),':k');
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),500);
+xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),600);
 plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xlabel('time [min]')
 ylabel('Pulsing');
