@@ -1,7 +1,5 @@
 % Figure supplementary: %variance explained vs. #basis functions
-%%
-clear all
-close all
+addpath('./Functions/')
 
 load('./Workspaces/harm_basis_fPCA_5basis_noFGF')
 
