@@ -5,6 +5,11 @@ load('./Workspaces/harm_basis_fPCA_5basis_noFGF')
 load('./Workspaces/scores_early_5basis_noFGF')
 myextension = '130722_corrected_retracked_all_cleaned';
 
+propvar = squeeze(sum(harmscr.^2));
+propvar = propvar./sum(propvar);
+propvar = propvar.*sum(c_signal_pcastr.varprop(1:length(propvar)));
+propvar = round(propvar*1e4)./1e2;
+
 sites_all = [17 57 64];
 % sigs = [26 6 17]; % IGF 26 looks OK; EPR 6 looks OK; BTC 32 has transient shape + pulsing (75 is maybe better; 17 has some of everything)
 sigs = [26 17 56]; % Alternatives: IGF 8 or 10 or 11 or 20; EPR 17; BTC 1 or 7 or 29 or 52
@@ -90,6 +95,8 @@ for iplot = basisind
     
     set(gca,'XLim',[50 200],'XTick',60:30:180,'XTickLabel',-60:30:60)
     set(gca,'YLim',[-.22 .22])
+    
+    text(60,-.14,sprintf('Explains %g%% variance',propvar(iplot)))
 end
 
 ylims = [[-.2 .1];[-.05 .15];[-.05 .15]];
