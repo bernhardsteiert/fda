@@ -87,7 +87,7 @@ for isb = 1:length(mysb)
         end
     end
     
-    set(gca,'XLim',[50 400])
+    set(gca,'XLim',[50 400],'XTick',70:50:370,'XTickLabel',-50:50:250)
     set(gca,'YLim',[-.02 .03])
     
     title(sprintf('%i: %s %i - %s',isb,sref.lig_name,sref.lig_dose,sref.celltype))

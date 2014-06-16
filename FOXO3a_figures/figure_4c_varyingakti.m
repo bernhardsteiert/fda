@@ -35,14 +35,14 @@ for iakti = akti_cond
         subplot(1,2,1)
         hold on
         title(sprintf('%s %i - MCF10A',sprop.lig_name,sprop.lig_dose))
-        set(gca,'XLim',[50 400])
+        set(gca,'XLim',[50 400],'XTick',70:50:370,'XTickLabel',-50:50:250)
         set(gca,'YLim',[-.02 .03])
         ylabel('log_{10} FOXO3a [Cyt/Nuc]');
     else
         subplot(1,2,2)
         hold on
         title(sprintf('%s %i - 184A1',sprop.lig_name,sprop.lig_dose))
-        set(gca,'XLim',[50 400])
+        set(gca,'XLim',[50 400],'XTick',70:50:370,'XTickLabel',-50:50:250)
         set(gca,'YLim',[-.02 .03])
         xlabel('time [min]')
     end
