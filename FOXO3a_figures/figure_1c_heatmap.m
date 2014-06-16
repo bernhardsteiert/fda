@@ -60,7 +60,7 @@ for i = 1:size(c_signal_single,2)
 end
 
 
-time_range = getbasisrange(harm_basis);
+time_range = [50 605];%getbasisrange(harm_basis);
 [~, range_ind_min] = min(abs(timestamp - time_range(1) - 5));
 [~, range_ind_max] = min(abs(timestamp - time_range(2) + 5));
 range_ind = range_ind_min:range_ind_max;

@@ -36,7 +36,7 @@ colmap = [linspace(0,1,length(sites_all)+1)' ones(length(sites_all)+1,1) ones(le
 colmap = hsv2rgb(colmap(1:end-1,:));
 
 for iplot = 1:length(sites_all)-1
-    subplot(nrows,ncols,iplot)
+    subplot(nrows,ncols,iplot+1)
 %     rectangle('Position',[65 0.02 50 0.015],'Curvature',[.2 .2],'FaceColor',colmap(iplot,:))
     hold on
     
@@ -73,7 +73,7 @@ for iplot = 1:length(sites_all)-1
     set(gca,'XTick',120:100:520,'XTickLabel',0:100:400,'YTick',[-0.04 -0.02 0 0.02 0.04])
 end
 
-subplot(nrows,ncols,6)
+subplot(nrows,ncols,1)
 hold on
 % resort = [1 2 3 4 6 5];
 resort = [1 2 3 6 4 5];
@@ -84,5 +84,6 @@ for iplot = 1:length(sites_all)
 end
 title('Averaged')
 set(gca,'XLim',time_range,'YLim',ylim/2)
-set(gca,'XTick',0:200:time_range(2),'YTick',[-0.01 0 0.01])
+%set(gca,'XTick',0:200:time_range(2),'YTick',[-0.01 0 0.01])
+set(gca,'XTick',120:100:520,'XTickLabel',0:100:400,'YTick',[-0.04 -0.02 0 0.02 0.04])
 legend(legh,legstr{resort})
