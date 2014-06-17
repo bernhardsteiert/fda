@@ -5,12 +5,13 @@ close all
 
 load('./Workspaces/harm_basis_50_to_end')
 % load('./Workspaces/scores_puls')
+myextension = '130722_corrected_retracked_all_cleaned';
 
 sites_all = [64];
 % sites_all = [4];
-nsigs = 36;
+nsigs = 40;
 removeTraces = [];
-removeTraces = [6 9 10 21 31 32 33 43];
+removeTraces = [6 7 9 14 15 24 25 29 30 32 37 45 52];
 sigs = setdiff(1:100,removeTraces);
 sigs = sigs(1:nsigs);
 colmap = jet(length(sigs));
@@ -18,7 +19,7 @@ colind = 1:nsigs;
 harmonicsRemoved = [1]; % specify harmonics that shall be removed from signal, e.g. for trend effects
 
 % myscores = scores_puls(ismember(celltypes,sites_all),1);
-myscores = edge_snr_score_pw_distdur(sites_all,[],0,1/120,'harm_basis_130722_corrected_retracked_all_cleaned_late',1);
+myscores = edge_snr_score_pw_distdur(sites_all,myextension,0,1/120,'harm_basis_130722_corrected_retracked_all_cleaned_late',1);
 % myscores = myscores(sigs);
 [tmp sorted_inds] = sort(myscores);
 sorted_inds = sorted_inds(end:-1:1);
@@ -33,7 +34,7 @@ scores_single = nan(3,length(sigs));
 
 for icount = 1:length(sites_all)
     isite = sites_all(icount);
-    load(['./Workspaces/site_' num2str(isite)])
+    load(['./Workspaces/site_' num2str(isite) '_' myextension])
     c_signal_single = log10(intensity);
     s = siteprop(isite);
     legstr{icount} = s.lig_name;
