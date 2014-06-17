@@ -78,7 +78,7 @@ for iplot = 1:size(c_signal_single,2)
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
     plot(times_fine,smoothed_eval(:,iplot),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
 end
-set(gca,'XLim',[50 200])
+set(gca,'XLim',[50 200],'XTick',60:30:180,'XTickLabel',-60:30:60)
 
 h = legend(legh,legstr,'Location','NorthWest');
 ch = get(h,'child');
@@ -100,7 +100,7 @@ for isite = 1:size(c_signal_single,2)
     legh = [legh plot(timestamp,c_signal_single(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'LineWidth',linewidth)];
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
 end
-set(gca,'XLim',[50 200])
+set(gca,'XLim',[50 200],'XTick',60:30:180,'XTickLabel',-60:30:60)
 legend(legh,legstr,'Location','NorthWest')
 
 xlabel('time [min]')
@@ -121,7 +121,7 @@ end
 
 legend(legh,legstr)
 
-set(gca,'XLim',[50 1000])
+set(gca,'XLim',[50 1000],'XTick',120:100:920,'XTickLabel',0:100:800)
 % plot([200 200],get(gca,'YLim'),'k--')
 
 xlabel('time [min]')
@@ -155,7 +155,7 @@ end
 
 legend(legh,legstr,'Location','SouthEast')
 
-set(gca,'XLim',[200 1000])
+set(gca,'XLim',[200 1000],'XTick',220:100:920,'XTickLabel',100:100:800)
 % plot([200 200],get(gca,'YLim'),'k--')
 
 xlabel('time [min]')
@@ -184,7 +184,7 @@ for iplot = 1:size(c_signal_single,2)
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
     plot(times_fine_late,data_fpca_repr_fine(iplot,:),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
 end
-set(gca,'XLim',[200 1000])
+set(gca,'XLim',[200 1000],'XTick',220:100:920,'XTickLabel',100:100:800)
 
 h = legend(legh,legstr,'Location','SouthEast');
 ch = get(h,'child');
@@ -212,7 +212,7 @@ end
 
 legend(legh,legstr,'Location','SouthEast')
 
-set(gca,'XLim',[200 1000])
+set(gca,'XLim',[200 1000],'XTick',220:100:920,'XTickLabel',100:100:800)
 set(gca,'YLim',[-.015 .015])
 % plot([200 200],get(gca,'YLim'),'k--')
 
@@ -229,7 +229,7 @@ for iplot = 1:size(c_signal_single,2)
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
     plot(times_fine,basis_eval*scores_single(:,iplot),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
 end
-set(gca,'XLim',[50 200])
+set(gca,'XLim',[50 200],'XTick',60:30:180,'XTickLabel',-60:30:60)
 
 h = legend(legh,legstr,'Location','NorthWest');
 ch = get(h,'child');
@@ -404,7 +404,7 @@ for isig = 1:size(c_signal_woNharm,2)
         end
         plot(get(gca,'XLim'),[max(c_smoothed_eval(:,isig)) max(c_smoothed_eval(:,isig))],'k:')
         plot(get(gca,'XLim'),[min(c_smoothed_eval(:,isig)) min(c_smoothed_eval(:,isig))],'k:')
-        set(gca,'XLim',[200 1000])
+        set(gca,'XLim',[200 1000],'XTick',220:100:920,'XTickLabel',100:100:800)
         subplot(1,3,3)
         set(gca,'Visible','off')
         text(.1,.9,sprintf('nEdges = %g',nEdges(end)))
