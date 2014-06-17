@@ -6,17 +6,20 @@ close all
 load('./Workspaces/harm_basis_50_to_end')
 % load('./Workspaces/scores_puls')
 
-% sites_all = [64];
-sites_all = [4];
-sigs = [1:40];
+sites_all = [64];
+% sites_all = [4];
+nsigs = 36;
+removeTraces = [];
+removeTraces = [6 9 10 21 31 32 33 43];
+sigs = setdiff(1:100,removeTraces);
+sigs = sigs(1:nsigs);
 colmap = jet(length(sigs));
-colind = sigs;
-sorted_inds = sigs;
+colind = 1:nsigs;
 harmonicsRemoved = [1]; % specify harmonics that shall be removed from signal, e.g. for trend effects
 
 % myscores = scores_puls(ismember(celltypes,sites_all),1);
 myscores = edge_snr_score_pw_distdur(sites_all,[],0,1/120,'harm_basis_130722_corrected_retracked_all_cleaned_late',1);
-myscores = myscores(sigs);
+% myscores = myscores(sigs);
 [tmp sorted_inds] = sort(myscores);
 sorted_inds = sorted_inds(end:-1:1);
 
@@ -36,11 +39,11 @@ for icount = 1:length(sites_all)
     legstr{icount} = s.lig_name;
 end
 
-
 figure
 setFigure(gcf,xfac,yfac,fontsize);
 
 plot(harm_basis);legend(num2str((1:getnbasis(harm_basis))'));
+set(gca,'XLim',[50 1000],'XTick',120:100:920,'XTickLabel',0:100:800)
 c_signal_single(isinf(c_signal_single)) = nan;
 for i = 1:size(c_signal_single,2)
     if sum(isnan(c_signal_single(:,i))) > length(c_signal_single(:,i))-2
@@ -58,8 +61,6 @@ for i = 1:size(c_signal_single,2)
         c_signal_single(end-rl(end)+1:end,i) = c_signal_single(end-rl(end),i);
     end
 end
-
-
 time_range = [50 605];%getbasisrange(harm_basis);
 [~, range_ind_min] = min(abs(timestamp - time_range(1) - 5));
 [~, range_ind_max] = min(abs(timestamp - time_range(2) + 5));
@@ -83,19 +84,19 @@ setFigure(gcf,xfac,yfac,fontsize)
 
 hold on
 legh = [];
-for iplot = sigs(sorted_inds)
-    legh = [legh plot(timestamp,c_signal_single(:,iplot),'o','Color',colmap(colind(iplot),:),'LineWidth',linewidth)];
+for iplot = 1:nsigs
+    legh = [legh plot(timestamp,c_signal_single(:,sigs(iplot)),'o','Color',colmap(colind(iplot),:),'LineWidth',linewidth)];
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
-    plot(times_fine_late,data_fpca_repr_fine(iplot,:),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
+    plot(times_fine_late,data_fpca_repr_fine(sigs(iplot),:),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
 end
 
 
 xlabel('time [min]')
 ylabel('log_{10} FOXO3a [Cyt/Nuc]');
-set(gca,'XLim',time_range)
+set(gca,'XLim',[50 600],'XTick',120:100:520,'XTickLabel',0:100:400)
 
 figure
-h = heatmap(data_fpca_repr_fine(sorted_inds,:), times_fine_late, [],-.015,.015,[],'Colormap','money','UseFigureColormap',false);
+h = heatmap(data_fpca_repr_fine(sorted_inds(sigs),:), times_fine_late, [],-.015,.015,[],'Colormap','money','UseFigureColormap',false);
 drawnow
 xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'linear','extrap');
 hold on;plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
@@ -106,24 +107,33 @@ plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xlabel('time [min]')
 ylabel('Localization');
 set(gcf,'Position',[100 100 700 400]);
+
+% Old code to adjust heatmap x-ticks ... not working atm
+% xtick = round(linspace(1,length(timestamp),11));
+% xticklab_new = [50 120 200:100:700];
+% xticklab = timestamp(xtick);
+% xtick_new = interp1(timestamp(xtick),xtick,xticklab_new);
+% set(get(h2,'Parent'),'XTick',xtick_new)
+% set(get(h2,'Parent'),'XTickLabel',num2str(xticklab_new'))
+
 figure
 setFigure(gcf,xfac,yfac,fontsize)
 
 hold on
 
 legh = [];
-for isite = sigs(sorted_inds)
-    legh = [legh plot(timestamp(range_ind),c_signal_woNharm(:,isite),'o-','Color',colmap(colind(isite),:),'LineWidth',linewidth)];
+for isite = 1:nsigs
+    legh = [legh plot(timestamp(range_ind),c_signal_woNharm(:,sigs(isite)),'o-','Color',colmap(colind(isite),:),'LineWidth',linewidth)];
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
 end
 
 
 xlabel('time [min]')
 ylabel('log_{10} FOXO3a [Cyt/Nuc]');
-set(gca,'XLim',time_range)
+set(gca,'XLim',[50 600],'XTick',120:100:520,'XTickLabel',0:100:400)
 
 figure
-h2 = heatmap(c_signal_woNharm(:,sorted_inds)', timestamp(range_ind), [],-.015,.015,[],'Colormap','money','UseFigureColormap',false);
+h2 = heatmap(c_signal_woNharm(:,sorted_inds(sigs))', timestamp(range_ind), [],-.015,.015,[],'Colormap','money','UseFigureColormap',false);
 
 drawnow
 xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'linear','extrap');
