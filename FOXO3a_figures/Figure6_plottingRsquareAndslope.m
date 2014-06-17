@@ -1,6 +1,6 @@
 close all;clear all;
-load rawdata
-load('mycolormap','mycmap')
+load('./Workspaces/rawdata');
+load('./Workspaces/mycolormap','mycmap')
 testParam = 'MEKidrivenFOXO3aiqrchange';%'AKTidrivenFOXO3amediancha';%
 AllCellLines = unique(cellstr(rawdata(:,'Cell')));
 plotCells = {'HCC1806';'MCF10A'};
