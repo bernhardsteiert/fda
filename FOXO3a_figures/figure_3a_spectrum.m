@@ -88,13 +88,15 @@
 % return
 
 %% Plot
+addpath('./Functions/')
+
 thres_sorted = [0 .1 .25 .5 .75 .9 1];
 % load('fourier_signals')
 % time_range = [200 500];
 load('./Workspaces/fourier_signals_corrected_cleaned')
 time_range = [200 1475];
 
-labels = {'< 10%', '10-25%', '25-50%', '50-75%', '75-90%', '> 90%', 'Sine + white noise', 'Pink noise'};
+labels = {'< 10%', '10-25%', '25-50%', '50-75%', '75-90%', '> 90%', 'Pink noise', 'Sine + white noise'};
 colmap = hsv(length(c_signal_single));
 % colmap(1,:) = [0 0 0];
 
@@ -121,7 +123,9 @@ NFFT = 2^nextpow2(L);
 legh = [];
 legstr = {};
 
-for iplot = 1:length(c_signal_single)
+c_signal_single{8} = c_signal_single{8}*.6;
+
+for iplot = [1:6 8 7]
 
     c_signal_fft = [];
     c_signal_tmp = c_signal_single{iplot};
