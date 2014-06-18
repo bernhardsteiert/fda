@@ -1,19 +1,19 @@
 % Figure 3c: pulsatile late response in 184A1
 addpath('./Functions/')
 
-sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:70]; % Without FGF
+sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:69]; % Without FGF
 nCelltype = 6;
 possible_doses = [0 2.5 5 10 20 50 100];
 
 puls_thres = .5;
 
-load('./Workspaces/scores_puls')
+load('./Workspaces/scores_puls_corrected_retracked_all_cleaned')
 
 ylabels = {'','','log_{10} Cyt/Nuc','min'};
 
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 
-medians = nan(length(possible_doses),nCelltype,length(features));
+medians = nan(length(possible_doses),nCelltype,length(features)+1);
 highdoses = [];
 for isite = sites_all
     sprop = siteprop(isite);
@@ -26,6 +26,7 @@ for isite = sites_all
     medians(doseind,resort(sprop.lig_index),1:7) = nanmean(scores_puls(celltypes == isite & scores_puls(:,1)' > puls_thres,:),1);
     medians(doseind,resort(sprop.lig_index),8) = sum(scores_puls(celltypes == isite,1) > puls_thres)/sum(celltypes == isite);
 end
+medians(1,5,:) = nanmean(medians(1,:,:),2);
 
 resort = [2 3 4 1 6 5];
 highdoses = highdoses(resort);

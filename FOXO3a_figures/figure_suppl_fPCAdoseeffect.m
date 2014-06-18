@@ -5,13 +5,13 @@ sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:70]; % Without FGF
 nCelltype = 6;
 possible_doses = [0 2.5 5 10 20 50 100];
 
-puls_thres = .5;
+puls_thres = .3;
 
-load('./Workspaces/scores_early')
+load('./Workspaces/scores_early_5basis_noFGF')
 
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 
-medians = nan(length(possible_doses),nCelltype,3);
+medians = nan(length(possible_doses),nCelltype,5);
 highdoses = [];
 for isite = sites_all
     sprop = siteprop(isite);
@@ -22,6 +22,7 @@ for isite = sites_all
     
     medians(doseind,resort(sprop.lig_index),:) = nanmedian(scores_early(:,celltypes == isite),2);
 end
+medians(1,5,:) = nanmean(medians(1,:,:),2);
 
 resort = [2 3 4 1 6 5];
 highdoses = highdoses(resort);
@@ -100,6 +101,8 @@ title('Harmonic 3')
 set(gca,'XLim',[-.5 length(possible_doses)-.5])
 set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
 xlabel('Ligand dose [ng/ml]')
+
+return
 
 figure
 
