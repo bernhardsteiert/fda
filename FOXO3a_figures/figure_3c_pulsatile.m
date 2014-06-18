@@ -7,14 +7,14 @@ nCelltype = 6;
 possible_doses = [0 2.5 5 10 20 50 100];
 
 % puls_thres = .1;
-puls_thres = 0.7;
+puls_thres = 0.3;
 
 % load('./Workspaces/scores_puls')
-load('./Workspaces/scores_puls_corrected_all')
+load('./Workspaces/scores_puls_corrected_retracked_all_cleaned')
 
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 
-medians = nan(length(possible_doses),nCelltype,length(features));
+medians = nan(length(possible_doses),nCelltype,length(features)+1);
 highdoses = [];
 for isite = sites_all
     sprop = siteprop(isite);
@@ -27,6 +27,7 @@ for isite = sites_all
     medians(doseind,resort(sprop.lig_index),1:7) = nanmean(scores_puls(celltypes == isite & scores_puls(:,1)' > puls_thres,:),1);
     medians(doseind,resort(sprop.lig_index),8) = sum(scores_puls(celltypes == isite,1) > puls_thres)/sum(celltypes == isite);
 end
+medians(1,5,:) = nanmean(medians(1,:,:),2);
 
 resort = [2 3 4 1 6 5];
 highdoses = highdoses(resort);
@@ -54,8 +55,8 @@ end
 title('Fraction cells [%]')
 set(gca,'XLim',[-.5 length(possible_doses)-.5])
 set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
-set(gca,'YTick',0:.05:.60,'YTickLabel',0:5:60)
-set(gca,'YLim',[0 .60])
+set(gca,'YTick',0:.1:1,'YTickLabel',0:10:100)
+set(gca,'YLim',[0 1])
 xlabel('Ligand dose [ng/ml]')
 
 % subplot(nrows,ncols,2)
