@@ -1,0 +1,11 @@
+close all;clear all;
+load(['.\Workspaces\FoxO3aVSReporter']);
+x = double(M.FoxO3aCNofParental(M.Ligand=='EGF',:));
+y = double(M.FoxO3aCNofreporter(M.Ligand=='EGF',:));
+RHO = corr(x,y,'type','Pearson');
+figure;
+plot(x,y,'o','MarkerSize',6,'MarkerEdgeColor','none','MarkerFaceColor','k'); hold on;
+%plot(f,x,y);
+xlabel('Endogenous FoxO3a C/N Ratio');
+ylabel('Reporter FoxO3a C/N Ratio');
+title(['\rho =' num2str(RHO)]);
