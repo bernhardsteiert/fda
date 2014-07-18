@@ -1,10 +1,10 @@
 % Figure 1b (eyecatcher): Traces of BTC 100ng/ml in 184A1
 addpath('./Functions/')
-
+myextension = '130722_corrected_retracked_all_cleaned';
 % isite = 64;
-isite = 4;
+isite = 64;
+load(['./Workspaces/site_' num2str(isite) '_' myextension])
 
-load(['./Workspaces/site_' num2str(isite)])
 c_signal = log10(intensity);
 
 % % Interpolate (looks a bit weird --> switched off)

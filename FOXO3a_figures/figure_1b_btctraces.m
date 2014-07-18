@@ -1,10 +1,10 @@
 % Figure 1b (eyecatcher): Traces of BTC 100ng/ml in 184A1
 addpath('./Functions/')
-
+myextension = '130722_corrected_retracked_all_cleaned';
 % isite = 64;
-isite = 4;
+isite = 64;
+load(['./Workspaces/site_' num2str(isite) '_' myextension])
 
-load(['./Workspaces/site_' num2str(isite)])
 c_signal = log10(intensity);
 
 % % Interpolate (looks a bit weird --> switched off)
@@ -26,7 +26,7 @@ c_signal = log10(intensity);
 %     end
 % end
 
-time_range = [50 510];
+time_range = [50 605];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -54,7 +54,7 @@ ylabel('log_{10} FOXO3a [Cyt/Nuc]');
 ylim = [-1 1]*.04;
 plot([200 200],ylim,'k--')
 text(125,.033,{'non-stationary','(deterministic)'},'HorizontalAlignment','center')
-text(355,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
+text(400,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
 
-set(gca,'XLim',time_range,'YLim',ylim)
-set(gca,'XTick',100:100:500)
+set(gca,'XLim',[50 600],'YLim',ylim)
+set(gca,'XTick',120:100:520,'XTickLabel',0:100:400)
