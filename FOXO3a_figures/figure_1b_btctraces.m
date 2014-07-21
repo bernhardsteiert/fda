@@ -26,7 +26,7 @@ c_signal = log10(intensity);
 %     end
 % end
 
-time_range = [50 510];
+time_range = [50 1000];
 
 [tmp range_ind_min] = min(abs(timestamp - time_range(1)));
 [tmp range_ind_max] = min(abs(timestamp - time_range(2)));
@@ -45,16 +45,17 @@ ind_isite = [ind_tmp_pul_str(end:-1:end-first_n+1) ind_tmp_pul_str(round(linspac
 plot(repmat(timestamp(range_ind),1,size(c_signal,2)),c_signal(range_ind,:),'g','color',[0.7 0.7 0.7])
 hold on
 plot(repmat(timestamp(range_ind),1,2*first_n),c_signal(range_ind,ind_isite))
-% plot(timestamp(range_ind),nanmean(c_signal(range_ind,:),2),'color','k','LineWidth',2)
+plot(timestamp(range_ind),c_signal(range_ind,ind_isite(1)),'color','k','LineWidth',2)
 title([s.lig_name num2str(s.lig_dose) ' ng/ml'])
 
 xlabel('time [min]')
 ylabel('log_{10} FOXO3a [Cyt/Nuc]');
 
 ylim = [-1 1]*.04;
+xlim = get(gca,'XLim');
 plot([200 200],ylim,'k--')
 text(125,.033,{'non-stationary','(deterministic)'},'HorizontalAlignment','center')
-text(355,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
+text((xlim(2)-150)/2+150,.033,{'stationary','(stochastic)'},'HorizontalAlignment','center')
 
 set(gca,'XLim',time_range,'YLim',ylim)
-set(gca,'XTick',100:100:500)
+set(gca,'XTick',100:100:xlim(2))
