@@ -1,8 +1,8 @@
 % Figure 1b (eyecatcher): Traces of BTC 100ng/ml in 184A1
 addpath('./Functions/')
 
-% isite = 64;
-isite = 4;
+isite = 64;
+% isite = 4;
 
 load(['./Workspaces/site_' num2str(isite)])
 c_signal = log10(intensity);
