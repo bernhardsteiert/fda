@@ -43,7 +43,7 @@ for i = 1:length(sites_egfmeki)
     end
     
     plotcond = 0;
-    if s.lig_dose == egf_dose && icell > 0 
+    if ~isempty(strmatch(s.lig_name,'EGF','exact')) && s.lig_dose == egf_dose && icell > 0 
         mycol = colmap(meki_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
@@ -108,7 +108,7 @@ for i = 1:length(sites_igfakti)
     end
     
     plotcond = 0;
-    if s.lig_dose == egf_dose && icell > 0 
+    if ~isempty(strmatch(s.lig_name,'IGF','exact')) && s.lig_dose == igf_dose && icell > 0 
         mycol = colmap(akti_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
@@ -179,7 +179,7 @@ for i = 1:length(sites_egfmeki)
     end
     
     plotcond = 0;
-    if s.lig_dose == egf_dose && icell > 0 
+    if ~isempty(strmatch(s.lig_name,'EGF','exact')) && s.lig_dose == egf_dose && icell > 0 
         mycol = colmap(meki_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
@@ -229,7 +229,7 @@ for i = 1:length(sites_igfakti)
     end
     
     plotcond = 0;
-    if s.lig_dose == egf_dose && icell > 0 
+    if ~isempty(strmatch(s.lig_name,'IGF','exact')) && s.lig_dose == igf_dose && icell > 0 
         mycol = colmap(akti_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
