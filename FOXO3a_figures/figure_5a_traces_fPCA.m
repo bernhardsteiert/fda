@@ -30,6 +30,7 @@ colmap = jet(length(meki_doses));
 cell_names = {'MCF10A','184A1'};
 legh = [];
 legstr = {};
+titstr = {};
 for i = 1:length(sites_egfmeki)
     
     isite = sites_egfmeki(i);
@@ -47,7 +48,7 @@ for i = 1:length(sites_egfmeki)
         mycol = colmap(meki_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
-        titstr = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
+        titstr{icell} = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
     elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0
         mycol = [.4 .4 .4];
         plotcond = 1;
@@ -57,7 +58,7 @@ for i = 1:length(sites_egfmeki)
     if plotcond
         subplot(1,2,icell)
         hold on
-        title(titstr)
+        title(titstr{icell})
         set(gca,'XLim',[50 400],'XTick',120:100:320,'XTickLabel',0:100:200)
         set(gca,'YLim',[-.015 .025])
         
@@ -95,6 +96,7 @@ colmap = jet(length(akti_doses));
 cell_names = {'MCF10A','184A1'};
 legh = [];
 legstr = {};
+titstr = {};
 for i = 1:length(sites_igfakti)
     
     isite = sites_igfakti(i);
@@ -112,7 +114,7 @@ for i = 1:length(sites_igfakti)
         mycol = colmap(akti_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
-        titstr = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
+        titstr{icell} = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
     elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0
         mycol = [.4 .4 .4];
         plotcond = 1;
@@ -122,7 +124,7 @@ for i = 1:length(sites_igfakti)
     if plotcond
         subplot(1,2,icell)
         hold on
-        title(titstr)
+        title(titstr{icell})
         set(gca,'XLim',[50 400],'XTick',120:100:320,'XTickLabel',0:100:200)
         set(gca,'YLim',[-.025 .035])
         
@@ -166,6 +168,7 @@ colmap = jet(length(meki_doses));
 cell_names = {'MCF10A','184A1'};
 legh = [];
 legstr = {};
+titstr = {};
 for i = 1:length(sites_egfmeki)
     
     isite = sites_egfmeki(i);
@@ -183,7 +186,7 @@ for i = 1:length(sites_egfmeki)
         mycol = colmap(meki_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
-        titstr = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
+        titstr{icell} = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
     elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0
         mycol = [.4 .4 .4];
         plotcond = 1;
@@ -193,7 +196,7 @@ for i = 1:length(sites_egfmeki)
     if plotcond
         subplot(1,2,icell)
         hold on
-        title(titstr)
+        title(titstr{icell})
         plot(egfmeki_fPCA.scores_all(pcs(1),egfmeki_fPCA.celltype == isite),egfmeki_fPCA.scores_all(pcs(2),egfmeki_fPCA.celltype == isite),'o','Color',mycol,'MarkerFaceColor',mycol)
         plotEllipsis(egfmeki_fPCA.scores_all(pcs(1),egfmeki_fPCA.celltype == isite),egfmeki_fPCA.scores_all(pcs(2),egfmeki_fPCA.celltype == isite),mycol,.5);
     end
@@ -216,6 +219,7 @@ colmap = jet(length(akti_doses));
 cell_names = {'MCF10A','184A1'};
 legh = [];
 legstr = {};
+titstr = {};
 for i = 1:length(sites_igfakti)
     
     isite = sites_igfakti(i);
@@ -233,7 +237,7 @@ for i = 1:length(sites_igfakti)
         mycol = colmap(akti_doses == s.drug_dose,:);
         plotcond = 1;
         mylegstr = sprintf('%s %g',s.drug_name, s.drug_dose);
-        titstr = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
+        titstr{icell} = sprintf('%s: %s %i',cell_names{icell},s.lig_name,s.lig_dose);
     elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0
         mycol = [.4 .4 .4];
         plotcond = 1;
@@ -243,7 +247,7 @@ for i = 1:length(sites_igfakti)
     if plotcond
         subplot(1,2,icell)
         hold on
-        title(titstr)
+        title(titstr{icell})
         plot(igfakti.scores_all(pcs(1),igfakti.celltype == isite),igfakti.scores_all(pcs(2),igfakti.celltype == isite),'o','Color',mycol,'MarkerFaceColor',mycol)
         plotEllipsis(igfakti.scores_all(pcs(1),igfakti.celltype == isite),igfakti.scores_all(pcs(2),igfakti.celltype == isite),mycol,.5);
     end
