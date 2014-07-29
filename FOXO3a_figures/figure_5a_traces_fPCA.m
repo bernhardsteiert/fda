@@ -17,8 +17,6 @@ sites_igfakti = sites_igfakti_unsorted([60:-1:1 61:72]);
 extension_egfmeki = '04-18-2014';
 extension_igfakti = '03-30-2014';
 
-puls_thres = .3;
-
 meki_doses = [.1 .1/4 .1/4^2 .1/4^3 .1/4^4 0];
 akti_doses = [.5 .1 .025 .00625 0];
 
