@@ -17,133 +17,131 @@ sites_egfmeki = [6:-1:1 7:12 19:24 18:-1:13 30:-1:25 31:39 41:72];
 sites_igfakti_unsorted = 1:72;
 sites_igfakti = sites_igfakti_unsorted([60:-1:1 61:72]);
 
-puls_thres = [.2 .5; .3 .3];
+puls_thres = [.2 .5; .3 .3; nan nan];
 
 meki_doses = [.1 .1/4 .1/4^2 .1/4^3 .1/4^4 0];
 akti_doses = [.5 .1 .025 .00625 0];
 
-egfmeki_pulsing = nan(length(egf_dose),length(meki_doses)+1,2);
-igfakti_pulsing = nan(length(igf_dose),length(akti_doses)+1,2);
-egfmeki_early = egfmeki_pulsing;
-igfakti_early = igfakti_pulsing;
+egf_all_doses = [0 .16 .8 4 20 100];
+igf_all_doses = [0 .8 4 20 100];
 
-egfmeki_pulsing_gray = cell(1,2);
-egfmeki_early_gray = cell(1,2);
-igfakti_pulsing_gray = cell(1,2);
-igfakti_early_gray = cell(1,2);
+cell_names = {'MCF10A','184A1','HCC1806'};
+lig_names = {'EGF','IGF','FGF','HRG','HGF','EPR','BTC','NS'};
 
+egfmeki_pulsing = [];
+igfakti_pulsing = [];
+egfmeki_early = [];
+igfakti_early = [];
+egfmeki_celltype = [];
+igfakti_celltype = [];
+egfmeki_drugdose = [];
+igfakti_drugdose = [];
+egfmeki_ligind = [];
+igfakti_ligind = [];
+egfmeki_ligdose = [];
+igfakti_ligdose = [];
 
-for id = 1:length(egf_dose)
+for i = 1:length(sites_egfmeki)
 
-    for i = 1:length(sites_egfmeki)
+    isite = sites_egfmeki(i);
+    s = siteprop(isite,extension_egfmeki);
 
-        isite = sites_egfmeki(i);
-        s = siteprop(isite,extension_egfmeki);
+    icell = strmatch(s.celltype,cell_names,'exact');
+    idrug = s.drug_dose;
+    ilig = strmatch(s.lig_name,lig_names,'exact');
+    idose = s.lig_dose;
 
-        icell = 0;
-        if ~isempty(strmatch(s.celltype,'MCF10A','exact'))
-            icell = 1;
-        elseif ~isempty(strmatch(s.celltype,'184A1','exact'))
-            icell = 2;
-        end
+    egfmeki_pulsing = [egfmeki_pulsing sum(egfmeki.dists(egfmeki.celltype == isite) > puls_thres(icell,1)) / sum(egfmeki.celltype == isite)];
+    egfmeki_early = [egfmeki_early nanmean(egfmeki_fPCA.scores_all(pc,egfmeki.celltype == isite))];
+    egfmeki_celltype = [egfmeki_celltype icell];
+    egfmeki_drugdose = [egfmeki_drugdose idrug];
+    egfmeki_ligind = [egfmeki_ligind ilig];
+    egfmeki_ligdose = [egfmeki_ligdose idose];
 
-        if s.lig_dose == egf_dose(id) && icell > 0 && ~isempty(strmatch(s.lig_name,'EGF','exact'))
-            egfmeki_pulsing(id,s.drug_dose == meki_doses,icell) = sum(egfmeki.dists(egfmeki.celltype == isite) > puls_thres(icell,1)) / sum(egfmeki.celltype == isite);
-            egfmeki_early(id,s.drug_dose == meki_doses,icell) = nanmean(egfmeki_fPCA.scores_all(pc,egfmeki.celltype == isite));
-%         elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0  
-%             egfmeki_pulsing(id,end,icell) = sum(egfmeki.dists(egfmeki.celltype == isite) > puls_thres(icell,1)) / sum(egfmeki.celltype == isite);
-%             egfmeki_early(id,end,icell) = nanmean(egfmeki_fPCA.scores_all(pc,egfmeki.celltype == isite));
-        elseif icell > 0 && ~isempty(strmatch(s.lig_name,'EGF','exact'))
-            egfmeki_pulsing_gray{icell} = [egfmeki_pulsing_gray{icell} sum(egfmeki.dists(egfmeki.celltype == isite) > puls_thres(icell,1)) / sum(egfmeki.celltype == isite)];
-            egfmeki_early_gray{icell} = [egfmeki_early_gray{icell} nanmean(egfmeki_fPCA.scores_all(pc,egfmeki.celltype == isite))];
-        end
-
-    end
-    
 end
-
-for id = 1:length(igf_dose)
-
-    for i = 1:length(sites_igfakti)
-
-        isite = sites_igfakti(i);
-        s = siteprop(isite,extension_igfakti);
-
-        icell = 0;
-        if ~isempty(strmatch(s.celltype,'MCF10A','exact'))
-            icell = 1;
-        elseif ~isempty(strmatch(s.celltype,'184A1','exact'))
-            icell = 2;
-        end
-
-        if s.lig_dose == igf_dose(id) && icell > 0 && ~isempty(strmatch(s.lig_name,'IGF','exact'))
-            igfakti_pulsing(id,s.drug_dose == akti_doses,icell) = sum(igfakti.dists(igfakti.celltype == isite) > puls_thres(icell,2)) / sum(igfakti.celltype == isite);
-            igfakti_early(id,s.drug_dose == akti_doses,icell) = nanmean(igfakti.scores_all(pc,igfakti.celltype == isite));
-%         elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0  
-%             igfakti_pulsing(id,end,icell) = sum(igfakti.dists(igfakti.celltype == isite) > puls_thres(icell,1)) / sum(igfakti.celltype == isite);
-%             igfakti_early(id,end,icell) = nanmean(igfakti_fPCA.scores_all(pc,igfakti.celltype == isite));
-        elseif icell > 0 && ~isempty(strmatch(s.lig_name,'IGF','exact'))
-            igfakti_pulsing_gray{icell} = [igfakti_pulsing_gray{icell} sum(igfakti.dists(igfakti.celltype == isite) > puls_thres(icell,2)) / sum(igfakti.celltype == isite)];
-            igfakti_early_gray{icell} = [igfakti_early_gray{icell} nanmean(igfakti.scores_all(pc,igfakti.celltype == isite))];
-        end
-
-    end
     
+for i = 1:length(sites_igfakti)
+
+    isite = sites_igfakti(i);
+    s = siteprop(isite,extension_igfakti);
+
+    icell = strmatch(s.celltype,cell_names,'exact');
+    idrug = s.drug_dose;
+    ilig = strmatch(s.lig_name,lig_names,'exact');
+    idose = s.lig_dose;
+
+    igfakti_pulsing = [igfakti_pulsing sum(igfakti.dists(igfakti.celltype == isite) > puls_thres(icell,1)) / sum(igfakti.celltype == isite)];
+    igfakti_early = [igfakti_early nanmean(igfakti.scores_all(pc,igfakti.celltype == isite))];
+    igfakti_celltype = [igfakti_celltype icell];
+    igfakti_drugdose = [igfakti_drugdose idrug];
+    igfakti_ligind = [igfakti_ligind ilig];
+    igfakti_ligdose = [igfakti_ligdose idose];
+
 end
 
 
 
-cell_names = {'MCF10A','184A1'};
+
 for icell = 1:2
     figure
-    subplot(1,3,1)
+	hold on
     
-    plot(egfmeki_early_gray{icell},egfmeki_pulsing_gray{icell},'^','Color',[.7 .7 .7]);
-    hold on
-    colmap = jet(length(meki_doses));
-    colmap = [colmap; 0 0 0];
-    markers = {'s','o'};
-    for i = 1:size(egfmeki_early,2)
-        col = colmap(i,:);
-        legh = [];
-        legstr = {};
-        for j = 1:size(egfmeki_early,1)
-            legh = [legh plot(egfmeki_early(j,i,icell),egfmeki_pulsing(j,i,icell),markers{j},'MarkerFaceColor',col)];
-            legstr{end+1} = sprintf('EGF %g ng/mL',egf_dose(j));
+    for i = 1:length(sites_egfmeki)
+        isite = sites_egfmeki(i);
+        if egfmeki_celltype(i) == icell
+            markersize = 4 + find(egfmeki_drugdose(i) == meki_doses) * 3;
+            col2 = 1;
+            col3 = (length(egf_dose)-find(egfmeki_ligdose(i) == egf_dose)+1) / length(egf_dose);
+            doplot = 0;
+            if egfmeki_ligind(i) == strmatch('EGF',lig_names,'exact')
+                doplot = 1;
+                if ismember(egfmeki_ligdose(i),egf_dose)
+                    col1 = 2/3; % blue
+                else
+                    col1 = 2/3;
+                    col2 = 0.1;
+                    col3 = 0.7;
+                end
+            end
+            if doplot
+                col = hsv2rgb([col1 col2 col3]);
+                plot(egfmeki_early(i),egfmeki_pulsing(i),'o','MarkerSize',markersize,'MarkerFaceColor',col,'MarkerEdgeColor','none')
+            end
         end
     end
-    legend(legh,legstr)
-    title(sprintf('%s: %s / MEKi',cell_names{icell},'EGF'))
-    set(gca,'XLim',[-.2 .3],'YLim',[0 1])
+    
+    for i = 1:length(sites_igfakti)
+        isite = sites_igfakti(i);
+        if igfakti_celltype(i) == icell
+            markersize = 4 + find(igfakti_drugdose(i) == akti_doses) * 3;
+            col2 = 1;
+            col3 = (length(igf_dose)-find(igfakti_ligdose(i) == igf_dose)+1) / length(igf_dose);
+            doplot = 0;
+            if igfakti_ligind(i) == strmatch('IGF',lig_names,'exact')
+                doplot = 1;
+                if ismember(igfakti_ligdose(i),igf_dose)
+                    col1 = 0; % red
+                else
+                    col1 = 0;
+                    col2 = 0.1;
+                    col3 = 0.7;
+                end
+            end
+            if doplot
+                col = hsv2rgb([col1 col2 col3]);
+                plot(igfakti_early(i),igfakti_pulsing(i),'o','MarkerSize',markersize,'MarkerFaceColor',col,'MarkerEdgeColor','none')
+            end
+        end
+    end
+
+    title(cell_names{icell})
+    set(gca,'XLim',[-.15 .25],'YLim',[0 1])
     xlabel(sprintf('Early PC%i',pc))
     ylabel('Fraction of pulsing cells')
     
-    subplot(1,3,2)
-    
-    plot(igfakti_early_gray{icell},igfakti_pulsing_gray{icell},'^','Color',[.7 .7 .7]);
-    hold on
-    colmap = jet(length(akti_doses));
-    colmap = [colmap; 0 0 0];
-    markers = {'s','o'};
-    for i = 1:size(igfakti_early,2)
-        col = colmap(i,:);
-        legh = [];
-        legstr = {};
-        for j = 1:size(igfakti_early,1)
-            legh = [legh plot(igfakti_early(j,i,icell),igfakti_pulsing(j,i,icell),markers{j},'MarkerFaceColor',col)];
-            legstr{end+1} = sprintf('IGF %g ng/mL',igf_dose(j));
-        end
-    end
-    legend(legh,legstr)
-    title(sprintf('%s: %s / AKTi',cell_names{icell},'IGF'))
-    set(gca,'XLim',[-.2 .3],'YLim',[0 1])
-    xlabel(sprintf('Early PC%i',pc))
-    ylabel('Fraction of pulsing cells')
-    
-    subplot(1,3,3)
-    set(gca,'Visible','off','CLim',[0 1])
-    colormap(jet)
-    c = colorbar('Location','West');
-    set(c,'YTick',[0 .5 1],'YTickLabel',{'High drug dose','Medium drug dose','No Drug'});
+    h = legend({'EGF with varying [MEKi]','IGF with varying [AKTi]'});
+    legs = get(h,'Children');
+    set(legs(1),'MarkerFaceColor',[1 0 0],'MarkerSize',14)
+    set(legs(4),'MarkerFaceColor',[0 0 1],'MarkerSize',14)
     
 end
