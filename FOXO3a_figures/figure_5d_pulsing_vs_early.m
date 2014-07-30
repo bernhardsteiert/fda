@@ -128,7 +128,7 @@ for icell = 1:2
                 end
             end
             if doplot
-                col = hsv2rgb([col1 col2 col3])
+                col = hsv2rgb([col1 col2 col3]);
                 plot(igfakti_early(i),igfakti_pulsing(i),'s','MarkerSize',markersize,'MarkerFaceColor',col,'MarkerEdgeColor','none')
             end
         end
