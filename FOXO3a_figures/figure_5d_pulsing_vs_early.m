@@ -89,8 +89,8 @@ for icell = 1:2
     for i = 1:length(sites_egfmeki)
         isite = sites_egfmeki(i);
         if egfmeki_celltype(i) == icell
-            markersize = 4 + find(egfmeki_drugdose(i) == meki_doses) * 3;
-            col2 = 1;
+            markersize = 4 + find(egfmeki_drugdose(i) == meki_doses) * 4;
+            col2 = .7;
             col3 = (length(egf_dose)-find(egfmeki_ligdose(i) == egf_dose)+1) / length(egf_dose);
             doplot = 0;
             if egfmeki_ligind(i) == strmatch('EGF',lig_names,'exact')
@@ -99,7 +99,7 @@ for icell = 1:2
                     col1 = 2/3; % blue
                 else
                     col1 = 2/3;
-                    col2 = 0.1;
+                    col2 = 0;
                     col3 = 0.7;
                 end
             end
@@ -113,8 +113,8 @@ for icell = 1:2
     for i = 1:length(sites_igfakti)
         isite = sites_igfakti(i);
         if igfakti_celltype(i) == icell
-            markersize = 4 + find(igfakti_drugdose(i) == akti_doses) * 3;
-            col2 = 1;
+            markersize = 4 + find(igfakti_drugdose(i) == akti_doses) * 4;
+            col2 = .7;
             col3 = (length(igf_dose)-find(igfakti_ligdose(i) == igf_dose)+1) / length(igf_dose);
             doplot = 0;
             if igfakti_ligind(i) == strmatch('IGF',lig_names,'exact')
@@ -123,13 +123,13 @@ for icell = 1:2
                     col1 = 0; % red
                 else
                     col1 = 0;
-                    col2 = 0.1;
+                    col2 = 0;
                     col3 = 0.7;
                 end
             end
             if doplot
-                col = hsv2rgb([col1 col2 col3]);
-                plot(igfakti_early(i),igfakti_pulsing(i),'o','MarkerSize',markersize,'MarkerFaceColor',col,'MarkerEdgeColor','none')
+                col = hsv2rgb([col1 col2 col3])
+                plot(igfakti_early(i),igfakti_pulsing(i),'s','MarkerSize',markersize,'MarkerFaceColor',col,'MarkerEdgeColor','none')
             end
         end
     end
@@ -139,9 +139,11 @@ for icell = 1:2
     xlabel(sprintf('Early PC%i',pc))
     ylabel('Fraction of pulsing cells')
     
-    h = legend({'EGF with varying [MEKi]','IGF with varying [AKTi]'});
+    h = legend({sprintf('EGF %i',egf_dose(1)),sprintf('EGF %i',egf_dose(2)),sprintf('IGF %i',igf_dose(1)),sprintf('IGF %i',igf_dose(2)),});
     legs = get(h,'Children');
-    set(legs(1),'MarkerFaceColor',[1 0 0],'MarkerSize',14)
-    set(legs(4),'MarkerFaceColor',[0 0 1],'MarkerSize',14)
+    set(legs(1),'MarkerFaceColor',[.5 .15 .15],'Marker','s','MarkerSize',14)
+    set(legs(4),'MarkerFaceColor',[1 .3 .3],'Marker','s','MarkerSize',14)
+    set(legs(7),'MarkerFaceColor',[.15 .15 .5],'Marker','o','MarkerSize',14)
+    set(legs(10),'MarkerFaceColor',[.3 .3 1],'Marker','o','MarkerSize',14)
     
 end
