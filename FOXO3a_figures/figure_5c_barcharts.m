@@ -85,8 +85,8 @@ for icell = 1:2
     figure
     subplot(1,2,1)
     h = bar(fliplr(egfmeki_pulsing(:,:,icell))');
-    set(h(1),'FaceColor',[0 0 1])
-    set(h(2),'FaceColor',[1 0 0])
+    set(h(1),'FaceColor',[.3 .3 1])
+    set(h(2),'FaceColor',[.15 .15 .5])
     hold on
     for ih = 1:length(h)
         x1 = get(get(h(ih),'children'), 'xdata');
@@ -108,8 +108,8 @@ for icell = 1:2
     
     subplot(1,2,2)
     h = bar(fliplr(igfakti_pulsing(:,:,icell))');
-    set(h(1),'FaceColor',[0 0 1])
-    set(h(2),'FaceColor',[1 0 0])
+    set(h(1),'FaceColor',[1 .3 .3])
+    set(h(2),'FaceColor',[.5 .15 .15])
     hold on
     for ih = 1:length(h)
         x1 = get(get(h(ih),'children'), 'xdata');
