@@ -286,3 +286,33 @@ ylabel('signal')
 
 set(gca,'XTick',[])
 set(gca,'YTick',[])
+
+
+figure
+hold on
+
+kswidth = 10;
+
+highinds = ismember(celltypes,highdoses);
+[dists_boxcox,lambda,c] = boxcox(scores_puls(highinds,1));
+thres_trafo = boxcox_apply(puls_thres,lambda,c);
+
+legh = [];
+legstr = {};
+for isite = highdoses([1 6 5])
+    s = siteprop(isite);
+
+    [f,xi] = ksdensity(dists_boxcox(celltypes(highinds) == isite),'width',range(scores_puls(:,1))./kswidth);
+    legh = [legh plot(xi,f,'Color',colmap(isite == highdoses,:))];
+
+    legstr{end+1} = s.lig_name;
+    
+end
+set(gca,'XLim',[min(dists_boxcox) max(dists_boxcox)]+[-.2 .2]*range(dists_boxcox))
+plot([thres_trafo thres_trafo],get(gca,'YLim'),'k--')
+% set(gca,'XLim',[-6 2])
+% title(s.celltype)
+legend(legh,legstr)
+
+xlabel('pulsatory score')
+ylabel('probability density')
