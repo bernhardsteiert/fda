@@ -5,7 +5,8 @@ sites_all = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:69]; % Without FGF
 
 % load('./Workspaces/scores_early')
 % load('./Workspaces/scores_early_corrected_all')
-load('./Workspaces/scores_early_5basis_noFGF')
+% load('./Workspaces/scores_early_5basis_noFGF')
+load('./Workspaces/scores_early_5basis_noFGF_newBTC')
 
 
 outliers = logical(zeros(size(celltypes)));
