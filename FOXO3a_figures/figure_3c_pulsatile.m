@@ -10,7 +10,7 @@ possible_doses = [0 2.5 5 10 20 50 100];
 puls_thres = 0.3;
 
 % load('./Workspaces/scores_puls')
-load('./Workspaces/scores_puls_corrected_retracked_all_cleaned')
+load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC')
 
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 
