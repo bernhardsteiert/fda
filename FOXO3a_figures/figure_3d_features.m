@@ -55,15 +55,16 @@ for iplot = 1:length(myfeat)
         isite = highdoses(resort2(irow));
         sprop = siteprop(isite);
         legstr{isite == highdoses} = sprop.lig_name(1:3);
-        legh = [legh plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)];
+        myind = ~isnan(medians(:,irow,icol));
+        legh = [legh plot(0:sum(myind)-1,medians(myind,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)];
 
-    %     [axb s] = polyfitZero(1:length(possible_doses)-1,medians(2:end,irow,icol)'-mean(medians(1,:,icol)),1);
-    %     legh = [legh plot(0:length(possible_doses)-1,(0:length(possible_doses)-1)*axb(1) + mean(medians(1,:,icol)),'-','Color',colmap(irow,:),'LineWidth',2)];
+    %     [axb s] = polyfitZero(1:sum(myind)-1,medians(2:end,irow,icol)'-mean(medians(1,:,icol)),1);
+    %     legh = [legh plot(0:sum(myind)-1,(0:sum(myind)-1)*axb(1) + mean(medians(1,:,icol)),'-','Color',colmap(irow,:),'LineWidth',2)];
 
-        [axb s] = polyfit(0:length(possible_doses)-1,medians(:,irow,icol)',1);
-        plot(0:length(possible_doses)-1,(0:length(possible_doses)-1)*axb(1) + axb(2),'-','Color',colmap(irow,:),'LineWidth',2);
+        [axb s] = polyfit(0:sum(myind)-1,medians(myind,irow,icol)',1);
+        plot(0:sum(myind)-1,(0:sum(myind)-1)*axb(1) + axb(2),'-','Color',colmap(irow,:),'LineWidth',2);
 
-        plot([0 length(possible_doses)-1],[nanmean(scores_puls(scores_puls(:,1)' <= puls_thres,icol),1) nanmean(scores_puls(scores_puls(:,1)' <= puls_thres,icol),1)],'k--','LineWidth',2)
+        plot([0 sum(myind)-1],[nanmean(scores_puls(scores_puls(:,1)' <= puls_thres,icol),1) nanmean(scores_puls(scores_puls(:,1)' <= puls_thres,icol),1)],'k--','LineWidth',2)
     end
     title(features{icol} )
     set(gca,'XLim',[-.5 length(possible_doses)-.5])
