@@ -1,4 +1,8 @@
 % Figure 5a: Traces and fPCA for varying AKTi / MEKi dose
+onlyellipses = 0; % Only plot ellipses for colored conditions; If onlyellipses = 0 also dots are plotted
+markersizecolored = 6; % Specify size of colored markers
+markersizegray = 3; % Specify size of gray background markers
+
 egf_dose = 20; % Choose EGF dose here
 igf_dose = 100; % Same for IGF
 
@@ -158,7 +162,7 @@ figure
 
 for isb = 1:2
     subplot(1,2,isb)
-    plot(egfmeki_fPCA.scores_all(pcs(1),:),egfmeki_fPCA.scores_all(pcs(2),:),'.','Color',[.7 .7 .7])
+    plot(egfmeki_fPCA.scores_all(pcs(1),:),egfmeki_fPCA.scores_all(pcs(2),:),'o','Color',[.7 .7 .7],'MarkerFaceColor',[.7 .7 .7],'MarkerSize',markersizegray)
     set(gca,'XLim',[-.25 .25],'YLim',[-.1 .1])
 end
 
@@ -195,7 +199,9 @@ for i = 1:length(sites_egfmeki)
         subplot(1,2,icell)
         hold on
         title(titstr{icell})
-        plot(egfmeki_fPCA.scores_all(pcs(1),egfmeki_fPCA.celltype == isite),egfmeki_fPCA.scores_all(pcs(2),egfmeki_fPCA.celltype == isite),'o','Color',mycol,'MarkerFaceColor',mycol)
+        if ~onlyellipses
+            plot(egfmeki_fPCA.scores_all(pcs(1),egfmeki_fPCA.celltype == isite),egfmeki_fPCA.scores_all(pcs(2),egfmeki_fPCA.celltype == isite),'o','Color',mycol,'MarkerFaceColor',mycol,'MarkerSize',markersizecolored)
+        end
         plotEllipsis(egfmeki_fPCA.scores_all(pcs(1),egfmeki_fPCA.celltype == isite),egfmeki_fPCA.scores_all(pcs(2),egfmeki_fPCA.celltype == isite),mycol,.5);
     end
 end
@@ -209,7 +215,7 @@ figure
 
 for isb = 1:2
     subplot(1,2,isb)
-    plot(igfakti.scores_all(pcs(1),:),igfakti.scores_all(pcs(2),:),'.','Color',[.7 .7 .7])
+    plot(igfakti.scores_all(pcs(1),:),igfakti.scores_all(pcs(2),:),'o','Color',[.7 .7 .7],'MarkerFaceColor',[.7 .7 .7],'MarkerSize',markersizegray)
     set(gca,'XLim',[-.8 .5],'YLim',[-.2 .2])
 end
 
@@ -246,7 +252,9 @@ for i = 1:length(sites_igfakti)
         subplot(1,2,icell)
         hold on
         title(titstr{icell})
-        plot(igfakti.scores_all(pcs(1),igfakti.celltype == isite),igfakti.scores_all(pcs(2),igfakti.celltype == isite),'o','Color',mycol,'MarkerFaceColor',mycol)
+        if ~onlyellipses
+            plot(igfakti.scores_all(pcs(1),igfakti.celltype == isite),igfakti.scores_all(pcs(2),igfakti.celltype == isite),'o','Color',mycol,'MarkerFaceColor',mycol,'MarkerSize',markersizecolored)
+        end
         plotEllipsis(igfakti.scores_all(pcs(1),igfakti.celltype == isite),igfakti.scores_all(pcs(2),igfakti.celltype == isite),mycol,.5);
     end
 end
