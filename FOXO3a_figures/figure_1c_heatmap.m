@@ -3,15 +3,16 @@ addpath('./Functions/')
 
 close all
 
-load('./Workspaces/harm_basis_50_to_end')
+load('./Workspaces/harm_basis_50_to_600')
 % load('./Workspaces/scores_puls')
 myextension = '130722_corrected_retracked_all_cleaned';
 
 sites_all = [64];
 % sites_all = [4];
 nsigs = 40;
-removeTraces = [];
-removeTraces = [6 7 9 14 15 24 25 29 30 32 37 45 52];
+% removeTraces = [];
+removeTraces = [5];
+% removeTraces = [6 7 9 14 15 24 25 29 30 32 37 45 52];
 sigs = setdiff(1:100,removeTraces);
 sigs = sigs(1:nsigs);
 colmap = jet(length(sigs));
@@ -97,7 +98,15 @@ ylabel('log_{10} FOXO3a [Cyt/Nuc]');
 set(gca,'XLim',[50 600],'XTick',120:100:520,'XTickLabel',0:100:400)
 
 figure
-h = heatmap(data_fpca_repr_fine(sorted_inds(sigs),:), times_fine_late, [],-.015,.015,[],'Colormap','money','UseFigureColormap',false);
+colmap2 = [];
+for i = 1:250
+    colmap2 = [colmap2; hsv2rgb([0 1-(i-1)/250 1])];
+end
+colmap2 = [colmap2; [1 1 1]];
+for i = 1:250
+    colmap2 = [colmap2; hsv2rgb([2/3 i/250 1])];
+end
+h = heatmap(data_fpca_repr_fine(sorted_inds(sigs),:), times_fine_late, [],-.015,.015,[],'Colormap',colmap2,'UseFigureColormap',false);
 drawnow
 xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'linear','extrap');
 hold on;plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
@@ -134,7 +143,7 @@ ylabel('log_{10} FOXO3a [Cyt/Nuc]');
 set(gca,'XLim',[50 600],'XTick',120:100:520,'XTickLabel',0:100:400)
 
 figure
-h2 = heatmap(c_signal_woNharm(:,sorted_inds(sigs))', timestamp(range_ind), [],-.015,.015,[],'Colormap','money','UseFigureColormap',false);
+h2 = heatmap(c_signal_woNharm(:,sorted_inds(sigs))', timestamp(range_ind), [],-.015,.015,[],'Colormap',colmap2,'UseFigureColormap',false);
 
 drawnow
 xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'linear','extrap');
