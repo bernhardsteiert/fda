@@ -7,7 +7,7 @@ possible_doses = [0 2.5 5 10 20 50 100];
 
 puls_thres = .5;
 
-load('./Workspaces/scores_puls_corrected_retracked_all_cleaned')
+load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC')
 
 ylabels = {'','','log_{10} Cyt/Nuc','min'};
 

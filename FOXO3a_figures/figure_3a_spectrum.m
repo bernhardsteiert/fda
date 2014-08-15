@@ -83,7 +83,7 @@
 % % c_signal_single{6} = c_signal;
 % % c_signal_single{6}(:) = .01*pinknoise2(length(c_signal(:)))';
 % 
-% save('fourier_signals_corrected_cleaned','timestamp','c_signal_single','celltype')
+% save('fourier_signals_corrected_cleaned_newBTC','timestamp','c_signal_single','celltype')
 % 
 % return
 
@@ -93,7 +93,7 @@ addpath('./Functions/')
 thres_sorted = [0 .1 .25 .5 .75 .9 1];
 % load('fourier_signals')
 % time_range = [200 500];
-load('./Workspaces/fourier_signals_corrected_cleaned')
+load('./Workspaces/fourier_signals_corrected_cleaned_newBTC')
 time_range = [200 1475];
 
 labels = {'< 10%', '10-25%', '25-50%', '50-75%', '75-90%', '> 90%', 'Pink noise', 'Sine + white noise'};

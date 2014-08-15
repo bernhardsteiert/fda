@@ -7,7 +7,7 @@ possible_doses = [0 2.5 5 10 20 50 100];
 
 puls_thres = .3;
 
-load('./Workspaces/scores_early_5basis_noFGF')
+load('./Workspaces/scores_early_5basis_noFGF_newBTC')
 
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 

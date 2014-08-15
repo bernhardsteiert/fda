@@ -1,5 +1,5 @@
 % Figure 3b: fPCA of early response in 184A1
-load('./Workspaces/scores_early_5basis_noFGF.mat')
+load('./Workspaces/scores_early_5basis_noFGF_newBTC.mat')
 
 sites_all = [4:10; 17:-1:11; 37:-1:31; 44:50; 57:-1:51; 64:69 10];
 sites_high = [4 17 37 44 57 64];

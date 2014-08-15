@@ -15,12 +15,15 @@ fontsize = 16;
 setFigure(f1,xfac,yfac,fontsize)
 
 hist(mi_boot,15)
+h = findobj(gca,'Type','patch');
+set(h,'FaceColor',[.7 .7 .7])
 ylim = get(gca,'YLim');
 mean_boot = mean(mi_boot);
 std_boot = std(mi_boot);
-legh(1) = plot([mean_boot-3*std_boot mean_boot+3*std_boot],.95*ylim(2)*[1 1],'LineWidth',2);
-plot([mean_boot-3*std_boot mean_boot-3*std_boot],ylim,':')
-plot([mean_boot+3*std_boot mean_boot+3*std_boot],ylim,':')
+legh(1) = plot([mean_boot-3*std_boot mean_boot+3*std_boot],.95*ylim(2)*[1 1],'LineWidth',2,'Color',[.7 .7 .7]);
+plot([mean_boot-3*std_boot mean_boot-3*std_boot],ylim,':','Color',[.7 .7 .7])
+plot([mean_boot+3*std_boot mean_boot+3*std_boot],ylim,':','Color',[.7 .7 .7])
+text(mean_boot-2*std_boot,.975*ylim(2),'95% CI')
 legh(2) = plot([mi_pc1_dists mi_pc1_dists],ylim,'g','LineWidth',2);
 legh(3) = plot([mi_pc2_dists mi_pc2_dists],ylim,'m','LineWidth',2);
 xlim5 = get(gca,'XLim');
