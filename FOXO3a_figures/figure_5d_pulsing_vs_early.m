@@ -94,13 +94,14 @@ for icell = 1:2
             col3 = (length(egf_dose)-find(egfmeki_ligdose(i) == egf_dose)+1) / length(egf_dose);
             doplot = 0;
             if egfmeki_ligind(i) == strmatch('EGF',lig_names,'exact')
-                doplot = 1;
+%                 doplot = 1;
                 if ismember(egfmeki_ligdose(i),egf_dose)
+                    doplot = 1;
                     col1 = 2/3; % blue
-                else
-                    col1 = 2/3;
-                    col2 = 0;
-                    col3 = 0.7;
+%                 else
+%                     col1 = 2/3;
+%                     col2 = 0;
+%                     col3 = 0.7;
                 end
             end
             if doplot
@@ -118,13 +119,14 @@ for icell = 1:2
             col3 = (length(igf_dose)-find(igfakti_ligdose(i) == igf_dose)+1) / length(igf_dose);
             doplot = 0;
             if igfakti_ligind(i) == strmatch('IGF',lig_names,'exact')
-                doplot = 1;
+%                 doplot = 1;
                 if ismember(igfakti_ligdose(i),igf_dose)
+                    doplot = 1;
                     col1 = 0; % red
-                else
-                    col1 = 0;
-                    col2 = 0;
-                    col3 = 0.7;
+%                 else
+%                     col1 = 0;
+%                     col2 = 0;
+%                     col3 = 0.7;
                 end
             end
             if doplot
