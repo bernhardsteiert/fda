@@ -1,8 +1,8 @@
 % Figure box: Explanation of fPCA
 addpath('./Functions/')
 close all
-load('./Workspaces/harm_basis_fPCA_5basis_noFGF')
-load('./Workspaces/scores_early_5basis_noFGF')
+load('./Workspaces/harm_basis_fPCA_5basis_noFGF_newBTC_rot')
+load('./Workspaces/scores_early_5basis_noFGF_newBTC')
 myextension = '130722_corrected_retracked_all_cleaned';
 
 propvar = squeeze(sum(harmscr.^2));
@@ -12,7 +12,7 @@ propvar = round(propvar*1e4)./1e2;
 
 sites_all = [17 57 64];
 % sigs = [26 6 17]; % IGF 26 looks OK; EPR 6 looks OK; BTC 32 has transient shape + pulsing (75 is maybe better; 17 has some of everything)
-sigs = [26 17 56]; % Alternatives: IGF 8 or 10 or 11 or 20; EPR 17; BTC 1 or 7 or 29 or 52
+sigs = [26 17 99];
 colind = [1 6 5];
 basisind = 1:3; % Only use basis 1-3 to fit data
 

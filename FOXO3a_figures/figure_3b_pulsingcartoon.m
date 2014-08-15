@@ -3,16 +3,16 @@ addpath('./Functions/')
 
 close all
 
-load('./Workspaces/harm_basis_fPCA_5basis_noFGF')
+load('./Workspaces/harm_basis_fPCA_5basis_noFGF_newBTC_rot')
 harm_basis_fPCA = harm_basis;
-load('./Workspaces/harm_basis_130722_corrected_retracked_all_late')
-load('./Workspaces/scores_early_5basis_noFGF')
+load('./Workspaces/harm_basis_130722_corrected_retracked_all_cleaned_late_newBTC')
+load('./Workspaces/scores_early_5basis_noFGF_newBTC')
 
 myextension = '130722_corrected_retracked_all_cleaned';
 
 sites_all = [17 57 64];
 % sigs = [26 6 17]; % IGF 26 looks OK; EPR 6 looks OK; BTC 32 has transient shape + pulsing (75 is maybe better; 17 has some of everything)
-sigs = [26 17 56]; % Alternatives: IGF 8 or 10 or 11 or 20; EPR 17; BTC 1 or 7 or 29 or 52
+sigs = [26 17 99];
 colind = [1 6 5];
 
 colmap = [linspace(0,1,7)' ones(7,1) ones(7,1)*.9];
