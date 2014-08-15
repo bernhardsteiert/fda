@@ -1,7 +1,7 @@
 % Figure supplementary: %variance explained vs. #basis functions
 addpath('./Functions/')
 
-load('./Workspaces/harm_basis_fPCA_5basis_noFGF')
+load('./Workspaces/harm_basis_fPCA_5basis_noFGF_newBTC_rot')
 
 f1 = figure;
 
