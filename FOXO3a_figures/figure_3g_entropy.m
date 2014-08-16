@@ -1,5 +1,5 @@
 % Fig. 3G: Mutual information of early PCs and pulsing decision
-load('./Workspaces/mi_boot_binary')
+load('./Workspaces/mi_boot_binary_newBTC')
 
 rng(0)
 n = 10000;
