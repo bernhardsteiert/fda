@@ -11,6 +11,8 @@ puls_thres = 0.3;
 
 % load('./Workspaces/scores_puls')
 load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC')
+late_ws = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC');
+early_ws = load('./Workspaces/scores_early_5basis_noFGF_newBTC');
 
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 
@@ -295,7 +297,7 @@ kswidth = 20;
 
 unstim = [10 11 31 50 51];
 for i = 2:length(unstim)
-    siteprop(unstim(i))
+    siteprop(unstim(i));
     celltypes(celltypes == unstim(i)) = unstim(1);
 end
 highdoses = [highdoses unstim(1)];
@@ -323,3 +325,56 @@ legend(legh,legstr)
 
 xlabel('pulsatory score')
 ylabel('probability density')
+
+% ------------------------------------------
+% Early and late scores are not aligned yet; Sorting is done in the following
+
+sites_all_early = [4:17 31:37 44:57 64:69];
+sites_all_late = [4:10 17:-1:11 37:-1:31 44:50 57:-1:51 64:69];
+
+sites_all_sorted = sort(sites_all_early);
+dists_sorted = nan*dists_boxcox;
+early_sorted = nan*early_ws.scores_early;
+celltypes_sorted = nan*celltypes;
+
+myind = 1;
+for isite = 1:length(sites_all_sorted)
+    myind2 = late_ws.celltypes == sites_all_sorted(isite);
+    dists_sorted(myind:myind+sum(myind2)-1) = dists_boxcox(myind2);
+    early_sorted(:,myind:myind+sum(myind2)-1) = early_ws.scores_early(:,early_ws.celltypes == sites_all_sorted(isite));
+    celltypes_sorted(myind:myind+sum(myind2)-1) = late_ws.celltypes(myind2);
+    myind = myind+sum(myind2);
+end
+
+sites_labels = {'EGF','IGF','HRG','HGF','EPR','BTC'};
+
+highdoses = 1:6;
+colmap = [linspace(0,1,length(highdoses)+1)' ones(length(highdoses)+1,1) ones(length(highdoses)+1,1)*.9];
+colmap = hsv2rgb(colmap(1:end-1,:));
+ligand_dose = [100 50 20 10 5 2.5 0];
+
+resort = [2 3 4 1 6 5];
+for ilig2 = 1:6
+    subplot(3,2,ilig2)
+    ilig = resort(ilig2);
+    plot(early_sorted(2,:),dists_sorted,'.','Color',[.7 .7 .7])
+    hold on
+    
+    isBTC = ilig == 6;
+    if mod(floor((sites_all_sorted((ilig-1)*7+1)-1)/10),2)
+        loopind = sites_all_sorted((ilig-1)*7+1):sites_all_sorted(ilig*(7)-isBTC);
+    else
+        loopind = sites_all_sorted(ilig*(7)-isBTC):-1:sites_all_sorted((ilig-1)*7+1);
+    end
+    for isite = loopind
+        s = siteprop(isite);
+        mycol = rgb2hsv(colmap(ilig2,:));
+        mycol(3) = find(s.lig_dose == ligand_dose) / length(ligand_dose);
+        mycol = hsv2rgb(mycol);
+        plot(early_sorted(2,celltypes_sorted == isite),dists_sorted(celltypes_sorted == isite),'.','Color',mycol)
+        title(sites_labels{ilig})
+    end
+    
+    xlabel('Early PC2')
+    ylabel('Pulsatory score')
+end
