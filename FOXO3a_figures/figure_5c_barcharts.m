@@ -78,6 +78,56 @@ for id = 1:length(igf_dose)
     
 end
 
+zeromeki = find(meki_doses == 0);
+zeroakti = find(akti_doses == 0);
+
+egfmeki_pvals = nan*egfmeki_pulsing;
+igfakti_pvals = nan*igfakti_pulsing;
+
+for iligdose = 1:size(egfmeki_pulsing,1)
+    for icell = 1:2
+        refcond_mean = egfmeki_pulsing(iligdose,zeromeki,icell); % MEAN2
+        refcond_std = egfmeki_pulsing_bd(2*iligdose,zeromeki,icell) - egfmeki_pulsing_bd(2*iligdose-1,zeromeki,icell); % STD2
+        for idrugdose = 1:size(egfmeki_pulsing,2)
+            if idrugdose ~= zeromeki
+%                 egfmeki_pulsing(iligdose,idrugdose,icell); % MEAN1
+%                 egfmeki_pulsing_bd(2*iligdose,idrugdose,icell) - egfmeki_pulsing_bd(2*iligdose-1,idrugdose,icell); % STD1
+
+                egfmeki_pvals(iligdose,idrugdose,icell) = 1-cdf('t',abs((refcond_mean - egfmeki_pulsing(iligdose,idrugdose,icell)) / sqrt((refcond_std)^2 + (egfmeki_pulsing_bd(2*iligdose,idrugdose,icell) - egfmeki_pulsing_bd(2*iligdose-1,idrugdose,icell))^2)),1e6);
+            end
+        end
+    end
+end
+
+for iligdose = 1:size(igfakti_pulsing,1)
+    for icell = 1:2
+        refcond_mean = igfakti_pulsing(iligdose,zeroakti,icell); % MEAN2
+        refcond_std = igfakti_pulsing_bd(2*iligdose,zeroakti,icell) - igfakti_pulsing_bd(2*iligdose-1,zeroakti,icell); % STD2
+        for idrugdose = 1:size(igfakti_pulsing,2)
+            if idrugdose ~= zeroakti
+%                 igfakti_pulsing(iligdose,idrugdose,icell); % MEAN1
+%                 igfakti_pulsing_bd(2*iligdose,idrugdose,icell) - igfakti_pulsing_bd(2*iligdose-1,idrugdose,icell); % STD1
+
+                igfakti_pvals(iligdose,idrugdose,icell) = 1-cdf('t',abs((refcond_mean - igfakti_pulsing(iligdose,idrugdose,icell)) / sqrt((refcond_std)^2 + (igfakti_pulsing_bd(2*iligdose,idrugdose,icell) - igfakti_pulsing_bd(2*iligdose-1,idrugdose,icell))^2)),1e6);
+            end
+        end
+    end
+end
+
+egfmeki_signif1 = egfmeki_pvals < .1;
+egfmeki_signif1 = double(egfmeki_signif1);
+egfmeki_signif1(egfmeki_signif1 == 0) = nan;
+egfmeki_signif2 = egfmeki_pvals < .05;
+egfmeki_signif2 = double(egfmeki_signif2);
+egfmeki_signif2(egfmeki_signif2 == 0) = nan;
+igfakti_signif1 = igfakti_pvals < .01;
+igfakti_signif1 = double(igfakti_signif1);
+igfakti_signif1(igfakti_signif1 == 0) = nan;
+igfakti_signif2 = igfakti_pvals < .05;
+igfakti_signif2 = double(igfakti_signif2);
+igfakti_signif2(igfakti_signif2 == 0) = nan;
+    
+
 cell_names = {'MCF10A','184A1'};
 ylim = [0 1; 0 1];
 for icell = 1:2
@@ -93,6 +143,11 @@ for icell = 1:2
         x1 = mean(x1([1 3],:));
         h1 = errorbar(x1,fliplr(egfmeki_pulsing(ih,:,icell)),fliplr(egfmeki_pulsing(ih,:,icell)-egfmeki_pulsing_bd(1+2*(ih-1),:,icell)),fliplr(egfmeki_pulsing_bd(2*ih,:,icell)-egfmeki_pulsing(ih,:,icell)),'k');
         set(h1,'linestyle','none')
+        plot(x1,fliplr(egfmeki_signif1(ih,:,icell)) * .85,'k*')
+        plot(x1,fliplr(egfmeki_signif2(ih,:,icell)) * .87,'k*')
+        
+        x1
+        fliplr(egfmeki_signif1(ih,:,icell))
     end
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 length(meki_doses)+1.5])
@@ -116,6 +171,8 @@ for icell = 1:2
         x1 = mean(x1([1 3],:));
         h1 = errorbar(x1,fliplr(igfakti_pulsing(ih,:,icell)),fliplr(igfakti_pulsing(ih,:,icell)-igfakti_pulsing_bd(1+2*(ih-1),:,icell)),fliplr(igfakti_pulsing_bd(2*ih,:,icell)-igfakti_pulsing(ih,:,icell)),'k');
         set(h1,'linestyle','none')
+        plot(x1,fliplr(igfakti_signif1(ih,:,icell)) * .85,'k*')
+        plot(x1,fliplr(igfakti_signif2(ih,:,icell)) * .87,'k*')
     end
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 length(akti_doses)+1.5])
