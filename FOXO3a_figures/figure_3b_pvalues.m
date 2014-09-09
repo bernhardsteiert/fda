@@ -1,13 +1,15 @@
 % Figure 3b: fPCA of early response in 184A1
 load('./Workspaces/scores_early_5basis_noFGF_newBTC.mat')
 
-sites_all = [4:10; 17:-1:11; 37:-1:31; 44:50; 57:-1:51; 64:69 10];
+sites_all = [17:-1:11; 37:-1:31; 44:50; 4:10; 64:69 10; 57:-1:51];
 sites_high = [4 17 37 44 57 64];
 sites_unst = [10 11 31 50 51];
 
 myind = ~isnan(scores_early(1,:));
 
 ps = 1:3;
+
+colmap = hsv(size(sites_all,1));
 
 for ipc = ps
     pvals_all = nan(size(sites_all));
@@ -16,18 +18,20 @@ for ipc = ps
         pvals_all(i) = ranksum(scores_early(ipc,ismember(celltypes,sites_unst) & myind),scores_early(ipc,celltypes == isite & myind));
     end
 
-    colmap = lines(size(sites_all,1));
     figure
     hold on
     legh = [];
     legstr = {};
     for isite = 1:size(sites_all,1)
-        legh = [legh plot(pvals_all(isite,:),'Color',colmap(isite,:))];
+        legh = [legh plot(pvals_all(isite,:),'o-','Color',colmap(isite,:))];
         s = siteprop(sites_all(isite,1));
         legstr{end+1} = s.lig_name;
     end
     legend(legh,legstr,'Location','SouthWest')
-    plot(get(gca,'XLim'),[1e-3 1e-3],'k--')
+    plot(get(gca,'XLim'),[1e-10 1e-10],'k--')
+    if ipc == 1
+        set(gca,'YLim',[1e-15 1])
+    end
     set(gca,'YScale','log','XDir','reverse')
     title(sprintf('PC %i',ipc))
     xlabel('ligand dose')
