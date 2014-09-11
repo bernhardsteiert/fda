@@ -115,44 +115,52 @@ end
 % set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
 % xlabel('Ligand dose [ng/ml]')
 
-% figure
-% 
+figure
+
 % subplot(nrows,ncols,1)
-% 
-% hold on
-% icol = 8;
-% legh = [];
-% colmap = [linspace(0,1,length(highdoses)+1)' ones(length(highdoses)+1,1) ones(length(highdoses)+1,1)*.9];
-% colmap = hsv2rgb(colmap(1:end-1,:));
-% markers = {'o','s','v','d','^','>'};
-% f = @(p,x) p(1) + (p(2)-p(1)) ./ (1 + 10.^((p(3)-x)*p(4)));
-% for irow = 1:length(highdoses)
-%     plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)
-%     
-%     % Fix lower asymptotic to mean(medians)
-% %     qFit = logical([0 1 1 1]);
-% %     pFix = mean(medians(1,:,icol));
-% %     pinit = [medians(end,irow,icol) length(possible_doses)/2 .1];
-% %     optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf .2],[Inf Inf Inf],optimset('Display','off'));
-% 
-%     % Fill all parameters
-%     qFit = logical([1 1 1 1]);
-%     pFix = [];
-%     pinit = [medians(1,irow,icol) medians(end,irow,icol) length(possible_doses)/2 .1];
-%     optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf -Inf .2],[Inf Inf Inf Inf],optimset('Display','off'));
-%     
-%     % Plotting
-%     p = nan(size(qFit));
-%     p(qFit) = optRes;
-%     p(~qFit) = pFix;
-%     legh = [legh plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2)];
-% end
-% title('Fraction cells [%]')
-% set(gca,'XLim',[-.5 length(possible_doses)-.5])
-% set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
-% set(gca,'YTick',0:.05:.40,'YTickLabel',0:5:40)
-% set(gca,'YLim',[0 .40])
-% xlabel('Ligand dose [ng/ml]')
+
+hold on
+icol = 8;
+legh = [];
+colmap = [linspace(0,1,length(highdoses)+1)' ones(length(highdoses)+1,1) ones(length(highdoses)+1,1)*.9];
+colmap = hsv2rgb(colmap(1:end-1,:));
+markers = {'o','s','v','d','^','>'};
+f = @(p,x) p(1) + (p(2)-p(1)) ./ (1 + 10.^((p(3)-x)*p(4)));
+mymean = mean(medians(1,:,8));
+for irow = 1:length(highdoses)
+    legh = [legh plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)];
+    medians(1,irow,icol) = mymean;
+    % Fix lower asymptotic to mean(medians)
+%     qFit = logical([0 1 1 1]);
+%     pFix = mean(medians(1,:,icol));
+%     pinit = [medians(end,irow,icol) length(possible_doses)/2 .1];
+%     optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf .2],[Inf Inf Inf],optimset('Display','off'));
+
+    % Fill all parameters
+    qFit = logical([1 1 1 1]);
+    pFix = [];
+    pinit = [medians(1,irow,icol) medians(end,irow,icol) length(possible_doses)/2 .1];
+    optRes = lsqnonlin(@(p) objFunHill(p,0:length(possible_doses)-1,medians(:,irow,icol)',qFit,pFix),pinit,[-Inf -Inf -Inf .2],[Inf Inf Inf Inf],optimset('Display','off'));
+    
+    % Plotting
+    p = nan(size(qFit));
+    p(qFit) = optRes;
+    p(~qFit) = pFix;
+    plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2)
+end
+title('Fraction cells [%]')
+set(gca,'XLim',[-.5 length(possible_doses)-.5])
+set(gca,'XTick',0:length(possible_doses)-1,'XTickLabel',possible_doses)
+set(gca,'YTick',0:.1:1,'YTickLabel',0:10:100)
+set(gca,'YLim',[0 1])
+xlabel('Ligand dose [ng/ml]')
+
+h = legend(legh,legstr,'Location','NorthWest');
+ch = get(h,'child');
+for ileg = 1:length(ch)/3
+    ilegch = (ileg-1)*3+2;
+    set(ch(ilegch),'LineStyle','-','LineWidth',2,'Color',colmap(size(colmap,1)-ileg+1,:)); 
+end
 % 
 % subplot(nrows,ncols,2)
 % hold on
