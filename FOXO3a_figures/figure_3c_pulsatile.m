@@ -309,8 +309,18 @@ for i = 2:length(unstim)
     celltypes(celltypes == unstim(i)) = unstim(1);
 end
 highdoses = [highdoses unstim(1)];
-[dists_boxcox,lambda,c] = boxcox(scores_puls(:,1));
+c = 0;
+lambda = 0.0500878494830929582581902081984;
+dists_boxcox = boxcox_apply(scores_puls(:,1),lambda,c);
 thres_trafo = boxcox_apply(puls_thres,lambda,c);
+mymin = 0.00360508363121257550953924209125;
+mymax = 2.34695221468680559340214131225;
+mymin_trafo = boxcox_apply(mymin,lambda,c);
+mymax_trafo = boxcox_apply(mymax,lambda,c);
+myrange = mymax_trafo - mymin_trafo;
+
+dists_boxcox = (dists_boxcox-mymin_trafo)./myrange;
+thres_trafo = (thres_trafo-mymin_trafo)./myrange;
 
 legh = [];
 legstr = {};
@@ -333,6 +343,9 @@ legend(legh,legstr)
 
 xlabel('pulsatory score')
 ylabel('probability density')
+
+figure
+hold on
 
 % ------------------------------------------
 % Early and late scores are not aligned yet; Sorting is done in the following
@@ -382,6 +395,7 @@ for ilig2 = 1:6
         plot(early_sorted(2,celltypes_sorted == isite),dists_sorted(celltypes_sorted == isite),'.','Color',mycol)
         title(sites_labels{ilig})
     end
+    plot(get(gca,'XLim'),[thres_trafo thres_trafo],'k--')
     
     xlabel('Early PC2')
     ylabel('Pulsatory score')

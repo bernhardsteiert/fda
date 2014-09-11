@@ -9,10 +9,26 @@ pcs = [2 3];
 sites_all = [17 37 44 4 64 57];
 sites_akti = [19 39 42 2 62 59];
 
-kswidth = 2;
+puls_thres = .3;
+
+kswidth = 15;
+
+mymin = min([scores_puls(:,1); noInhpuls.scores_puls(:,1)]);
+mymax = max([scores_puls(:,1); noInhpuls.scores_puls(:,1)]);
 
 highinds = ismember(celltypes,sites_akti);
-scores_puls_boxcox = boxcox(scores_puls(highinds,1));
+[~,lambda,c] = boxcox([scores_puls(:,1); noInhpuls.scores_puls(:,1)]);
+% --> c = 0 and lambda = 0.0500878494830929582581902081984
+scores_puls_boxcox = boxcox_apply(scores_puls(highinds,1),lambda,c);
+thres_trafo = boxcox_apply(puls_thres,lambda,c);
+mymin_trafo = boxcox_apply(mymin,lambda,c);
+mymax_trafo = boxcox_apply(mymax,lambda,c);
+myrange = mymax_trafo - mymin_trafo;
+
+scores_puls_boxcox = (scores_puls_boxcox-mymin_trafo)./myrange;
+thres_trafo = (thres_trafo-mymin_trafo)./myrange;
+% mymax_trafo = (mymax_trafo-mymin_trafo)./myrange;
+% mymin_trafo = (mymin_trafo-mymin_trafo)./myrange;
 
 figure
 
@@ -68,17 +84,21 @@ end
 % set(gca,'XLim',[min(scores_puls_boxcox) max(scores_puls_boxcox)]+[-.2 .2]*range(scores_puls_boxcox))
 %     set(gca,'XLim',xlim_all(icell,:))
 %     title(s.celltype)
+plot([thres_trafo thres_trafo],get(gca,'YLim'),'k--')
+plot([0 0],get(gca,'YLim'),'k:')
+plot([1 1],get(gca,'YLim'),'k:')
 legend(legh,legstr)
 
-xlabel('pulsatory score')
+xlabel('pulsatory score [au]')
 ylabel('probability density')
 
 
 
-kswidth = 10;
+kswidth = 40;
 
 highinds = ismember(noInhpuls.celltypes,sites_all);
-scores_puls_boxcox = boxcox(noInhpuls.scores_puls(highinds,1));
+scores_puls_boxcox = boxcox_apply(noInhpuls.scores_puls(highinds,1),lambda,c);
+scores_puls_boxcox = (scores_puls_boxcox-mymin_trafo)./myrange;
 
 figure
 
@@ -135,7 +155,10 @@ end
 % set(gca,'XLim',[min(scores_puls_boxcox) max(scores_puls_boxcox)]+[-.2 .2]*range(scores_puls_boxcox))
 %     set(gca,'XLim',xlim_all(icell,:))
 %     title(s.celltype)
+plot([thres_trafo thres_trafo],get(gca,'YLim'),'k--')
+plot([0 0],get(gca,'YLim'),'k:')
+plot([1 1],get(gca,'YLim'),'k:')
 legend(legh,legstr)
 
-xlabel('pulsatory score')
+xlabel('pulsatory score [au]')
 ylabel('probability density')
