@@ -1,13 +1,13 @@
 addpath('./Functions/')
-load('./Workspaces/scores_04-15')
+load('./Workspaces/scores_04-15_new')
 
 extension = '04-15-2014';
 pcs = [2 3];
 
 highdoses_all = [1 24 25 48 49 66; 3 22 27 46 51 65; 5 20 29 44 53 64; 7 18 31 42 55 63; 9 16 33 40 57 62; 11 14 35 38 59 61];
 
-kswidth_all = [5 5 3 5 5 .25];
-xlim_all = [-6 2; -6 2; -18 3; -6 2; -6 2; -160 20];
+kswidth_all = ones(1,6)*35;
+puls_thres = [.3 .5 .45 .2 .2 .2];
 
 for icell = 1:size(highdoses_all,1)
 
@@ -15,7 +15,12 @@ for icell = 1:size(highdoses_all,1)
     kswidth = kswidth_all(icell);
 
     highinds = ismember(celltype,highdoses);
-    dists_boxcox = boxcox(dists(highinds));
+    [dists_boxcox,lambda,c] = boxcox(dists(highinds));
+    thres_trafo = boxcox_apply(puls_thres(icell),lambda,c);
+    mymin = min(dists_boxcox);
+    myrange = range(dists_boxcox);
+    dists_boxcox = (dists_boxcox-mymin) ./ myrange;
+    thres_trafo = (thres_trafo-mymin) ./ myrange;
 
     figure
 
@@ -67,7 +72,8 @@ for icell = 1:size(highdoses_all,1)
 
     end
     % set(gca,'XLim',[min(dists_boxcox) max(dists_boxcox)]+[-.2 .2]*range(dists_boxcox))
-    set(gca,'XLim',xlim_all(icell,:))
+    set(gca,'XLim',[-.2 1.2])
+    plot([thres_trafo thres_trafo],get(gca,'YLim'),'k--')
     title(s.celltype)
     legend(legh,legstr)
 
