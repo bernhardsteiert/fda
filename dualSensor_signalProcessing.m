@@ -1,5 +1,7 @@
 %% Dual-sensor first steps
-load('c_signal_dual')
+% load('c_signal_dual')
+% save('c_signal_dual_2','celltype','timestamp','c_signal_foxo','c_signal_ekarev')
+load('c_signal_dual_2')
 
 exten = '02-15-2014';
 obs = {'Dual_FOXO3a','Dual_EKAREV'};
@@ -33,16 +35,16 @@ setFigure(f1,xfac,yfac,fontsize)
 nrow = 4;
 ncol = 5;
 
-myind = 1:length(celltype);
-myind = find(celltype == 9); % Only plot BTC 100
+myind2 = 1:length(celltype);
+myind2 = find(celltype == 9); % Only plot BTC 100
 
 for irow = 1:nrow
     for icol = 1:ncol
         subplot(nrow,ncol,(irow-1)*ncol+icol)
         hold on
         
-        plot(timestamp,c_signal_foxo(:,myind((irow-1)*ncol+icol)),'b')
-        plot(timestamp,c_signal_ekarev(:,myind((irow-1)*ncol+icol)),'r')
+        plot(timestamp,c_signal_foxo(:,myind2((irow-1)*ncol+icol)),'b')
+        plot(timestamp,c_signal_ekarev(:,myind2((irow-1)*ncol+icol)),'r')
 %         plot(c_signal_foxo(:,myind((irow-1)*ncol+icol)),c_signal_ekarev(:,myind((irow-1)*ncol+icol)))
 
         set(gca,'XLim',[200 1500])
@@ -107,36 +109,65 @@ for i = 1:size(c_signal_foxo,2)
     end
 end
 
+onlyNaN = sum(~isnan(c_signal_foxo),1) == 0 | sum(~isnan(c_signal_ekarev),1) == 0;
+c_signal_foxo = c_signal_foxo(:,~onlyNaN);
+c_signal_ekarev = c_signal_ekarev(:,~onlyNaN);
+celltype = celltype(~onlyNaN);
+removed_inds = removed_inds(:,~onlyNaN);
+
 %% Interpolate between missing points
 % Neccessary for spline interpolation to work
 % For later analysis, interpolated data can be neglected again
+myind = timestamp>time_cutoff;
+
 c_signal_ekarev_interp = c_signal_ekarev;
 c_signal_foxo_interp = c_signal_foxo;
+removedInds = [];
 for i = 1:size(c_signal_ekarev,2)
-    c_signal_ekarev_interp(:,i) = interp1(timestamp(~isnan(c_signal_ekarev(:,i))),c_signal_ekarev(~isnan(c_signal_ekarev(:,i)),i),timestamp);
-    vec = ~isnan(c_signal_ekarev_interp(:,i))';
-    rl = find(vec ~= [vec(2:end), vec(end)+1]);
-    data =  vec(rl);
-    rl(2:end) = rl(2:end) - rl(1:end-1);
-    if ~data(1)
-        c_signal_ekarev_interp(1:rl(1),i) = c_signal_ekarev_interp(rl(1)+1,i);
+    remove = 0;
+    if sum(~isnan(c_signal_ekarev(myind,i))) > 2 && range(c_signal_ekarev(myind,i)) ~= 0
+        c_signal_ekarev_interp(:,i) = interp1(timestamp(~isnan(c_signal_ekarev(:,i))),c_signal_ekarev(~isnan(c_signal_ekarev(:,i)),i),timestamp);
+        vec = ~isnan(c_signal_ekarev_interp(:,i))';
+        rl = find(vec ~= [vec(2:end), vec(end)+1]);
+        data =  vec(rl);
+        rl(2:end) = rl(2:end) - rl(1:end-1);
+        if ~data(1)
+            c_signal_ekarev_interp(1:rl(1),i) = c_signal_ekarev_interp(rl(1)+1,i);
+        end
+        if ~data(end)
+            c_signal_ekarev_interp(end-rl(end)+1:end,i) = c_signal_ekarev_interp(end-rl(end),i);
+        end
+    else
+        remove = 1;
     end
-    if ~data(end)
-        c_signal_ekarev_interp(end-rl(end)+1:end,i) = c_signal_ekarev_interp(end-rl(end),i);
+    if sum(~isnan(c_signal_foxo(myind,i))) > 2 && range(c_signal_foxo(myind,i)) ~= 0
+        c_signal_foxo_interp(:,i) = interp1(timestamp(~isnan(c_signal_foxo(:,i))),c_signal_foxo(~isnan(c_signal_foxo(:,i)),i),timestamp);
+        vec = ~isnan(c_signal_foxo_interp(:,i))';
+        rl = find(vec ~= [vec(2:end), vec(end)+1]);
+        data =  vec(rl);
+        rl(2:end) = rl(2:end) - rl(1:end-1);
+        if ~data(1)
+            c_signal_foxo_interp(1:rl(1),i) = c_signal_foxo_interp(rl(1)+1,i);
+        end
+        if ~data(end)
+            c_signal_foxo_interp(end-rl(end)+1:end,i) = c_signal_foxo_interp(end-rl(end),i);
+        end
+    else
+        remove = 1;
     end
     
-    c_signal_foxo_interp(:,i) = interp1(timestamp(~isnan(c_signal_foxo(:,i))),c_signal_foxo(~isnan(c_signal_foxo(:,i)),i),timestamp);
-    vec = ~isnan(c_signal_foxo_interp(:,i))';
-    rl = find(vec ~= [vec(2:end), vec(end)+1]);
-    data =  vec(rl);
-    rl(2:end) = rl(2:end) - rl(1:end-1);
-    if ~data(1)
-        c_signal_foxo_interp(1:rl(1),i) = c_signal_foxo_interp(rl(1)+1,i);
-    end
-    if ~data(end)
-        c_signal_foxo_interp(end-rl(end)+1:end,i) = c_signal_foxo_interp(end-rl(end),i);
+    if remove
+        removedInds = [removedInds i];
     end
 end
+
+keepInds = setdiff(1:size(c_signal_foxo,2),removedInds);
+c_signal_foxo = c_signal_foxo(:,keepInds);
+c_signal_foxo_interp = c_signal_foxo_interp(:,keepInds);
+c_signal_ekarev = c_signal_ekarev(:,keepInds);
+c_signal_ekarev_interp = c_signal_ekarev_interp(:,keepInds);
+celltype = celltype(keepInds);
+removed_inds = removed_inds(:,keepInds);
 
 c_signal_foxo_interp = c_signal_foxo_interp./repmat(range(c_signal_foxo_interp(myind,:),1),size(c_signal_foxo_interp,1),1);
 c_signal_foxo_interp = c_signal_foxo_interp - repmat(min(c_signal_foxo_interp(myind,:),[],1),size(c_signal_foxo_interp,1),1);
@@ -315,3 +346,23 @@ for irow = 1:nrow
 %         text(.5,.8,sprintf('CorrCoef = %g',mycor(1,2)),'Units','normalized')
     end
 end
+
+%% Boxplot for high doses
+highdoses = [9 10 27 28 45 46 63];
+myext = '02-15-2014_retracked';
+
+mylab = {};
+boxCorrC = [];
+
+for i = 1:length(highdoses)
+    s = siteprop(highdoses(i),myext);
+    
+    mylab{end+1} = s.lig_name;
+    boxCorrC = padconcatenation(boxCorrC,myCorrC(celltype == highdoses(i)),1);
+    
+end
+
+figure
+boxplot(boxCorrC')
+
+set(gca,'XTick',1:length(highdoses),'XTickLabel',mylab)
