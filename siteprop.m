@@ -248,7 +248,7 @@ switch dataset
         s.lig_dose = ligand_dose(col);
         s.celltype = celltype{(col>5)+1};
         
-    case '02-15-2014'
+    case {'02-15-2014','02-15-2014_retracked','02-15-2014_retracked_nucl'}
         ligand_name = {'BTC','EPR','EGF','HGF','HRG','IGF','NS'};
         ligand_dose = [4 20 100 4 20 100 4 20 100 0];
         sensor_name = {'EKAREV','EKAREV','EKAREV','FOXO3a','FOXO3a','FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a'};
@@ -268,7 +268,28 @@ switch dataset
         s.lig_dose = ligand_dose(col);
         s.sensor_name = sensor_name{col_bak};
         
-    case '03-30-2014'
+        
+    case '02-27-2014'
+        ligand_name = {'BTC','EPR','EGF','HGF','HRG','IGF','NS'};
+        ligand_dose = [4 20 100 4 20 100 4 20 100 0];
+        sensor_name = {'EKAREV','EKAREV','EKAREV','FOXO3a','FOXO3a','FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a'};
+        
+        row = ceil(site/9);
+        col = mod(site-1,9)+1;
+        if ~mod(row,2)
+            col = 10-col;
+        end
+        col_bak = col;
+        if row == 7
+            col = 10;
+        end
+        
+        s.lig_name = ligand_name{row};
+        s.lig_index = row;
+        s.lig_dose = ligand_dose(col);
+        s.sensor_name = sensor_name{col_bak};
+        
+    case {'03-30-2014','03-30-2014_cleaned'}
         igf_name = 'IGF';
         igf_dose = [.8 4 20 100 .8 4 20 100 .8 4 20 100];
         ligand_name = {'NS','BTC','EGF','EGF','NS','BTC','EGF','EGF','NS','BTC','EGF','EGF'};
@@ -295,7 +316,7 @@ switch dataset
         s.drug_name = drug_name;
         s.drug_dose = drug_dose(row);
         
-    case '04-04-2014'
+    case {'04-04-2014','04-04-2014_all_cleaned'}
         ligand_name = {'EGF','EGF','EGF','EGF','IGF','IGF','IGF','IGF'};
         celltype = {'MCF10A','MCF10A','MCF10A','MCF10A','MCF10A','184A1','184A1','184A1','184A1','184A1'};
         meki_dose = [0 1/6^3 1/6^2 1/6 1 0 1/6^3 1/6^2 1/6 1];
@@ -337,25 +358,28 @@ switch dataset
         s.drug2_dose = akti_dose(row);
         s.drug1_timing = meki_timing{col};
         
-    case '04-15-2014'
+    case {'04-15-2014','04-15-2014_all_cleaned'}
         celltype = {'MCF10A-WT','MCF10A-WT','MCF10A-AKTspec','MCF10A-AKTspec','MCF10A-ERKspec','MCF10A-ERKspec','184A1-WT','184A1-WT','184A1-AKTspec','184A1-AKTspec','184A1-ERKspec','184A1-ERKspec'};
         ligand_name = {'IGF','HRG','HGF','EGF','BTC','NS'};
-        ligand_dose = [100 20 100 20 100 20 100 20 100 20 100 20 0];
+        ligand_dose = [100 20 100 20 100 20 100 20 100 20 100 20];
         
         row = ceil(site/12);
         col = mod(site-1,12)+1;
         if ~mod(row,2)
             col = 13-col;
         end
-        if row == 6
-            col = 13;
-        end
         
         s.celltype = celltype{col};
         s.lig_name = ligand_name{row};
+        s.lig_index = row;
         s.lig_dose = ligand_dose(col);
+        if row == 6
+            s.celltype = celltype{col-(12-col)};
+            s.lig_name = ligand_name{row};
+            s.lig_dose = 0;
+        end
         
-    case '04-18-2014'
+    case {'04-18-2014','04-18-2014_cleaned'}
         celltype = {'MCF10A','MCF10A','MCF10A','MCF10A','MCF10A','MCF10A','184A1','184A1','184A1','184A1','184A1','184A1'};
         ligand_name = 'EGF';
         ligand_dose = [100 20 4 .8 .16 0];
@@ -373,6 +397,21 @@ switch dataset
         s.lig_dose = ligand_dose(row);
         s.drug_name = drug_name;
         s.drug_dose = drug_dose(col);
+        
+    case '03-24-2014'
+        celltype = 'MCF10A';
+        ligand_name = {'IGF','HRG','HGF','EGF','BTC','EPR'};
+        ligand_dose = [100 100/2.5 100/2.5^2 100/2.5^3 100/2.5^4 100/2.5^5 100/2.5^6 100/2.5^7 100/2.5^8 0];
+        
+        row = ceil(site/10);
+        col = mod(site-1,10)+1;
+        if ~mod(row,2)
+            col = 11-col;
+        end
+        
+        s.celltype = celltype;
+        s.lig_name = ligand_name{row};
+        s.lig_dose = ligand_dose(col);
         
     otherwise
         error('Unknown data-set!!')
