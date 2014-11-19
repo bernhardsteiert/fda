@@ -268,6 +268,26 @@ switch dataset
         s.lig_dose = ligand_dose(col);
         s.sensor_name = sensor_name{col_bak};
         
+    case '02-15-2014_retracked'
+        ligand_name = {'BTC','EPR','EGF','HGF','HRG','IGF','NS'};
+        ligand_dose = [4 20 100 4 20 100 4 20 100 0];
+        sensor_name = {'EKAREV','EKAREV','EKAREV','FOXO3a','FOXO3a','FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a','Dual_EKAREV_FOXO3a'};
+        
+        row = ceil(site/9);
+        col = mod(site-1,9)+1;
+        if ~mod(row,2)
+            col = 10-col;
+        end
+        col_bak = col;
+        if row == 7
+            col = 10;
+        end
+        
+        s.lig_name = ligand_name{row};
+        s.lig_index = row;
+        s.lig_dose = ligand_dose(col);
+        s.sensor_name = sensor_name{col_bak};
+        
     case '03-30-2014'
         igf_name = 'IGF';
         igf_dose = [.8 4 20 100 .8 4 20 100 .8 4 20 100];
