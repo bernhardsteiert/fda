@@ -130,6 +130,8 @@ igfakti_signif2(igfakti_signif2 == 0) = nan;
 
 cell_names = {'MCF10A','184A1'};
 ylim = [0 1; 0 1];
+matVer = ver('MATLAB');
+matVer = str2double(matVer.Version)>=8.4;
 for icell = 1:2
 
     figure
@@ -139,15 +141,16 @@ for icell = 1:2
     set(h(2),'FaceColor',[.15 .15 .5])
     hold on
     for ih = 1:length(h)
-        x1 = get(get(h(ih),'children'), 'xdata');
-        x1 = mean(x1([1 3],:));
+        if ~matVer
+            x1 = get(get(h(ih),'children'), 'xdata');
+            x1 = mean(x1([1 3],:));
+        else
+            x1 = bsxfun(@plus, h(ih).XData, [h(ih).XOffset]');
+        end
         h1 = errorbar(x1,fliplr(egfmeki_pulsing(ih,:,icell)),fliplr(egfmeki_pulsing(ih,:,icell)-egfmeki_pulsing_bd(1+2*(ih-1),:,icell)),fliplr(egfmeki_pulsing_bd(2*ih,:,icell)-egfmeki_pulsing(ih,:,icell)),'k');
         set(h1,'linestyle','none')
         plot(x1,fliplr(egfmeki_signif1(ih,:,icell)) * .85,'k*')
         plot(x1,fliplr(egfmeki_signif2(ih,:,icell)) * .87,'k*')
-        
-        x1
-        fliplr(egfmeki_signif1(ih,:,icell))
     end
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 length(meki_doses)+1.5])
@@ -167,8 +170,12 @@ for icell = 1:2
     set(h(2),'FaceColor',[.5 .15 .15])
     hold on
     for ih = 1:length(h)
-        x1 = get(get(h(ih),'children'), 'xdata');
-        x1 = mean(x1([1 3],:));
+        if ~matVer
+            x1 = get(get(h(ih),'children'), 'xdata');
+            x1 = mean(x1([1 3],:));
+        else
+            x1 = bsxfun(@plus, h(ih).XData, [h(ih).XOffset]');
+        end
         h1 = errorbar(x1,fliplr(igfakti_pulsing(ih,:,icell)),fliplr(igfakti_pulsing(ih,:,icell)-igfakti_pulsing_bd(1+2*(ih-1),:,icell)),fliplr(igfakti_pulsing_bd(2*ih,:,icell)-igfakti_pulsing(ih,:,icell)),'k');
         set(h1,'linestyle','none')
         plot(x1,fliplr(igfakti_signif1(ih,:,icell)) * .85,'k*')
