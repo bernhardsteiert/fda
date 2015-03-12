@@ -400,3 +400,37 @@ for ilig2 = 1:6
     xlabel('Early PC2')
     ylabel('Pulsatory score')
 end
+
+%%
+figure
+hold on
+resort = [4 1 nan 2 3 6 5]; % Relative to platemap
+
+early_pc2_med = nan(size(medians(:,:,1)));
+highdoses = [];
+for isite = sites_all_sorted
+    s = siteprop(isite);
+    if s.lig_dose == 100
+        highdoses = [highdoses isite];
+    end
+    early_pc2_med(possible_doses == s.lig_dose,resort(s.lig_index)) = nanmedian(early_ws.scores_early(2,early_ws.celltypes == isite));
+end
+early_pc2_med(1,:) = mean(early_pc2_med(1,:));
+resort = [2 3 4 1 6 5];
+highdoses = highdoses(resort);
+
+icol = 8;
+legh = [];
+for irow = 1:length(highdoses)
+    sprop = siteprop(highdoses(irow));
+    legstr{irow} = sprop.lig_name(1:3);
+    legh = [legh plot(early_pc2_med(:,irow),medians(:,irow,icol),'--','Color',colmap(irow,:))];
+    for idose = 1:size(medians,1)
+        plot(early_pc2_med(idose,irow),medians(idose,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',2+idose*4);
+    end
+end
+xlabel('Early PC2')
+ylabel('Fraction cells [%]')
+set(gca,'YLim',[0 1],'YTick',0:.1:1,'YTickLabel',0:10:100)
+
+legend(legh,legstr)
