@@ -141,11 +141,11 @@ for icell = 1:2
     xlabel(sprintf('Early PC%i',pc))
     ylabel('Fraction of pulsing cells')
     
-    h = legend({sprintf('EGF %i',egf_dose(1)),sprintf('EGF %i',egf_dose(2)),sprintf('IGF %i',igf_dose(1)),sprintf('IGF %i',igf_dose(2)),});
-    legs = get(h,'Children');
-    set(legs(1),'MarkerFaceColor',[.5 .15 .15],'Marker','s','MarkerSize',14)
-    set(legs(4),'MarkerFaceColor',[1 .3 .3],'Marker','s','MarkerSize',14)
-    set(legs(7),'MarkerFaceColor',[.15 .15 .5],'Marker','o','MarkerSize',14)
-    set(legs(10),'MarkerFaceColor',[.3 .3 1],'Marker','o','MarkerSize',14)
+%     h = legend({sprintf('EGF %i',egf_dose(1)),sprintf('EGF %i',egf_dose(2)),sprintf('IGF %i',igf_dose(1)),sprintf('IGF %i',igf_dose(2)),});
+%     legs = get(h,'Children');
+%     set(legs(1),'MarkerFaceColor',[.5 .15 .15],'Marker','s','MarkerSize',14)
+%     set(legs(4),'MarkerFaceColor',[1 .3 .3],'Marker','s','MarkerSize',14)
+%     set(legs(7),'MarkerFaceColor',[.15 .15 .5],'Marker','o','MarkerSize',14)
+%     set(legs(10),'MarkerFaceColor',[.3 .3 1],'Marker','o','MarkerSize',14)
     
 end
