@@ -5,13 +5,14 @@ close all
 
 load('./Workspaces/harm_basis_50_to_600')
 % load('./Workspaces/scores_puls')
-myextension = '130722_corrected_retracked_all_cleaned';
+% myextension = '130722_corrected_retracked_all_cleaned';
+myextension = '130722_corrected_retracked_all_paper_cleaned';
 
-sites_all = [64];
-% sites_all = [4];
+% sites_all = [64];
+sites_all = 48;
 nsigs = 40;
-% removeTraces = [];
-removeTraces = [5];
+removeTraces = [];
+% removeTraces = [5];
 % removeTraces = [6 7 9 14 15 24 25 29 30 32 37 45 52];
 sigs = setdiff(1:100,removeTraces);
 sigs = sigs(1:nsigs);
@@ -40,6 +41,10 @@ for icount = 1:length(sites_all)
     s = siteprop(isite);
     legstr{icount} = s.lig_name;
 end
+
+nsigs = min([nsigs size(c_signal_single,2)]);
+sigs = sigs(1:nsigs);
+colind = 1:nsigs;
 
 figure
 setFigure(gcf,xfac,yfac,fontsize);
