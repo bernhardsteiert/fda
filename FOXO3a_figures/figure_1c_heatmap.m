@@ -113,14 +113,18 @@ colmap2 = [colmap2; [1 1 1]];
 for i = 1:250
     colmap2 = [colmap2; hsv2rgb([2/3 i/250 1])];
 end
-h = heatmap(data_fpca_repr_fine(sorted_inds(sigs),:), times_fine_late, [],-.015,.015,[],'Colormap',colmap2,'UseFigureColormap',false);
-drawnow
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'linear','extrap');
-hold on;plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),200);
+h = heatmap(data_fpca_repr_fine(sorted_inds(sigs),:),[],[],[],'Colormap',colmap2,'UseFigureColormap',false);
+set(get(h,'Parent'),'CLim',[-.015 .015])
+xtickfac = size(data_fpca_repr_fine,2)/(timestamp(range_ind(end))-timestamp(range_ind(1)));
+xticklab = 70:50:600;
+set(gca,'XLim',[0 size(data_fpca_repr_fine,2)]+.5,'XTick',(xticklab-timestamp(range_ind(1)))*xtickfac,'XTickLabel',xticklab-120)
+hold on
+% xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),-70,'linear','extrap');
+% plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
+xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),0);
 plot([xtick_new xtick_new],get(gca,'YLim'),':k');
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),600);
-plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
+% xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),480);
+% plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xlabel('time [min]')
 ylabel('Localization');
 set(gcf,'Position',[100 100 700 400]);
@@ -150,14 +154,19 @@ ylabel('log_{10} FOXO3a [Cyt/Nuc]');
 set(gca,'XLim',[50 600],'XTick',120:100:520,'XTickLabel',0:100:400)
 
 figure
-h2 = heatmap(c_signal_woNharm(:,sorted_inds(sigs))', timestamp(range_ind), [],-.015,.015,[],'Colormap',colmap2,'UseFigureColormap',false);
+% h2 = heatmap(c_signal_woNharm(:,sorted_inds(sigs))', timestamp(range_ind), [],-.015,.015,[],'Colormap',colmap2,'UseFigureColormap',false);
+h2 = heatmap(c_signal_woNharm(:,sorted_inds(sigs))',[],[],[],'Colormap',colmap2,'UseFigureColormap',false);
+set(get(h2,'Parent'),'CLim',[-.015 .015])
+xtickfac = size(c_signal_woNharm,1)/(timestamp(range_ind(end))-timestamp(range_ind(1)));
+xticklab = 70:50:600;
+set(gca,'XLim',[0 size(c_signal_woNharm,1)]+.5,'XTick',(xticklab-timestamp(range_ind(1)))*xtickfac,'XTickLabel',xticklab-120)
 
 drawnow
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),50,'linear','extrap');
+xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),-70,'linear','extrap');
 hold on;plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),200);
+xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),0);
 plot([xtick_new xtick_new],get(gca,'YLim'),':k');
-xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),600);
+xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),480);
 plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xlabel('time [min]')
 ylabel('Pulsing');

@@ -1,4 +1,4 @@
-function [hImage, hText, hXText] = heatmap(mat, xlab, ylab, minV,maxV, textmat, varargin)
+function [hImage, hText, hXText] = heatmap(mat, xlab, ylab, textmat, varargin)
 % HEATMAP displays a matrix as a heatmap image
 %
 % USAGE:
@@ -39,10 +39,25 @@ function [hImage, hText, hXText] = heatmap(mat, xlab, ylab, minV,maxV, textmat, 
 % * 'UseFigureColormap': Specifies whether the figure's colormap should be
 %   used. If false, the color intensities after applying the
 %   specified/default colormap will be hardcoded, so that the image will be
-%   independent of the figures colormap. If this option is true, the figure
+%   independent of the figure's colormap. If this option is true, the figure
 %   colormap in the end will be replaced by specified/default colormap.
 %   (default = true)
 %
+% * 'NaNColor': A 3-element [R G B] vector specifying the color used to display NaN
+%   or missing value. [0 0 0] corresponds to black and [1 1 1] to white. By
+%   default MATLAB displays NaN values using the color assigned to the
+%   lowest value in the colormap. Specifying this option automatically sets
+%   the 'UseFigureColormap' option to false because the color mapping must
+%   be computed prior to setting the nan color. 
+%
+% * 'MinColorValue': A scalar number corresponding to the value of the data
+%   that is mapped to the lowest color of the colormap. By default this is 
+%   the minimum value of the matrix input. 
+%
+% * 'MaxColorValue': A scalar number corresponding to the value of the data
+%   that is mapped to the highest color of the colormap. By default this is 
+%   the maximum value of the matrix input. 
+% 
 % * 'Parent': Handle to an axes object
 %
 % * 'TextColor': Either a color specification of all the text displayed on
@@ -70,6 +85,11 @@ function [hImage, hText, hXText] = heatmap(mat, xlab, ylab, minV,maxV, textmat, 
 %   the default axes font size, usually 10. Set to a lower value if many
 %   tick labels are being displayed
 %
+% * 'TickTexInterpreter': Set to 1 or true to render tick labels using a TEX
+%   interpreter. For example, '_b' and '^o' would be rendered as subscript
+%   b and the degree symbol with the TEX interpreter. This parameter is only
+%   available in MATLAB R2014b and above (Default: false)
+%
 % OUTPUTS:
 % * hImage: handle to the image object
 % * hText : handle to the text objects (empty if no text labels are drawn)
@@ -89,6 +109,8 @@ function [hImage, hText, hXText] = heatmap(mat, xlab, ylab, minV,maxV, textmat, 
 %         'TextColor', 'b')
 % For detailed examples, see the associated document heatmap_examples.m
 
+% Copyright The MathWorks, Inc. 2009-2014
+
 % Handle missing inputs
 if nargin < 1, error('Heatmap requires at least one input argument'); end
 if nargin < 2, xlab = []; end
@@ -96,18 +118,22 @@ if nargin < 3, ylab = []; end
 if nargin < 4, textmat = []; end
 
 % Parse parameter/value inputs
-p = parseInputs(varargin{:});
+p = parseInputs(mat, varargin{:});
+
+% Get heatmap axes information if it already exists
+p.axesInfo = getHeatmapAxesInfo(p.hAxes);
 
 % Calculate the colormap based on inputs
-p = calculateColormap(p, mat,minV,maxV);
+p = calculateColormap(p, mat);
 
 % Create heatmap image
-p = plotHeatmap(p, mat,minV,maxV); % New properties hImage and cdata added
+p = plotHeatmap(p, mat); % New properties hImage and cdata added
+
 % Generate grid lines if selected
 generateGridLines(p);
 
 % Set axes labels
-[p, xlab, ylab, hXText] = setAxesLabels(p, xlab, ylab);
+[p, xlab, ylab, hXText, origPos] = setAxesTickLabels(p, xlab, ylab);
 
 % Set text labels
 [p, displayText, fontScaleFactor] = setTextLabels(p, mat, textmat);
@@ -117,11 +143,11 @@ addColorbar(p, mat, textmat)
 
 % Store heatmap properties in axes for callbacks
 axesInfo = struct('Type', 'heatmap', 'Parameters', p, 'FontScaleFactor', ...
-                   fontScaleFactor, 'mat', mat, 'hXText', hXText);
+                   fontScaleFactor, 'mat', mat, 'hXText', hXText, ...
+                   'origAxesPos', origPos);
 axesInfo.xlab = xlab;
 axesInfo.ylab = ylab;
 axesInfo.displayText = displayText;
-
 set(p.hAxes, 'UserData', axesInfo);
 
 % Define callbacks
@@ -146,61 +172,103 @@ end
 % ---------------------- Heatmap Creation Functions ----------------------
 
 % Parse PV inputs & return structure of parameters
-function param = parseInputs(varargin) 
+function param = parseInputs(mat, varargin) 
 
 p = inputParser;
-p.addParamValue('Colormap',[]);
+p.addParamValue('Colormap',[]); %#ok<*NVREPL>
 p.addParamValue('ColorLevels',[]);
 p.addParamValue('TextColor',[0 0 0]);
 p.addParamValue('UseFigureColormap',true);
 p.addParamValue('UseLogColormap',false);
-p.addParamValue('Parent',gca);
+p.addParamValue('Parent',NaN);
 p.addParamValue('FontSize',[]);
 p.addParamValue('Colorbar',[]);
 p.addParamValue('GridLines','none');
 p.addParamValue('TickAngle',0);
 p.addParamValue('ShowAllTicks',false);
 p.addParamValue('TickFontSize',[]);
+p.addParamValue('TickTexInterpreter',false);
+p.addParamValue('NaNColor', [NaN NaN NaN], @(x)isnumeric(x) && length(x)==3 && all(x>=0) && all(x<=1));
+p.addParamValue('MinColorValue', nan, @(x)isnumeric(x) && isscalar(x));
+p.addParamValue('MaxColorValue', nan, @(x)isnumeric(x) && isscalar(x));
 p.parse(varargin{:});
 
 param = p.Results;
 
+if ~ishandle(param.Parent) || ~strcmp(get(param.Parent,'type'), 'axes')
+    param.Parent = gca;
+end
+
+ind = ~isinf(mat(:)) | isnan(mat(:));
+if isnan(param.MinColorValue)
+    param.MinColorValue = min(mat(ind));
+end
+if isnan(param.MaxColorValue)
+    param.MaxColorValue = max(mat(ind));
+end
+
 % Add a few other parameters
 param.hAxes = param.Parent;
-param.hFig = get(param.hAxes, 'Parent');
+param.hFig = ancestor(param.hAxes, 'figure');
+param.IsGraphics2 = ~verLessThan('matlab','8.4');
+param.ExplicitlyComputeImage = ~all(isnan(param.NaNColor)) ... NaNColor is specified
+                         || ~param.IsGraphics2 && ~param.UseFigureColormap;
+
+
+% if param.IsGraphics2 && ~param.UseFigureColormap && ~isempty(param.ColorBar) % graphics v2
+%     warning('heatmap:graphics2figurecolormap', 'The UseFigureColormap false option with colorbar is not supported in versions R2014b and above. In most such cases UseFigureColormap false is unnecessary');
+% end
+    
 
 end
 
 % Visualize heatmap image
-function p = plotHeatmap(p, mat,minV,maxV)
+function p = plotHeatmap(p, mat)
+
 p.cdata = [];
 if p.UseLogColormap
     p.Colormap = resamplecmap(p.Colormap, p.ColorLevels, ...
                            logspace(0,log10(p.ColorLevels),p.ColorLevels));
 end
-if p.UseFigureColormap 
-    % Use scaled image plot to let the figure's colormap automatically
-    % convert from the matrix to color data
-    set(p.hFig,'Colormap',p.Colormap);
-    cla(p.hAxes);
-    p.hImage = imagesc(mat, 'Parent', p.hAxes);
-else
-    % Calculate the color data explicitly and then display it as an image.
 
-    %if x == n, x = n+1; end
-    [R,C] = find(mat<minV);
-    for i = 1:length(R)
-        mat(R(i),C(i)) = minV;
-    end
-    clear R C;
-    [R,C] = find(mat>maxV);
-    for i = 1:length(R)
-        mat(R(i),C(i)) = maxV;
-    end
-    p.cdata = round((mat-minV)/(maxV-minV)*(p.ColorLevels-1)+1);
+if p.ExplicitlyComputeImage
+    % Calculate the color data explicitly and then display it as an image.
+    n = p.MinColorValue;
+    x = p.MaxColorValue;
+    if x == n, x = n+1; end
+    p.cdata = round((mat-n)/(x-n)*(p.ColorLevels-1)+1);
     %p.cdata = ceil((mat-n)/(x-n)*p.ColorLevels);
+    p.cdata(p.cdata<1) = 1; % Clipping
+    p.cdata(p.cdata>p.ColorLevels) = p.ColorLevels; % Clipping
+    nanInd = find(isnan(p.cdata));
+    p.cdata(isnan(p.cdata)) = 1;
     p.cdata = reshape(p.Colormap(p.cdata(:),:),[size(p.cdata) 3]);
+    % Handle NaNColor case
+    if ~all(isnan(p.NaNColor))
+        p.cdata(nanInd                     ) = p.NaNColor(1); % Set red   color level of nan indices
+        p.cdata(nanInd +   numel(p.cdata)/3) = p.NaNColor(2); % Set green color level of nan indices
+        p.cdata(nanInd + 2*numel(p.cdata)/3) = p.NaNColor(3); % set blue  color level of nan indices
+    end
+    % Add a small dummy image so that colorbar subsequently works
+    [indr, indc] = find(~isnan(mat),1);
+    imagesc(indr, indc, mat(indr,indc),'Parent',p.hAxes);
+    nextplot = get(p.hAxes,'nextplot');
+    set(p.hAxes,'nextplot','add');
     p.hImage = image(p.cdata, 'Parent', p.hAxes);
+    set(p.hAxes,'nextplot',nextplot);
+    axis(p.hAxes,'tight');
+else
+    % Use a scaled image plot. Axes CLims and colormap will be set later
+    p.hImage = imagesc(mat, 'Parent', p.hAxes);
+end
+
+set(p.hAxes, 'CLim', [p.MinColorValue p.MaxColorValue]); % Ensure proper clipping for colorbar
+if p.UseFigureColormap
+    set(p.hFig,'Colormap',p.Colormap);
+elseif p.IsGraphics2
+    % Set the axes colormap and limits
+    colormap(p.hAxes, p.Colormap);
+    %set(p.hAxes, 'CLim', [p.MinColorValue p.MaxColorValue]);
 end
 end
 
@@ -228,26 +296,23 @@ elseif iscell(p.Colorbar)
 else
     c = colorbar;
 end
-ticks = get(c,'YTick');
-if isempty(ticks)
-    ticks = get(c,'XTick');
-    tickAxis = 'X';
+if p.IsGraphics2
+    c.Limits = p.hAxes.CLim;
+    ticks = get(c,'Ticks');
 else
+    if p.ExplicitlyComputeImage || ~p.UseFigureColormap
+        d = findobj(get(c,'Children'),'Tag','TMW_COLORBAR'); % Image
+        set(d,'YData', get(p.hAxes,'CLim'));
+        set(c,'YLim', get(p.hAxes,'CLim'));
+    end
+    ticks = get(c,'YTick');
     tickAxis = 'Y';
+    if isempty(ticks)
+        ticks = get(c,'XTick');
+        tickAxis = 'X';
+    end
 end
-    
-if ~p.UseFigureColormap
-    d = findobj(get(c,'Children'),'Tag','TMW_COLORBAR'); % Image
-    %cdata = get(d,'Cdata');
-    %ytick = get(d,'YTick');
-    %ytl = get(g,'YTickLabel');
-    set(d,'CData',reshape(p.Colormap,[p.ColorLevels 1 3]))
-    set(c,'YLim',[1 p.ColorLevels]);
-    n = min(mat(:));
-    x = max(mat(:));
-    if x == n, x = n+1; end
-    ticks = (ticks-1)*(x-n)/(p.ColorLevels-1)+n;
-end
+  
 if ~isempty(ticks)
     
     if ischar(textmat) % If format string, format colorbar ticks in the same way
@@ -255,7 +320,12 @@ if ~isempty(ticks)
     else
         ticklabels = num2str(ticks(:));
     end
-    set(c, [tickAxis 'TickLabel'], ticklabels);
+    if p.IsGraphics2
+        set(c, 'TickLabels', ticklabels);
+    else
+        set(c, [tickAxis 'TickLabel'], ticklabels);
+    end
+    
 end
 
 
@@ -264,8 +334,16 @@ end
 
 % ------------------------- Tick Label Functions -------------------------
 
-% Set axes labels
-function [p, xlab, ylab, hXText] = setAxesLabels(p, xlab, ylab)
+% Set axes tick labels
+function [p, xlab, ylab, hXText, origPos] = setAxesTickLabels(p, xlab, ylab)
+
+if isempty(p.axesInfo) % Not previously a heatmap axes
+    origPos = [get(p.hAxes,'Position') get(p.hAxes,'OuterPosition')];
+else
+    origPos = p.axesInfo.origAxesPos;
+    set(p.hAxes, 'Position', origPos(1:4), 'OuterPosition', origPos(5:8));
+end
+
 
 if isempty(p.TickFontSize)
     p.TickFontSize = get(p.hAxes, 'FontSize');
@@ -279,12 +357,22 @@ else
     if isnumeric(ylab) % Numeric tick labels
         ylab = arrayfun(@(x){num2str(x)},ylab);
     end
-    if p.ShowAllTicks
+    if ischar(ylab)
+        ylab = cellstr(ylab);
+    end
+    ytick = get(p.hAxes, 'YTick'); 
+    ytick(ytick<1|ytick>length(ylab)) = [];
+    if p.ShowAllTicks || length(ytick) > length(ylab)
         ytick = 1:length(ylab);
-    else
-        ytick = get(p.hAxes, 'YTick');
     end
     set(p.hAxes,'YTick',ytick,'YTickLabel',ylab(ytick));
+end
+if p.IsGraphics2
+    if p.TickTexInterpreter
+        set(p.hAxes,'TickLabelInterpreter','tex');
+    else
+        set(p.hAxes,'TickLabelInterpreter','none');
+    end
 end
 % Xlabels are trickier because they could have a TickAngle
 hXText = []; % Default value
@@ -294,16 +382,23 @@ else
     if isnumeric(xlab)
         xlab = arrayfun(@(x){num2str(x)},xlab);
     end
-    if p.ShowAllTicks
+    if ischar(xlab)
+        xlab = cellstr(xlab);
+    end
+    xtick = get(p.hAxes, 'XTick');
+    xtick(xtick<1|xtick>length(xlab)) = [];
+    if p.ShowAllTicks || length(xtick) > length(xlab)
         xtick = 1:length(xlab);
-    else
-        xtick = get(p.hAxes, 'XTick');
     end
-    if p.TickAngle == 0
-        set(p.hAxes,'XTick',xtick,'XTickLabel',xlab(xtick));
+    if p.IsGraphics2
+        set(p.hAxes,'XTick',xtick,'XTickLabel',xlab(xtick),'XTickLabelRotation', p.TickAngle);
     else
-        hXText = createXTicks(p.hAxes, p.TickAngle, xtick, xlab(xtick));
-        adjustAxesToAccommodateTickLabels(p.hAxes, hXText);
+        if p.TickAngle == 0
+            set(p.hAxes,'XTick',xtick,'XTickLabel',xlab(xtick));
+        else
+            hXText = createXTicks(p.hAxes, p.TickAngle, xtick, xlab(xtick), p.TickTexInterpreter);
+            adjustAxesToAccommodateTickLabels(p.hAxes, hXText);
+        end
     end
 end
 
@@ -311,16 +406,21 @@ end
 
 end
 
-% Create Rotated X Tick Labels
-function hXText = createXTicks(hAxes, tickAngle, xticks, xticklabels)
+% Create Rotated X Tick Labels (Graphics v1)
+function hXText = createXTicks(hAxes, tickAngle, xticks, xticklabels, texInterpreter)
 
     axXLim = get(hAxes, 'XLim');
     [xPos, yPos] = calculateTextTickPositions(hAxes, axXLim, xticks);
-            
+    
+    if texInterpreter
+        interpreter = 'tex';
+    else
+        interpreter = 'none';
+    end
     hXText = text(xPos, yPos, cellstr(xticklabels), 'Units', 'normalized', ...
                   'Parent', hAxes, 'FontSize', get(hAxes,'FontSize'), ...
                   'HorizontalAlignment', 'right', 'Rotation', tickAngle,...
-                  'Interpreter', 'none');
+                  'Interpreter', interpreter);
                 
     set(hAxes, 'XTick', xticks, 'XTickLabel', '');
 
@@ -438,6 +538,7 @@ if ~isempty(axInfo.ylab)
         set(hAxes, 'YTickMode', 'auto');
         yticks = get(hAxes, 'YTick');
         yticks = yticks( yticks == floor(yticks) );
+        yticks(yticks<1|yticks>length(axInfo.ylab)) = [];
     end
     ylabels = repmat({''},1,max(yticks));
     ylabels(1:length(axInfo.ylab)) = axInfo.ylab;
@@ -454,13 +555,14 @@ if ~isempty(axInfo.xlab)
         set(hAxes, 'XTickMode', 'auto');
         xticks = get(hAxes, 'XTick');
         xticks = xticks( xticks == floor(xticks) );
+        xticks(xticks<1|xticks>length(axInfo.xlab)) = [];
     end
     xlabels = repmat({''},1,max(xticks));
     xlabels(1:length(axInfo.xlab)) = axInfo.xlab;
     
     if ~isempty(axInfo.hXText) % Rotated X tick labels exist
         try delete(axInfo.hXText); end %#ok<TRYNC>
-        axInfo.hXText = createXTicks(hAxes, p.TickAngle, xticks, xlabels(xticks));
+        axInfo.hXText = createXTicks(hAxes, p.TickAngle, xticks, xlabels(xticks), p.TickTexInterpreter);
         set(hAxes, 'UserData', axInfo);
     else
         set(hAxes, 'XTick', xticks, 'XTickLabel', xlabels(xticks));
@@ -556,10 +658,10 @@ end
 [xpos,ypos] = meshgrid(1:size(mat,2),1:size(mat,1));
 if p.FontSize > 0
     p.hText = text(xpos(:),ypos(:),displaytext(:),'FontSize',p.FontSize,...
-        'HorizontalAlignment','center', colorprop, p.TextColor);
+        'HorizontalAlignment','center', colorprop, p.TextColor,'Parent',p.hAxes);
 else
     p.hText = text(xpos(:),ypos(:),displaytext(:),'Visible','off',...
-        'HorizontalAlignment','center', colorprop, p.TextColor);
+        'HorizontalAlignment','center', colorprop, p.TextColor,'Parent',p.hAxes);
 end
 
 % Calculate factor to scale font size in future callbacks
@@ -615,10 +717,14 @@ end
 % -------------------------- Colormap Functions --------------------------
 
 % Determine the colormap to use
-function p = calculateColormap(p, mat,minV,maxV);
+function p = calculateColormap(p, mat)
 
 if isempty(p.Colormap)
-    p.Colormap = get(p.hFig,'Colormap');
+    if p.IsGraphics2 && ~p.UseFigureColormap
+        p.Colormap = colormap(p.hAxes);
+    else
+        p.Colormap = get(p.hFig,'Colormap');
+    end
     if isempty(p.ColorLevels)
         p.ColorLevels = size(p.Colormap,1);
     else
@@ -627,7 +733,7 @@ if isempty(p.Colormap)
 elseif ischar(p.Colormap) || isa(p.Colormap,'function_handle')
     if isempty(p.ColorLevels), p.ColorLevels = 64; end
     if strcmp(p.Colormap, 'money')
-        p.Colormap = money(mat, p.ColorLevels,minV,maxV);
+        p.Colormap = money(mat, p.ColorLevels);
     else
         p.Colormap = feval(p.Colormap,p.ColorLevels);
     end
@@ -658,18 +764,12 @@ cmap = [interp1(xi, t(:,1), 1:clevels);...
 end
 
 % Generate Red-White-Green color map
-function cmap = money(data, clevels,minV,maxV)
+function cmap = money(data, clevels)
 % Function to make the heatmap have the green, white and red effect
-[R,C] = find(data<minV);
-for i = 1:length(R)
-    data(R(i),C(i)) = minV;
-end
-clear R C;
-[R,C] = find(data>maxV);
-for i = 1:length(R)
-    data(R(i),C(i)) = maxV;
-end
-zeroInd = round(-minV/(maxV-minV)*(clevels-1)+1);
+n = min(data(:));
+x = max(data(:));
+if x == n, x = n+1; end
+zeroInd = round(-n/(x-n)*(clevels-1)+1);
 if zeroInd <= 1 % Just green
     b = interp1([1 clevels], [1 0], 1:clevels);
     g = interp1([1 clevels], [1 1], 1:clevels);
