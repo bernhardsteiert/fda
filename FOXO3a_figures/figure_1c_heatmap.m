@@ -9,7 +9,7 @@ load('./Workspaces/harm_basis_50_to_600')
 myextension = '130722_corrected_retracked_all_paper_cleaned';
 
 % sites_all = [64];
-sites_all = 48;
+sites_all = 1;
 nsigs = 40;
 removeTraces = [];
 % removeTraces = [5];
@@ -68,9 +68,11 @@ for i = 1:size(c_signal_single,2)
         c_signal_single(end-rl(end)+1:end,i) = c_signal_single(end-rl(end),i);
     end
 end
-time_range = [50 605];%getbasisrange(harm_basis);
-[~, range_ind_min] = min(abs(timestamp - time_range(1) - 5));
-[~, range_ind_max] = min(abs(timestamp - time_range(2) + 5));
+time_range = getbasisrange(harm_basis);
+range_ind_min = find((timestamp-time_range(1))>0);
+range_ind_min = range_ind_min(1);
+range_ind_max = find((timestamp-time_range(2))<0);
+range_ind_max = range_ind_max(end);
 range_ind = range_ind_min:range_ind_max;
 times_fine_late = linspace(timestamp(range_ind(1)),timestamp(range_ind(end)),201);
 smoothed_additional = smooth_basis(timestamp(range_ind),c_signal_single(range_ind,:),harm_basis);
