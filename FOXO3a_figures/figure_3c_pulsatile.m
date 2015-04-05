@@ -16,8 +16,12 @@ early_ws = load('./Workspaces/scores_early_5basis_noFGF_newBTC');
 
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 
-medians = nan(length(possible_doses),nCelltype,length(features)+1);
+medians = nan(length(possible_doses),nCelltype,length(features)+1+2);
 highdoses = [];
+
+rng(0) % Make sure that bootstrap samples are reproducible
+ratio_fun = @(x) sum(x > puls_thres) / length(x);
+
 for isite = sites_all
     sprop = siteprop(isite);
     doseind = sprop.lig_dose == possible_doses;
@@ -28,6 +32,7 @@ for isite = sites_all
 %     medians(doseind,resort(sprop.lig_index),1:7) = nanmedian(scores_puls(celltypes == isite,:),1);
     medians(doseind,resort(sprop.lig_index),1:7) = nanmean(scores_puls(celltypes == isite & scores_puls(:,1)' > puls_thres,:),1);
     medians(doseind,resort(sprop.lig_index),8) = sum(scores_puls(celltypes == isite,1) > puls_thres)/sum(celltypes == isite);
+    medians(doseind,resort(sprop.lig_index),9:10) = bootci(2000,{ratio_fun,scores_puls(celltypes == isite,1)},'alpha',.32);
 end
 medians(1,5,:) = nanmean(medians(1,:,:),2);
 
@@ -53,6 +58,8 @@ for irow = 1:length(highdoses)
 
     [axb s] = polyfitZero(1:length(possible_doses)-1,medians(2:end,irow,icol)'-mean(medians(1,:,icol)),1);
     plot(0:length(possible_doses)-1,(0:length(possible_doses)-1)*axb(1) + mean(medians(1,:,icol)),'-','Color',colmap(irow,:),'LineWidth',2)
+    h=errorbar(0:length(possible_doses)-1,medians(:,irow,icol),medians(:,irow,icol)-medians(:,irow,icol+1),medians(:,irow,icol+2)-medians(:,irow,icol),'Color',colmap(irow,:));
+    set(h,'linestyle','none')
 end
 title('Fraction cells [%]')
 set(gca,'XLim',[-.5 length(possible_doses)-.5])
@@ -147,6 +154,9 @@ for irow = 1:length(highdoses)
     p(qFit) = optRes;
     p(~qFit) = pFix;
     plot(linspace(0,length(possible_doses)-1,201),f(p,linspace(0,length(possible_doses)-1,201)),'-','Color',colmap(irow,:),'LineWidth',2)
+    
+    h=errorbar(0:length(possible_doses)-1,medians(:,irow,icol),medians(:,irow,icol)-medians(:,irow,icol+1),medians(:,irow,icol+2)-medians(:,irow,icol),'Color',colmap(irow,:));
+    set(h,'linestyle','none')
 end
 title('Fraction cells [%]')
 set(gca,'XLim',[-.5 length(possible_doses)-.5])
