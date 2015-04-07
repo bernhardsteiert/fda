@@ -149,12 +149,12 @@ for icell = 1:2
         end
         h1 = errorbar(x1,fliplr(egfmeki_pulsing(ih,[1 6 7],icell)),fliplr(egfmeki_pulsing(ih,[1 6 7],icell)-egfmeki_pulsing_bd(1+2*(ih-1),[1 6 7],icell)),fliplr(egfmeki_pulsing_bd(2*ih,[1 6 7],icell)-egfmeki_pulsing(ih,[1 6 7],icell)),'k');
         set(h1,'linestyle','none')
-        plot(x1,fliplr(egfmeki_signif1(ih,[1 6 7],icell)) * .85,'k*')
-        plot(x1,fliplr(egfmeki_signif2(ih,[1 6 7],icell)) * .87,'k*')
+%         plot(x1,fliplr(egfmeki_signif1(ih,[1 6 7],icell)) * .85,'k*')
+%         plot(x1,fliplr(egfmeki_signif2(ih,[1 6 7],icell)) * .87,'k*')
     end
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 2+1.5])
-    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(meki_doses(5:6)))])
+    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(meki_doses([1 end])))])
     xlabel('MEKi [muM]')
     ylabel('Fraction of pulsing cells')
     title(sprintf('%s: EGF 4 ng/mL',cell_names{icell}))
@@ -178,13 +178,13 @@ for icell = 1:2
         end
         h1 = errorbar(x1,fliplr(igfakti_pulsing(ih,[1 5 6],icell)),fliplr(igfakti_pulsing(ih,[1 5 6],icell)-igfakti_pulsing_bd(1+2*(ih-1),[1 5 6],icell)),fliplr(igfakti_pulsing_bd(2*ih,[1 5 6],icell)-igfakti_pulsing(ih,[1 5 6],icell)),'k');
         set(h1,'linestyle','none')
-        plot(x1,fliplr(igfakti_signif1(ih,[1 5 6],icell)) * .85,'k*')
-        plot(x1,fliplr(igfakti_signif2(ih,[1 5 6],icell)) * .87,'k*')
+%         plot(x1,fliplr(igfakti_signif1(ih,[1 5 6],icell)) * .85,'k*')
+%         plot(x1,fliplr(igfakti_signif2(ih,[1 5 6],icell)) * .87,'k*')
     end
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 2+1.5])
     xlabel('AKTi [muM]')
-    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(akti_doses(4:5)))])
+    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(akti_doses([1 end])))])
     title(sprintf('%s: IGF 20 ng/mL',cell_names{icell}))
 %     legstr = {};
 %     for id = 1:length(igf_dose)

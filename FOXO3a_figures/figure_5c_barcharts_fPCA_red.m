@@ -22,8 +22,8 @@ akti_doses = [.5 .1 .025 .00625 0];
 egfmeki_pulsing = nan(length(egf_dose),length(meki_doses)+1,2);
 igfakti_pulsing = nan(length(igf_dose),length(akti_doses)+1,2);
 
-egfmeki_pulsing_bd = nan(2*length(egf_dose),length(meki_doses)+1,2);
-igfakti_pulsing_bd = nan(2*length(igf_dose),length(akti_doses)+1,2);
+egfmeki_pulsing_bd = nan(length(egf_dose),length(meki_doses)+1,2);
+igfakti_pulsing_bd = nan(length(igf_dose),length(akti_doses)+1,2);
 
 rng(0) % Make sure that bootstrap samples are reproducible
 ratio_fun = @(x) nanmean(x);
@@ -44,10 +44,10 @@ for id = 1:length(egf_dose)
 
         if s.lig_dose == egf_dose(id) && icell > 0 && ~isempty(strmatch(s.lig_name,'EGF','exact'))
             egfmeki_pulsing(id,s.drug_dose == meki_doses,icell) = nanmean(egfmeki.scores_all(pc,egfmeki.celltype == isite));
-            egfmeki_pulsing_bd(1+2*(id-1):2*id,s.drug_dose == meki_doses,icell) = bootci(2000,{ratio_fun,egfmeki.scores_all(pc,egfmeki.celltype == isite)},'alpha',.32);
+            egfmeki_pulsing_bd(id,s.drug_dose == meki_doses,icell) = nanstd(egfmeki.scores_all(pc,egfmeki.celltype == isite))./sqrt(sum(egfmeki.celltype == isite));
         elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0  
             egfmeki_pulsing(id,end,icell) = nanmean(egfmeki.scores_all(pc,egfmeki.celltype == isite));
-            egfmeki_pulsing_bd(1+2*(id-1):2*id,end,icell) = bootci(2000,{ratio_fun,egfmeki.scores_all(pc,egfmeki.celltype == isite)},'alpha',.32);
+            egfmeki_pulsing_bd(id,end,icell) = nanstd(egfmeki.scores_all(pc,egfmeki.celltype == isite))./sqrt(sum(egfmeki.celltype == isite));
         end
 
     end
@@ -70,10 +70,10 @@ for id = 1:length(igf_dose)
 
         if s.lig_dose == igf_dose(id) && icell > 0 && ~isempty(strmatch(s.lig_name,'IGF','exact'))
             igfakti_pulsing(id,s.drug_dose == akti_doses,icell) = nanmean(igfakti.scores_all(pc,igfakti.celltype == isite));
-            igfakti_pulsing_bd(1+2*(id-1):2*id,s.drug_dose == akti_doses,icell) = bootci(2000,{ratio_fun,igfakti.scores_all(pc,igfakti.celltype == isite)},'alpha',.32);
+            igfakti_pulsing_bd(id,s.drug_dose == akti_doses,icell) = nanstd(igfakti.scores_all(pc,igfakti.celltype == isite))./sqrt(sum(igfakti.celltype == isite));
         elseif s.lig_dose == 0 && s.drug_dose == 0 && icell > 0  
             igfakti_pulsing(id,end,icell) = nanmean(igfakti.scores_all(pc,igfakti.celltype == isite));
-            igfakti_pulsing_bd(1+2*(id-1):2*id,end,icell) = bootci(2000,{ratio_fun,igfakti.scores_all(pc,igfakti.celltype == isite)},'alpha',.32);
+            igfakti_pulsing_bd(id,end,icell) = nanstd(igfakti.scores_all(pc,igfakti.celltype == isite))./sqrt(sum(igfakti.celltype == isite));
         end
 
     end
@@ -99,12 +99,12 @@ for icell = 1:2
         else
             x1 = bsxfun(@plus, h(ih).XData, [h(ih).XOffset]');
         end
-        h1 = errorbar(x1,fliplr(egfmeki_pulsing(ih,[1 6 7],icell)),fliplr(egfmeki_pulsing(ih,[1 6 7],icell)-egfmeki_pulsing_bd(1+2*(ih-1),[1 6 7],icell)),fliplr(egfmeki_pulsing_bd(2*ih,[1 6 7],icell)-egfmeki_pulsing(ih,[1 6 7],icell)),'k');
+        h1 = errorbar(x1,fliplr(egfmeki_pulsing(ih,[1 6 7],icell)),fliplr(egfmeki_pulsing_bd(ih,[1 6 7],icell)),'k');
         set(h1,'linestyle','none')
     end
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 2+1.5])
-    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(meki_doses(5:6)))])
+    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(meki_doses([1 end])))])
     xlabel('MEKi [muM]')
     ylabel(sprintf('Mean PC%i score',pc))
     title(sprintf('%s: EGF 4 ng/mL',cell_names{icell}))
@@ -126,13 +126,13 @@ for icell = 1:2
         else
             x1 = bsxfun(@plus, h(ih).XData, [h(ih).XOffset]');
         end
-        h1 = errorbar(x1,fliplr(igfakti_pulsing(ih,[1 5 6],icell)),fliplr(igfakti_pulsing(ih,[1 5 6],icell)-igfakti_pulsing_bd(1+2*(ih-1),[1 5 6],icell)),fliplr(igfakti_pulsing_bd(2*ih,[1 5 6],icell)-igfakti_pulsing(ih,[1 5 6],icell)),'k');
+        h1 = errorbar(x1,fliplr(igfakti_pulsing(ih,[1 5 6],icell)),fliplr(igfakti_pulsing_bd(ih,[1 5 6],icell)),'k');
         set(h1,'linestyle','none')
     end
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 2+1.5])
     xlabel('AKTi [muM]')
-    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(akti_doses(4:5)))])
+    set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(akti_doses([1 end])))])
     title(sprintf('%s: IGF 20 ng/mL',cell_names{icell}))
 %     legstr = {};
 %     for id = 1:length(igf_dose)
