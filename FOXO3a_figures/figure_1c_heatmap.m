@@ -9,11 +9,11 @@ load('./Workspaces/harm_basis_50_to_600')
 myextension = '130722_corrected_retracked_all_paper_cleaned';
 
 % sites_all = [64];
-sites_all = 1;
+sites_all = 4;
 nsigs = 40;
-removeTraces = [];
-% removeTraces = [5];
-% removeTraces = [6 7 9 14 15 24 25 29 30 32 37 45 52];
+
+removeTraces = [4 7 13 18 23];
+%removeTraces = [6 7 9 14 15 24 25 29 30 32 37 45 52];
 sigs = setdiff(1:100,removeTraces);
 sigs = sigs(1:nsigs);
 colmap = jet(length(sigs));
@@ -127,7 +127,7 @@ plot([xtick_new xtick_new],get(gca,'YLim'),':k');
 % plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xlabel('time [min]')
 ylabel('Localization');
-set(gcf,'Position',[100 100 700 400]);
+set(gcf,'Position',[100 100 400 250]);
 
 % Old code to adjust heatmap x-ticks ... not working atm
 % xtick = round(linspace(1,length(timestamp),11));
@@ -170,4 +170,4 @@ xtick_new = interp1(str2num(char(get(gca,'XTickLabel'))),get(gca,'XTick'),480);
 plot([xtick_new xtick_new],get(gca,'YLim'),'-k');
 xlabel('time [min]')
 ylabel('Pulsing');
-set(gcf,'Position',[100 100 700 400]);
+set(gcf,'Position',[100 100 400 250]);

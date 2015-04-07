@@ -43,8 +43,10 @@ for ic = 1:length(cell_name)
 
         medians = [];
         iqrs = [];
-
+        currentLoc = pwd;
+        cd ..;
         data = load(['./Workspaces/' cell_name{ic} '_' obs{iobs}]);
+        cd(currentLoc);
         mydata = getfield(data,['single_' obs{iobs}]);
 
         shiftmedians = [];
