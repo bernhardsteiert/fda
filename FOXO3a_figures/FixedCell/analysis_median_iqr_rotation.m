@@ -10,7 +10,7 @@ obs = {'FOXO3a', 'pERK', 'pAKT'};
 timepoints_184a1 = [0, 5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 300, 480];
 timepoints_all   = [0,        15,     30,     60, 90, 120, 180, 240];
 
-highlight_ligs = [1 3 6 7]; % EGF; FGF1; BTC; NS
+highlight_ligs = [1:7]; % EGF; FGF1; BTC; NS
 %highlight_ligs = [2 4 5]; % IGF1 HRG NS
 
 close all
