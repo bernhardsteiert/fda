@@ -81,14 +81,15 @@ for id = 1:length(igf_dose)
 end
 
 cell_names = {'MCF10A','184A1'};
-ylim = [-.12 .25; -.12 .25];
+ylim = [-.12 .25; -.1 .25];
+baroff = .1; % Quantify negative offset here (defines baseline)
 matVer = ver('MATLAB');
 matVer = str2double(matVer.Version)>=8.4;
 for icell = 1:2
 
     figure
     subplot(1,2,1)
-    h = bar(fliplr(egfmeki_pulsing(1,[1 6 7],icell))');
+    h = bar(baroff+fliplr(egfmeki_pulsing(1,[1 6 7],icell))');
     set(h(1),'FaceColor',[.3 .3 1])
 %     set(h(2),'FaceColor',[.15 .15 .5])
     hold on
@@ -99,10 +100,13 @@ for icell = 1:2
         else
             x1 = bsxfun(@plus, h(ih).XData, [h(ih).XOffset]');
         end
-        h1 = errorbar(x1,fliplr(egfmeki_pulsing(ih,[1 6 7],icell)),fliplr(egfmeki_pulsing_bd(ih,[1 6 7],icell)),'k');
+        h1 = errorbar(x1,baroff+fliplr(egfmeki_pulsing(ih,[1 6 7],icell)),fliplr(egfmeki_pulsing_bd(ih,[1 6 7],icell)),'k');
         set(h1,'linestyle','none')
     end
-    set(gca,'YLim',ylim(icell,:))
+    
+    set(gca,'YLim',ylim(icell,:)+baroff)
+    myyticks = round(get(gca,'YTick')*100)./100;
+    set(gca,'YTick',myyticks,'YTickLabel',myyticks-baroff)
     set(gca,'XLim',[.5 2+1.5])
     set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(meki_doses([1 end])))])
     xlabel('MEKi [muM]')
@@ -115,7 +119,7 @@ for icell = 1:2
 %     legend(legstr)
     
     subplot(1,2,2)
-    h = bar(fliplr(igfakti_pulsing(1,[1 5 6],icell))');
+    h = bar(baroff+fliplr(igfakti_pulsing(1,[1 5 6],icell))');
     set(h(1),'FaceColor',[1 .3 .3])
 %     set(h(2),'FaceColor',[.5 .15 .15])
     hold on
@@ -126,10 +130,12 @@ for icell = 1:2
         else
             x1 = bsxfun(@plus, h(ih).XData, [h(ih).XOffset]');
         end
-        h1 = errorbar(x1,fliplr(igfakti_pulsing(ih,[1 5 6],icell)),fliplr(igfakti_pulsing_bd(ih,[1 5 6],icell)),'k');
+        h1 = errorbar(x1,baroff+fliplr(igfakti_pulsing(ih,[1 5 6],icell)),fliplr(igfakti_pulsing_bd(ih,[1 5 6],icell)),'k');
         set(h1,'linestyle','none')
     end
-    set(gca,'YLim',ylim(icell,:))
+    set(gca,'YLim',ylim(icell,:)+baroff)
+    myyticks = round(get(gca,'YTick')*100)./100;
+    set(gca,'YTick',myyticks,'YTickLabel',myyticks-baroff)
     set(gca,'XLim',[.5 2+1.5])
     xlabel('AKTi [muM]')
     set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(akti_doses([1 end])))])
