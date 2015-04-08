@@ -414,6 +414,9 @@ end
 %%
 figure
 hold on
+set(gca,'XLim',[-.1 ,.2])
+set(gca,'YLim',[0 1],'YTick',0:.1:1,'YTickLabel',0:10:100)
+set(gca,'ZLim',[-.01 ,.09])
 resort = [4 1 nan 2 3 6 5]; % Relative to platemap
 pcs = [2 3];
 
@@ -428,7 +431,7 @@ for isite = sites_all_sorted
         early_pc_med(possible_doses == s.lig_dose,resort(s.lig_index),ipc) = nanmedian(early_ws.scores_early(ipc,early_ws.celltypes == isite));
     end
 end
-early_pc_med(1,:,:) = repmat(mean(early_pc_med(1,:,:),2),1,size(early_pc_med,2),1);
+early_pc_med(1,:,:) = repmat(nanmean(early_pc_med(1,:,:),2),1,size(early_pc_med,2),1);
 resort = [2 3 4 1 6 5];
 highdoses = highdoses(resort);
 
@@ -438,8 +441,13 @@ for irow = 1:length(highdoses)
     sprop = siteprop(highdoses(irow));
     legstr{irow} = sprop.lig_name(1:3);
     legh = [legh plot3(early_pc_med(:,irow,pcs(1)),medians(:,irow,icol),early_pc_med(:,irow,pcs(2)),'--','Color',colmap(irow,:))];
+    [err,coeff,p0] = fit_3D_data(early_pc_med(:,irow,pcs(1)),medians(:,irow,icol),early_pc_med(:,irow,pcs(2)),'line','off','off');
+    plot3(p0(1)+[-1e3 1e3]*coeff(1),p0(2)+[-1e3 1e3]*coeff(2),p0(3)+[-1e3 1e3]*coeff(3),'Color',colmap(irow,:))
     for idose = 1:size(medians,1)
-        plot3(early_pc_med(idose,irow,pcs(1)),medians(idose,irow,icol),early_pc_med(idose,irow,pcs(2)),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',2+idose*4);
+        mycolor = rgb2hsv(colmap(irow,:));
+        mycolor(2:3) = idose/size(medians,1)*mycolor(2:3);
+        mycolor = hsv2rgb(mycolor);
+        plot3(early_pc_med(idose,irow,pcs(1)),medians(idose,irow,icol),early_pc_med(idose,irow,pcs(2)),markers{irow},'MarkerFaceColor',mycolor,'MarkerEdgeColor',mycolor,'MarkerSize',12);
     end
 end
 xlabel(sprintf('Early PC%d',pcs(1)))
