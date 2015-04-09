@@ -161,7 +161,7 @@ for iligdose = 1:size(igfakti_pulsing,1)
 %                 igfakti_pulsing(iligdose,idrugdose,icell); % MEAN1
 %                 igfakti_pulsing_bd(2*iligdose,idrugdose,icell) - igfakti_pulsing_bd(2*iligdose-1,idrugdose,icell); % STD1
 
-                igfakti_pvals(iligdose,idrugdose,icell) = 1-cdf('t',abs((refcond_mean_ns - igfakti_pulsing(iligdose,idrugdose,icell)) / sqrt((refcond_std_ns)^2 + (igfakti_pulsing_bd(2*iligdose,idrugdose,icell) - igfakti_pulsing_bd(2*iligdose-1,idrugdose,icell))^2)),1e6);
+                igfakti_pvals_ns(iligdose,idrugdose,icell) = 1-cdf('t',abs((refcond_mean_ns - igfakti_pulsing(iligdose,idrugdose,icell)) / sqrt((refcond_std_ns)^2 + (igfakti_pulsing_bd(2*iligdose,idrugdose,icell) - igfakti_pulsing_bd(2*iligdose-1,idrugdose,icell))^2)),1e6);
             end
         end
     end
