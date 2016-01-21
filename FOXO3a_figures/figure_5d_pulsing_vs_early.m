@@ -80,7 +80,10 @@ for i = 1:length(sites_igfakti)
 end
 
 
-
+cols{1,1} = [linspace(.6,.5,length(meki_doses)); linspace(1/2,1,length(meki_doses)); ones(1,length(meki_doses))]';
+cols{1,2} = [linspace(.6,.5,length(meki_doses)); linspace(1/2,1,length(meki_doses)); ones(1,length(meki_doses))*.8]';
+cols{2,1} = [linspace(.1,0,length(akti_doses)); linspace(.7,1,length(akti_doses)); ones(1,length(akti_doses))]';
+cols{2,2} = [linspace(.1,0,length(akti_doses)); linspace(.7,1,length(akti_doses)); ones(1,length(akti_doses))*.8]';
 
 for icell = 1:2
     figure
@@ -89,24 +92,18 @@ for icell = 1:2
     for i = 1:length(sites_egfmeki)
         isite = sites_egfmeki(i);
         if egfmeki_celltype(i) == icell
-            markersize = 4 + find(egfmeki_drugdose(i) == meki_doses) * 4;
-            col2 = .7;
-            col3 = (length(egf_dose)-find(egfmeki_ligdose(i) == egf_dose)+1) / length(egf_dose);
-            doplot = 0;
-            if egfmeki_ligind(i) == strmatch('EGF',lig_names,'exact')
-%                 doplot = 1;
-                if ismember(egfmeki_ligdose(i),egf_dose)
-                    doplot = 1;
-                    col1 = 2/3; % blue
-%                 else
-%                     col1 = 2/3;
-%                     col2 = 0;
-%                     col3 = 0.7;
+            if any(egfmeki_ligdose(i) == egf_dose) && any(egfmeki_drugdose(i) == meki_doses)
+                col = cols{1,egfmeki_ligdose(i) == egf_dose}(egfmeki_drugdose(i) == meki_doses,:);
+                doplot = 0;
+                if egfmeki_ligind(i) == strmatch('EGF',lig_names,'exact')
+                    if ismember(egfmeki_ligdose(i),egf_dose)
+                        doplot = 1;
+                    end
                 end
-            end
-            if doplot
-                col = hsv2rgb([col1 col2 col3]);
-                plot(egfmeki_early(i),egfmeki_pulsing(i),'o','MarkerSize',markersize,'MarkerFaceColor',col,'MarkerEdgeColor','none')
+                if doplot
+                    col = hsv2rgb(col);
+                    plot(egfmeki_early(i),egfmeki_pulsing(i),'d','MarkerSize',12,'MarkerFaceColor',col,'MarkerEdgeColor',hsv2rgb(cols{1,egfmeki_ligdose(i) == egf_dose}(end,:)))
+                end
             end
         end
     end
@@ -114,24 +111,18 @@ for icell = 1:2
     for i = 1:length(sites_igfakti)
         isite = sites_igfakti(i);
         if igfakti_celltype(i) == icell
-            markersize = 4 + find(igfakti_drugdose(i) == akti_doses) * 4;
-            col2 = .7;
-            col3 = (length(igf_dose)-find(igfakti_ligdose(i) == igf_dose)+1) / length(igf_dose);
-            doplot = 0;
-            if igfakti_ligind(i) == strmatch('IGF',lig_names,'exact')
-%                 doplot = 1;
-                if ismember(igfakti_ligdose(i),igf_dose)
-                    doplot = 1;
-                    col1 = 0; % red
-%                 else
-%                     col1 = 0;
-%                     col2 = 0;
-%                     col3 = 0.7;
+            if any(igfakti_ligdose(i) == igf_dose) && any(igfakti_drugdose(i) == akti_doses)
+                col = cols{2,igfakti_ligdose(i) == igf_dose}(igfakti_drugdose(i) == akti_doses,:);
+                doplot = 0;
+                if igfakti_ligind(i) == strmatch('IGF',lig_names,'exact')
+                    if ismember(igfakti_ligdose(i),igf_dose)
+                        doplot = 1;
+                    end
                 end
-            end
-            if doplot
-                col = hsv2rgb([col1 col2 col3]);
-                plot(igfakti_early(i),igfakti_pulsing(i),'s','MarkerSize',markersize,'MarkerFaceColor',col,'MarkerEdgeColor','none')
+                if doplot
+                    col = hsv2rgb(col);
+                    plot(igfakti_early(i),igfakti_pulsing(i),'o','MarkerSize',12,'MarkerFaceColor',col,'MarkerEdgeColor',hsv2rgb(cols{2,igfakti_ligdose(i) == igf_dose}(end,:)))
+                end
             end
         end
     end
