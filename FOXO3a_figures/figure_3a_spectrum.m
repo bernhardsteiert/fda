@@ -97,7 +97,10 @@ load('./Workspaces/fourier_signals_corrected_cleaned_newBTC')
 time_range = [200 1475];
 
 labels = {'< 10%', '10-25%', '25-50%', '50-75%', '75-90%', '> 90%', 'Pink noise', 'Sine + white noise'};
-colmap = hsv(length(c_signal_single));
+colmap = gray(length(c_signal_single)+6);
+colmap = colmap(4:end-3,:);
+colmap(8,:) = [255,105,180]/255;
+colmap(7,:) = [205,133,63]/255;
 % colmap(1,:) = [0 0 0];
 
 figure
