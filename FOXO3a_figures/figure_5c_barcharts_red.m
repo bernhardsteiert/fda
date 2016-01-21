@@ -6,6 +6,8 @@ addpath('./Functions/')
 egfmeki = load('Workspaces/dists_04182014');
 igfakti = load('./Workspaces/c_signal_03302014');
 
+significance_level = 0.05;
+
 sites_egfmeki = [1:39 41:72];
 sites_igfakti = 1:72;
 
@@ -116,13 +118,13 @@ for iligdose = 1:size(igfakti_pulsing,1)
     end
 end
 
-egfmeki_signif1 = egfmeki_pvals < .1;
+egfmeki_signif1 = egfmeki_pvals < significance_level;
 egfmeki_signif1 = double(egfmeki_signif1);
 egfmeki_signif1(egfmeki_signif1 == 0) = nan;
 egfmeki_signif2 = egfmeki_pvals < .05;
 egfmeki_signif2 = double(egfmeki_signif2);
 egfmeki_signif2(egfmeki_signif2 == 0) = nan;
-igfakti_signif1 = igfakti_pvals < .01;
+igfakti_signif1 = igfakti_pvals < significance_level;
 igfakti_signif1 = double(igfakti_signif1);
 igfakti_signif1(igfakti_signif1 == 0) = nan;
 igfakti_signif2 = igfakti_pvals < .05;
@@ -167,13 +169,13 @@ for iligdose = 1:size(igfakti_pulsing,1)
     end
 end
 
-egfmeki_signif1_ns = egfmeki_pvals_ns < .1;
+egfmeki_signif1_ns = egfmeki_pvals_ns < significance_level;
 egfmeki_signif1_ns = double(egfmeki_signif1_ns);
 egfmeki_signif1_ns(egfmeki_signif1_ns == 0) = nan;
 egfmeki_signif2_ns = egfmeki_pvals_ns < .05;
 egfmeki_signif2_ns = double(egfmeki_signif2_ns);
 egfmeki_signif2_ns(egfmeki_signif2_ns == 0) = nan;
-igfakti_signif1_ns = igfakti_pvals_ns < .01;
+igfakti_signif1_ns = igfakti_pvals_ns < significance_level;
 igfakti_signif1_ns = double(igfakti_signif1_ns);
 igfakti_signif1_ns(igfakti_signif1_ns == 0) = nan;
 igfakti_signif2_ns = igfakti_pvals_ns < .05;
@@ -202,11 +204,14 @@ for icell = 1:2
         end
         h1 = errorbar(x1,fliplr(egfmeki_pulsing(ih,[1 6 7],icell)),fliplr(egfmeki_pulsing(ih,[1 6 7],icell)-egfmeki_pulsing_bd(1+2*(ih-1),[1 6 7],icell)),fliplr(egfmeki_pulsing_bd(2*ih,[1 6 7],icell)-egfmeki_pulsing(ih,[1 6 7],icell)),'k');
         set(h1,'linestyle','none')
-        plot(x1,fliplr(egfmeki_signif1(ih,[1 6 7],icell)) * .85,'k*')
-        plot(x1,fliplr(egfmeki_signif2(ih,[1 6 7],icell)) * .87,'k*')
-        plot(x1,fliplr(egfmeki_signif1_ns(ih,[1 6 7],icell)) * .93,'b*')
-        plot(x1,fliplr(egfmeki_signif2_ns(ih,[1 6 7],icell)) * .95,'b*')
+%         plot(x1,fliplr(egfmeki_signif1(ih,[1 6 7],icell)) * .85,'k*')
+%         plot(x1,fliplr(egfmeki_signif2(ih,[1 6 7],icell)) * .87,'k*')
+%         plot(x1,fliplr(egfmeki_signif1_ns(ih,[1 6 7],icell)) * .93,'b*')
+%         plot(x1,fliplr(egfmeki_signif2_ns(ih,[1 6 7],icell)) * .95,'b*')
     end
+    plot(x1([2 2 3 3]),[.98 1 1 .98]*.9,'k')
+    plot(mean(x1(2:3)),egfmeki_signif1(ih,1,icell) * .95,'k*')
+    
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 2+1.5])
     set(gca,'XTick',1:3,'XTickLabel',[{'NS'},num2cell(fliplr(meki_doses([1 end])))])
@@ -233,11 +238,14 @@ for icell = 1:2
         end
         h1 = errorbar(x1,fliplr(igfakti_pulsing(ih,[1 5 6],icell)),fliplr(igfakti_pulsing(ih,[1 5 6],icell)-igfakti_pulsing_bd(1+2*(ih-1),[1 5 6],icell)),fliplr(igfakti_pulsing_bd(2*ih,[1 5 6],icell)-igfakti_pulsing(ih,[1 5 6],icell)),'k');
         set(h1,'linestyle','none')
-        plot(x1,fliplr(igfakti_signif1(ih,[1 5 6],icell)) * .85,'k*')
-        plot(x1,fliplr(igfakti_signif2(ih,[1 5 6],icell)) * .87,'k*')
-        plot(x1,fliplr(igfakti_signif1_ns(ih,[1 5 6],icell)) * .93,'b*')
-        plot(x1,fliplr(igfakti_signif2_ns(ih,[1 5 6],icell)) * .95,'b*')
+%         plot(x1,fliplr(igfakti_signif1(ih,[1 5 6],icell)) * .85,'k*')
+%         plot(x1,fliplr(igfakti_signif2(ih,[1 5 6],icell)) * .87,'k*')
+%         plot(x1,fliplr(igfakti_signif1_ns(ih,[1 5 6],icell)) * .93,'b*')
+%         plot(x1,fliplr(igfakti_signif2_ns(ih,[1 5 6],icell)) * .95,'b*')
     end
+    plot(x1([2 2 3 3]),[.98 1 1 .98]*.9,'k')
+    plot(mean(x1(2:3)),igfakti_signif1(ih,1,icell) * .95,'k*')
+    
     set(gca,'YLim',ylim(icell,:))
     set(gca,'XLim',[.5 2+1.5])
     xlabel('AKTi [muM]')
