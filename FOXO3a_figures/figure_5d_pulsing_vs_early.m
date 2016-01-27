@@ -80,10 +80,10 @@ for i = 1:length(sites_igfakti)
 end
 
 
-cols{1,1} = [linspace(.6,.5,length(meki_doses)); linspace(1/2,1,length(meki_doses)); ones(1,length(meki_doses))]';
-cols{1,2} = [linspace(.6,.5,length(meki_doses)); linspace(1/2,1,length(meki_doses)); ones(1,length(meki_doses))*.8]';
-cols{2,1} = [linspace(.1,0,length(akti_doses)); linspace(.7,1,length(akti_doses)); ones(1,length(akti_doses))]';
-cols{2,2} = [linspace(.1,0,length(akti_doses)); linspace(.7,1,length(akti_doses)); ones(1,length(akti_doses))*.8]';
+cols{1,1} = [linspace(0,0.1,length(meki_doses)); linspace(0,0.6,length(meki_doses)); linspace(.1,1,length(meki_doses))]';
+cols{1,2} = [linspace(0,0,length(meki_doses)); linspace(0,0.1,length(meki_doses)); linspace(.1,1,length(meki_doses))]';
+cols{2,1} = [linspace(.1,1,length(akti_doses));linspace(0,0.6,length(akti_doses)); linspace(0,0.1,length(akti_doses))]';
+cols{2,2} = [linspace(.1,1,length(akti_doses)); linspace(0,0.1,length(akti_doses)); linspace(0,0.1,length(akti_doses))]';
 
 for icell = 1:2
     figure
@@ -101,8 +101,8 @@ for icell = 1:2
                     end
                 end
                 if doplot
-                    col = hsv2rgb(col);
-                    plot(egfmeki_early(i),egfmeki_pulsing(i),'d','MarkerSize',12,'MarkerFaceColor',col,'MarkerEdgeColor',hsv2rgb(cols{1,egfmeki_ligdose(i) == egf_dose}(end,:)))
+
+                    plot(egfmeki_early(i),egfmeki_pulsing(i),'d','MarkerSize',12,'MarkerFaceColor',col,'MarkerEdgeColor',cols{1,egfmeki_ligdose(i) == egf_dose}(end,:))
                 end
             end
         end
@@ -120,8 +120,8 @@ for icell = 1:2
                     end
                 end
                 if doplot
-                    col = hsv2rgb(col);
-                    plot(igfakti_early(i),igfakti_pulsing(i),'o','MarkerSize',12,'MarkerFaceColor',col,'MarkerEdgeColor',hsv2rgb(cols{2,igfakti_ligdose(i) == igf_dose}(end,:)))
+
+                    plot(igfakti_early(i),igfakti_pulsing(i),'o','MarkerSize',12,'MarkerFaceColor',col,'MarkerEdgeColor',cols{2,igfakti_ligdose(i) == igf_dose}(end,:))
                 end
             end
         end
