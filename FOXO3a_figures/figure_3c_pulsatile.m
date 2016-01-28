@@ -135,7 +135,7 @@ markers = {'o','s','v','d','^','>'};
 f = @(p,x) p(1) + (p(2)-p(1)) ./ (1 + 10.^((p(3)-x)*p(4)));
 mymean = mean(medians(1,:,8));
 for irow = 1:length(highdoses)
-    legh = [legh plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor',colmap(irow,:),'MarkerSize',6)];
+    legh = [legh plot(0:length(possible_doses)-1,medians(:,irow,icol),markers{irow},'MarkerFaceColor',colmap(irow,:),'MarkerEdgeColor','none','MarkerSize',6)];
     medians(1,irow,icol) = mymean;
     % Fix lower asymptotic to mean(medians)
 %     qFit = logical([0 1 1 1]);
