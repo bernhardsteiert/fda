@@ -11,8 +11,7 @@ load('./Workspaces/scores_early_5basis_noFGF_newBTC')
 myextension = '130722_corrected_retracked_all_cleaned';
 
 sites_all = [17 57 64];
-% sigs = [26 6 17]; % IGF 26 looks OK; EPR 6 looks OK; BTC 32 has transient shape + pulsing (75 is maybe better; 17 has some of everything)
-sigs = [26 17 99];
+sigs = [26 35 99];
 colind = [1 6 5];
 
 colmap = [linspace(0,1,7)' ones(7,1) ones(7,1)*.9];

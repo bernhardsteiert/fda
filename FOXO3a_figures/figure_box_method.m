@@ -11,8 +11,7 @@ propvar = propvar.*sum(c_signal_pcastr.varprop(1:length(propvar)));
 propvar = round(propvar*1e4)./1e2;
 
 sites_all = [17 57 64];
-% sigs = [26 6 17]; % IGF 26 looks OK; EPR 6 looks OK; BTC 32 has transient shape + pulsing (75 is maybe better; 17 has some of everything)
-sigs = [26 17 99];
+sigs = [26 35 99];
 colind = [1 6 5];
 basisind = 1:3; % Only use basis 1-3 to fit data
 
@@ -99,7 +98,7 @@ for iplot = basisind
     text(60,-.14,sprintf('Explains %g%% variance',propvar(iplot)))
 end
 
-ylims = [[-.2 .1];[-.05 .15];[-.05 .15]];
+ylims = [[-.2 .1];[-.1 .15];[-.05 .15]];
 for iplot = basisind
     subplot(nrows,ncols,ncols*(iplot-1)+ncols)
     ylabel('Score')
