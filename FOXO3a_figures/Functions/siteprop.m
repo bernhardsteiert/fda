@@ -413,6 +413,24 @@ switch dataset
         s.lig_name = ligand_name{row};
         s.lig_dose = ligand_dose(col);
         
+    case {'02-20-2015','02-20-2015_cleaned'}
+        
+        meki_dose = [.125/3^0 .125/3^1 .125/3^2 .125/3^3 .125/3^4 0]; % Rows
+        akti_dose = [1/1.5^0 1/1.5^1 1/1.5^2 1/1.5^3 1/1.5^4 1/1.5^5 1/1.5^6 1/1.5^7 1/1.5^8 1/1.5^9 1/1.5^10 0]; % Cols
+
+        row = ceil(site/12);
+        col = mod(site-1,12)+1;
+        if ~mod(row,2)
+            col = 13-col;
+        end
+        
+        s.lig_name = 'EGF';
+        s.lig_dose = 20;
+        s.drug1_name = 'AKTi';
+        s.drug2_name = 'MEKi';
+        s.drug1_dose = akti_dose(col);
+        s.drug2_dose = meki_dose(row);
+         
     otherwise
         error('Unknown data-set!!')
         
