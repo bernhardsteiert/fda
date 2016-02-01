@@ -1,4 +1,5 @@
 % Figure 3b: fPCA of early response in 184A1
+close all; clear all;
 load('./Workspaces/scores_early_5basis_noFGF_newBTC.mat')
 
 sites_all = [17:-1:11; 37:-1:31; 44:50; 4:10; 64:69 10; 57:-1:51];
@@ -30,11 +31,15 @@ for ipc = ps
     title(sprintf('PC %i',ipc))
     set(gca,'XTick',1:length(legstr),'XTickLabel',legstr)
     set(gca,'YTick',1:length(legstr),'YTickLabel',legstr)
-    
+    axis image;
     figure
     imagesc(log10(pvals_all)<-10)
-    colormap('bone')
+    colormap('gray')
+    cmap = colormap;
+    cmap = flipud(cmap);
+    colormap(cmap);
     title(sprintf('PC %i',ipc))
     set(gca,'XTick',1:length(legstr),'XTickLabel',legstr)
     set(gca,'YTick',1:length(legstr),'YTickLabel',legstr)
+    axis image;
 end

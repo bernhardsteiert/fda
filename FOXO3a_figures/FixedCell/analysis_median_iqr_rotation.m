@@ -27,7 +27,7 @@ ncols = length(Tx);
 nrowssp = 3;
 ncolssp = 3;
 
-markers = {'o','s','^'};
+markers = {'o','x','^'};
 
 for ic = 1:length(cell_name)
 
@@ -104,9 +104,9 @@ for ic = 1:length(cell_name)
         igfhighmedians = igfhighmedians - shiftpar;
         igfhighiqrs = igfhighiqrs - shiftiqr;
         
-        alpha = atan(median(igfhighiqrs)/median(igfhighmedians));
-        Rmat = [cos(alpha)  sin(alpha); ...
-                -sin(alpha) cos(alpha)];
+        angle = atan(median(igfhighiqrs)/median(igfhighmedians));
+        Rmat = [cos(angle)  sin(angle); ...
+                -sin(angle) cos(angle)];
         tmp = Rmat*[medians; iqrs];
         medians = tmp(1,:);
         iqrs = tmp(2,:);
@@ -148,28 +148,31 @@ for ic = 1:length(cell_name)
         for itype = 1:length(highlight_ligs)
             idrug = 1;
             myinds = allind(alltype == highlight_ligs(itype) & alldrug == idrug & alltime > 0);
-            legh = [legh plot(medians(myinds),iqrs(myinds),markers{idrug},'MarkerFaceColor',colmap(itype,:),'MarkerEdgeColor','none')];
+            legh = [legh plot(medians(myinds),iqrs(myinds),markers{idrug},'MarkerFaceColor','none','MarkerEdgeColor',colmap(itype,:))];
             legstr{end+1} = Ligand{highlight_ligs(itype)};
             plottedinds = [plottedinds myinds];
         end
-        
+
         
         idrug = 1;
         myinds = allind(alltype == 8 & alldrug == idrug & alltime > 0);
-        legh = [legh plot(medians(myinds),iqrs(myinds),'s','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor','none')];
+        legh = [legh plot(medians(myinds),iqrs(myinds),'s','MarkerFaceColor','none','MarkerEdgeColor','k')];
+
         legstr{end+1} = Tx{idrug};
         plottedinds = [plottedinds myinds];
         
         idrug = 2;
         myinds = allind( alldrug == idrug & alltime > 0);
-        legh = [legh plot(medians(myinds),iqrs(myinds),'s','MarkerFaceColor',[0 0 0],'MarkerEdgeColor','none')];
+        legh = [legh plot(medians(myinds),iqrs(myinds),'x','MarkerFaceColor',[.5 .5 .5],'MarkerEdgeColor',[.5 .5 .5])];
+        alpha 0.5;
+        
+        
         legstr{end+1} = Tx{idrug};
         plottedinds = [plottedinds myinds];
-        
-        myinds = ~ismember(1:length(medians),plottedinds);
-        plot(medians(myinds),iqrs(myinds),'x','MarkerFaceColor','none','MarkerEdgeColor',[.75 .75 .75]);
+        %myinds = ~ismember(1:length(medians),plottedinds);
+        %plot(medians(myinds),iqrs(myinds),'x','MarkerFaceColor','none','MarkerEdgeColor',[.75 .75 .75]);
         uistack(legh,'top')
-        
+
         if ic == length(cell_name)
             legend(legh,legstr)
         end
@@ -177,6 +180,6 @@ for ic = 1:length(cell_name)
     end
     
     set(gca,'XLim',[-.2 1.2],'YLim',[-.05 .35])
-
+    
 end
 

@@ -1,10 +1,10 @@
 %% Immunostaining data of fixed parental cells
-
+cd ..
 % cell_name = 'BT20';
 % cell_name = 'HS578T';
 % cell_name = 'MCF7';
-cell_name = 'MCF10A';
-% cell_name = 'MDA231';
+%cell_name = 'MCF10A10142013';
+ cell_name = 'MDA231';
 % cell_name = 'SKBR3';
 % cell_name = 'T47D';
 % cell_name = 'HCC1806';

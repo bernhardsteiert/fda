@@ -17,7 +17,7 @@ colind = [1 6 5];
 colmap = [linspace(0,1,7)' ones(7,1) ones(7,1)*.9];
 colmap = hsv2rgb(colmap(1:end-1,:));
 markers = {'o','s','v','d','^','>'};
-linewidth = 2;
+linewidth = 0.75;
 
 xfac = 1;
 yfac = 1;
@@ -73,9 +73,11 @@ setFigure(gcf,xfac,yfac,fontsize)
 hold on
 legh = [];
 for iplot = 1:size(c_signal_single,2)
-    legh = [legh plot(timestamp,c_signal_single(:,iplot),markers{colind(iplot)},'Color',colmap(colind(iplot),:),'LineWidth',linewidth)];
-    plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
-    plot(times_fine,smoothed_eval(:,iplot),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
+    plot(times_fine,smoothed_eval(:,iplot),'Color',colmap(colind(iplot),:),'LineWidth',linewidth);
+    plot(timestamp,timestamp*0,'k:','LineWidth',linewidth);
+    legh = [legh plot(timestamp,c_signal_single(:,iplot),markers{colind(iplot)},'MarkerFaceColor','w','MarkerEdgeColor',colmap(colind(iplot),:),'LineWidth',linewidth)];
+    
+    
 end
 set(gca,'XLim',[50 200],'XTick',60:30:180,'XTickLabel',-60:30:60)
 
@@ -96,7 +98,7 @@ hold on
 
 legh = [];
 for isite = 1:size(c_signal_single,2)
-    legh = [legh plot(timestamp,c_signal_single(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'LineWidth',linewidth)];
+    legh = [legh plot(timestamp,c_signal_single(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'MarkerFaceColor','w','MarkerEdgeColor',colmap(colind(isite),:),'LineWidth',linewidth)];
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
 end
 set(gca,'XLim',[50 200],'XTick',60:30:180,'XTickLabel',-60:30:60)
@@ -114,7 +116,7 @@ hold on
 
 legh = [];
 for isite = 1:size(c_signal_single,2)
-    legh = [legh plot(timestamp,c_signal_single(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:))];
+    legh = [legh plot(timestamp,c_signal_single(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'MarkerFaceColor','w','MarkerEdgeColor',colmap(colind(isite),:),'LineWidth',linewidth)];
     plot(timestamp,timestamp*0,'k:')
 end
 
@@ -148,7 +150,7 @@ hold on
 
 legh = [];
 for isite = 1:size(c_signal_single,2)
-    legh = [legh plot(timestamp,c_signal_single(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'LineWidth',linewidth)];
+    legh = [legh plot(timestamp,c_signal_single(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'MarkerFaceColor','w','MarkerEdgeColor',colmap(colind(isite),:),'LineWidth',linewidth)];
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
 end
 
@@ -179,11 +181,13 @@ setFigure(gcf,xfac,yfac,fontsize)
 hold on
 legh = [];
 for iplot = 1:size(c_signal_single,2)
-    legh = [legh plot(timestamp,c_signal_single(:,iplot),markers{colind(iplot)},'Color',colmap(colind(iplot),:),'LineWidth',linewidth)];
-    plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
-    plot(times_fine_late,data_fpca_repr_fine(iplot,:),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
+    plot(times_fine_late,data_fpca_repr_fine(iplot,:),':','Color',colmap(colind(iplot),:),'LineWidth',linewidth);
+    plot(timestamp,timestamp*0,'k:','LineWidth',linewidth);
+    legh = [legh plot(timestamp,c_signal_single(:,iplot),[markers{colind(iplot)} '-'],'Color',colmap(colind(iplot),:),'MarkerFaceColor','w','MarkerEdgeColor',colmap(colind(iplot),:),'LineWidth',linewidth)];
+    
+    
 end
-set(gca,'XLim',[200 1000],'XTick',220:100:920,'XTickLabel',100:100:800)
+set(gca,'XLim',[200 600],'XTick',220:100:920,'XTickLabel',100:100:800)
 
 h = legend(legh,legstr,'Location','SouthEast');
 ch = get(h,'child');
@@ -205,7 +209,7 @@ hold on
 
 legh = [];
 for isite = 1:size(c_signal_single,2)
-    legh = [legh plot(timestamp(range_ind),c_signal_woNharm(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'LineWidth',linewidth)];
+    legh = [legh plot(timestamp(range_ind),c_signal_woNharm(:,isite),[markers{colind(isite)} '-'],'Color',colmap(colind(isite),:),'MarkerFaceColor','w','MarkerEdgeColor',colmap(colind(isite),:),'LineWidth',linewidth)];
     plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
 end
 
@@ -224,9 +228,11 @@ setFigure(gcf,xfac,yfac,fontsize)
 hold on
 legh = [];
 for iplot = 1:size(c_signal_single,2)
-    legh = [legh plot(timestamp,c_signal_single(:,iplot),markers{colind(iplot)},'Color',colmap(colind(iplot),:),'LineWidth',linewidth)];
-    plot(timestamp,timestamp*0,'k:','LineWidth',linewidth)
-    plot(times_fine,basis_eval*scores_single(:,iplot),'Color',colmap(colind(iplot),:),'LineWidth',linewidth)
+    plot(timestamp,timestamp*0,'k:','LineWidth',linewidth);
+    plot(times_fine,basis_eval*scores_single(:,iplot),'Color',colmap(colind(iplot),:),'LineWidth',linewidth);
+    legh = [legh plot(timestamp,c_signal_single(:,iplot),markers{colind(iplot)},'Color',colmap(colind(iplot),:),'MarkerFaceColor','w','MarkerEdgeColor',colmap(colind(iplot),:),'LineWidth',linewidth)];
+    
+    
 end
 set(gca,'XLim',[50 200],'XTick',60:30:180,'XTickLabel',-60:30:60)
 
@@ -390,10 +396,11 @@ for isig = 1:size(c_signal_woNharm,2)
 %                 close all
 %                 figure
         subplot(1,3,[1 2])
+        
         plot(xs,c_smoothed_eval(:,isig),'k--')
         hold on
-        plot(timestamp(range_ind),c_signal_woNharm(:,isig),'^')
-        hold on
+        
+
         mycolor = lines(length(ispeak));
         for i = 1:length(ind_edge_start)
             myrange = find(candidate_left(ind_edge_start(i))==c_smoothed_eval(:,isig)):find(candidate_right(ind_edge_end(i))==c_smoothed_eval(:,isig));
@@ -403,7 +410,8 @@ for isig = 1:size(c_signal_woNharm,2)
         end
         plot(get(gca,'XLim'),[max(c_smoothed_eval(:,isig)) max(c_smoothed_eval(:,isig))],'k:')
         plot(get(gca,'XLim'),[min(c_smoothed_eval(:,isig)) min(c_smoothed_eval(:,isig))],'k:')
-        set(gca,'XLim',[200 1000],'XTick',220:100:920,'XTickLabel',100:100:800)
+        plot(timestamp(range_ind),c_signal_woNharm(:,isig),'^b','MarkerFaceColor','w')
+        set(gca,'XLim',[200 600],'XTick',220:100:920,'XTickLabel',100:100:800)
         subplot(1,3,3)
         set(gca,'Visible','off')
         text(.1,.9,sprintf('nEdges = %g',nEdges(end)))

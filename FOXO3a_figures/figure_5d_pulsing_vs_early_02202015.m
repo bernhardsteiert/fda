@@ -68,7 +68,7 @@ for i = 1:size(egfmeki_early_mat,1)
     col3 = 1;
     col = hsv2rgb([col1 col2 col3]);
     legh = [legh plot(egfmeki_early_mat(i,:),egfmeki_pulsing_mat(i,:),'-.','Color',col)];
-    legstr{end+1} = sprintf('MEKi = %g',meki_doses(i));
+    legstr{end+1} = sprintf('MEKi = %g',1000*meki_doses(i));
 end
 legend(legh,legstr)
 
@@ -99,7 +99,7 @@ for i = 1:size(egfmeki_early_mat,2)
     col3 = 1;
     col = hsv2rgb([col1 col2 col3]);
     legh = [legh plot(egfmeki_early_mat(:,i),egfmeki_pulsing_mat(:,i),'-.','Color',col)];
-    legstr{end+1} = sprintf('AKTi = %g',akti_doses(i));
+    legstr{end+1} = sprintf('AKTi = %g',1000*akti_doses(i));
 end
 legend(legh,legstr)
 
