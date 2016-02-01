@@ -208,8 +208,8 @@ for ilig = uni_ligs(2:end)' % Ignore NS case
         end
         subplot(3,4,11)
         hold on
-        plot(mean(scaledData(myind,2)),medians(end,size(erkaktratio,2),6),markers{colcount},'MarkerFaceColor',colmap(colcount,:),'MarkerEdgeColor',colmap(colcount,:),'Color',colmap(colcount,:),'MarkerSize',12);
-        xlabel(['log_{2} ' description{myobs(2)}])
+        plot(mean(scaledData(myind,1)),medians(end,size(erkaktratio,2),6),markers{colcount},'MarkerFaceColor',colmap(colcount,:),'MarkerEdgeColor',colmap(colcount,:),'Color',colmap(colcount,:),'MarkerSize',12);
+        xlabel(['log_{2} ' description{myobs(1)}])
         ylabel('Fraction of pulsing cells')
         
         subplot(3,4,12)
