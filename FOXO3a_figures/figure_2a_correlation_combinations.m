@@ -211,6 +211,13 @@ for ilig = uni_ligs(2:end)' % Ignore NS case
         plot(mean(scaledData(myind,2)),medians(end,size(erkaktratio,2),6),markers{colcount},'MarkerFaceColor',colmap(colcount,:),'MarkerEdgeColor',colmap(colcount,:),'Color',colmap(colcount,:),'MarkerSize',12);
         xlabel(['log_{2} ' description{myobs(2)}])
         ylabel('Fraction of pulsing cells')
+        
+        subplot(3,4,12)
+        hold on
+        legh = [legh plot(mean(scaledData(myind,1)-scaledData(myind,2)),medians(end,size(erkaktratio,2),6)./medians(end,size(erkaktratio,2),2),markers{colcount},'MarkerFaceColor',colmap(colcount,:),'MarkerEdgeColor',colmap(colcount,:),'Color',colmap(colcount,:),'MarkerSize',12)];
+        xlabel(['log_{2} ' description{myobs(1)} '/' description{myobs(2)}])
+        ylabel('log_{2} Fraction of pulsing cells/Early PC2')
+        
 %         for i = 1:3
 %             figure(6+i)
 %             plot(mean(scaledData(myind,2)),medians(end,size(erkaktratio,2),i),markers{colcount},'MarkerFaceColor',colmap(colcount,:),'MarkerEdgeColor',colmap(colcount,:),'Color',colmap(colcount,:));
