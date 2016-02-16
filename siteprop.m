@@ -9,6 +9,7 @@ switch dataset
 
         ligand_name = {'EGF ','IGF ','FGF ','HRG ','HGF ','EPR ','BTC '}; % Rows
         inh_name = {' + MEKi',' + AKTi',' + PI3Ki','','','','','','',''}; % Cols
+        inh_fullname = {'CI-1040','MK-2206','BEZ-235','None','None','None','None','None','None','None'}; % Cols
         ligand_dose = [100 100 100 100 50 20 10 5 2.5 0];
         inh_dose = [10 10 10 0 0 0 0 0 0 0];
 
@@ -22,6 +23,7 @@ switch dataset
         s.lig_index = lig_index;
         s.lig_dose = ligand_dose(inh_index);
         s.inh_name = inh_name{inh_index};
+        s.inh_fullname = inh_fullname{inh_index};
         s.inh_dose = inh_dose(inh_index);
         s.col_index = inh_index;
         
@@ -337,7 +339,7 @@ switch dataset
         
     case '03-23-2014-10A1806'
         ligand_name = {'EGF','EGF','EGF','IGF','IGF','IGF'};
-        ligand_dose = [.1 .1 .1 1 1 1 1 1 1 10 10 10];
+        ligand_dose = [.1 1 10];
         celltype = {'MCF10A','MCF10A','MCF10A','MCF10A','MCF10A','MCF10A','HCC1806','HCC1806','HCC1806','HCC1806','HCC1806','HCC1806'};
         meki_dose = [0 0 1 1 1 1 1 1 1 1 0 0];
         meki_timing = {'No MEKi','No MEKi','Late (2HR)','Late (2HR)','Early (30MIN)','Early (30MIN)','Early (30MIN)','Early (30MIN)','Late (2HR)','Late (2HR)','No MEKi','No MEKi'};
@@ -350,7 +352,7 @@ switch dataset
         end
         
         s.lig_name = ligand_name{row};
-        s.lig_dose = ligand_dose(row+mod(col-1,2)*6);
+        s.lig_dose = ligand_dose(1+floor((row-1)/3)+mod(col-1,2)*(col<=6)+mod(col,2)*(col>6));
         s.celltype = celltype{col};
         s.drug1_name = 'MEKi';
         s.drug2_name = 'AKTi';
@@ -360,8 +362,10 @@ switch dataset
         
     case {'04-15-2014','04-15-2014_all_cleaned'}
         celltype = {'MCF10A-WT','MCF10A-WT','MCF10A-AKTspec','MCF10A-AKTspec','MCF10A-ERKspec','MCF10A-ERKspec','184A1-WT','184A1-WT','184A1-AKTspec','184A1-AKTspec','184A1-ERKspec','184A1-ERKspec'};
+        sensor = {'F3aN400Venus-P2A-NLSmCherry','F3aN400Venus-P2A-NLSmCherry','F3aN400S294A/S344A-P2AVenus-NLSmCherry','F3aN400S294A/S344A-P2AVenus-NLSmCherry','F3aN400T32A/S253A/S315AVenus-P2A-NLSmCherry','F3aN400T32A/S253A/S315AVenus-P2A-NLSmCherry','F3aN400Venus-P2A-NLSmCherry','F3aN400Venus-P2A-NLSmCherry','F3aN400S294A/S344A-P2AVenus-NLSmCherry','F3aN400S294A/S344A-P2AVenus-NLSmCherry','F3aN400T32A/S253A/S315AVenus-P2A-NLSmCherry','F3aN400T32A/S253A/S315AVenus-P2A-NLSmCherry'};
         ligand_name = {'IGF','HRG','HGF','EGF','BTC','NS'};
         ligand_dose = [100 20 100 20 100 20 100 20 100 20 100 20];
+        puls_thres = [.3 .3 .5 .5 .45 .45 .2 .2 .2 .2 .2 .2];
         
         row = ceil(site/12);
         col = mod(site-1,12)+1;
@@ -370,6 +374,8 @@ switch dataset
         end
         
         s.celltype = celltype{col};
+        s.sensor = sensor{col};
+        s.puls_thres = puls_thres(col);
         s.lig_name = ligand_name{row};
         s.lig_index = row;
         s.lig_dose = ligand_dose(col);
@@ -412,6 +418,24 @@ switch dataset
         s.celltype = celltype;
         s.lig_name = ligand_name{row};
         s.lig_dose = ligand_dose(col);
+        
+    case {'02-20-2015','02-20-2015_cleaned'}
+        
+        meki_dose = [.125/3^0 .125/3^1 .125/3^2 .125/3^3 .125/3^4 0]; % Rows
+        akti_dose = [1/1.5^0 1/1.5^1 1/1.5^2 1/1.5^3 1/1.5^4 1/1.5^5 1/1.5^6 1/1.5^7 1/1.5^8 1/1.5^9 1/1.5^10 0]; % Cols
+
+        row = ceil(site/12);
+        col = mod(site-1,12)+1;
+        if ~mod(row,2)
+            col = 13-col;
+        end
+        
+        s.lig_name = 'EGF';
+        s.lig_dose = 20;
+        s.drug1_name = 'AKTi';
+        s.drug2_name = 'MEKi';
+        s.drug1_dose = akti_dose(col);
+        s.drug2_dose = meki_dose(row);
         
     otherwise
         error('Unknown data-set!!')
