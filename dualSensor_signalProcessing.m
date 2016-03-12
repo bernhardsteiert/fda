@@ -1,6 +1,7 @@
 %% Dual-sensor first steps
-% load('c_signal_dual')
-% save('c_signal_dual_2','celltype','timestamp','c_signal_foxo','c_signal_ekarev')
+clear all; close all;
+%load('c_signal_dual')
+ %save('c_signal_dual_2','celltype','timestamp','c_signal_foxo','c_signal_ekarev')
 load('c_signal_dual_2')
 
 exten = '02-15-2014';
@@ -363,6 +364,6 @@ for i = 1:length(highdoses)
 end
 
 figure
-boxplot(boxCorrC')
+boxplot(boxCorrC','outliersize',1)
 
 set(gca,'XTick',1:length(highdoses),'XTickLabel',mylab)
