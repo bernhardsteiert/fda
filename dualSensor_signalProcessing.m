@@ -8,8 +8,9 @@ exten = '02-15-2014';
 obs = {'Dual_FOXO3a','Dual_EKAREV'};
 sites = [7	8	9   12	11	10  25	26	27  30	29	28  43	44	45  48	47	46  61	62	63];
 
-timeshift = -72;
-timestamp = timestamp - timeshift; % Shift to main data set
+% THE FOLLOWING HAS ALREADY BEEN DONE WHEN GENERATING c_signal_dual_2
+% timeshift = -72;
+% timestamp = timestamp - timeshift; % Shift to main data set
 
 % Remove Infs / Zeros
 c_signal_foxo(isinf(c_signal_foxo)) = nan;
