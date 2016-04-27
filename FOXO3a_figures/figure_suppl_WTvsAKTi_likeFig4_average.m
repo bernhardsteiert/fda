@@ -70,6 +70,10 @@ colorbar('YTick',linspace(1./(2*length(sites_akti)),1-1./(2*length(sites_akti)),
 figure
 hold on
 
+rng(0) % Make sure that bootstrap samples are reproducible
+ratio_fun = @(x) sum(x > puls_thres) / length(x);
+errorb = nan(3*length(sites_akti),4);
+
 legh = [];
 legstr = {};
 for i = 1:length(sites_akti)
@@ -77,13 +81,22 @@ for i = 1:length(sites_akti)
     s = siteprop(isite);
     
     iinh = 3;
-    legh = [legh bar(mod(iinh-1,3)*(length(sites_akti)+1)+i,sum(scores_puls(celltypes(highinds) == isite) > puls_thres)./sum(celltypes(highinds) == isite),'FaceColor',colmap(isite == sites_akti,:))];
+    errorb((i-1)*3+iinh,1) = mod(iinh-1,3)*(length(sites_akti)+1)+i;
+    errorb((i-1)*3+iinh,2) = sum(scores_puls(celltypes(highinds) == isite) > puls_thres)./sum(celltypes(highinds) == isite);
+    errorb((i-1)*3+iinh,3:4) = bootci(2000,{ratio_fun,scores_puls(celltypes(highinds) == isite)},'alpha',.32);
+    legh = [legh bar(errorb((i-1)*3+iinh,1),errorb((i-1)*3+iinh,2),'FaceColor',colmap(isite == sites_akti,:))];
     iinh = 1;
     isiteH = sites_all(i);
-    bar(mod(iinh-1,3)*(length(sites_akti)+1)+i,sum(noInhpuls.scores_puls(noInhpuls.celltypes(highindsNoInh) == isiteH) > puls_thres)./sum(noInhpuls.celltypes(highindsNoInh) == isiteH),'FaceColor',colmap(isiteH == sites_all,:));
+    errorb((i-1)*3+iinh,1) = mod(iinh-1,3)*(length(sites_akti)+1)+i;
+    errorb((i-1)*3+iinh,2) = sum(noInhpuls.scores_puls(noInhpuls.celltypes(highindsNoInh) == isiteH) > puls_thres)./sum(noInhpuls.celltypes(highindsNoInh) == isiteH);
+    errorb((i-1)*3+iinh,3:4) = bootci(2000,{ratio_fun,noInhpuls.scores_puls(noInhpuls.celltypes(highindsNoInh) == isiteH)},'alpha',.32);
+    bar(errorb((i-1)*3+iinh,1),errorb((i-1)*3+iinh,2),'FaceColor',colmap(isiteH == sites_all,:));
     iinh = 2;
     isiteM = sites_meki(i);
-    bar(mod(iinh-1,3)*(length(sites_akti)+1)+i,sum(mekipuls.scores_puls(mekipuls.celltypes(highindsMEKi) == isiteM) > puls_thres)./sum(mekipuls.celltypes(highindsMEKi) == isiteM),'FaceColor',colmap(isiteM == sites_meki,:));
+    errorb((i-1)*3+iinh,1) = mod(iinh-1,3)*(length(sites_akti)+1)+i;
+    errorb((i-1)*3+iinh,2) = sum(mekipuls.scores_puls(mekipuls.celltypes(highindsMEKi) == isiteM) > puls_thres)./sum(mekipuls.celltypes(highindsMEKi) == isiteM);
+    errorb((i-1)*3+iinh,3:4) = bootci(2000,{ratio_fun,mekipuls.scores_puls(mekipuls.celltypes(highindsMEKi) == isiteM)},'alpha',.32);
+    bar(errorb((i-1)*3+iinh,1),errorb((i-1)*3+iinh,2),'FaceColor',colmap(isiteM == sites_meki,:));
     legstr{end+1} = s.lig_name;
 %     [f,xi] = ksdensity(scores_puls(celltypes(highinds) == isite));
 %     legh = [legh plot(xi,f,'Color',colmap(isite == sites_akti,:))];
@@ -101,8 +114,10 @@ set(gca,'XTick',3.5:7:17.5,'XTickLabel',{'WT','MEKi','AKTi'});
 % plot([1 1],get(gca,'YLim'),'k:')
 legend(legh,legstr)
 
-xlabel('ligand')
+% xlabel('ligand')
 ylabel('fraction of pulsing cells')
+
+errorbar(errorb(:,1),errorb(:,2),errorb(:,2)-errorb(:,3),errorb(:,4)-errorb(:,2),'LineStyle','none','Color','k');
 
 return
 % 

@@ -64,11 +64,19 @@ end
 
 figure
 
+
+count = 1;
+errorb = nan(length(highdoses_all(:)),4);
 mutstr = {};
 for icell = 1:size(highdoses_all,1)
     
+    rng(0) % Make sure that bootstrap samples are reproducible
+    ratio_fun = @(x) sum(x > puls_thres(icell)) / length(x);
+    
     if icell == 4
+        errorbar(errorb(:,1),errorb(:,2),errorb(:,2)-errorb(:,3),errorb(:,4)-errorb(:,2),'LineStyle','none','Color','k');
         figure
+        errorb = nan(length(highdoses_all(:)),4);
     end
     hold on
 
@@ -82,9 +90,16 @@ for icell = 1:size(highdoses_all,1)
     for i = 1:length(highdoses)
         isite = highdoses(i);
         s = siteprop(isite,extension);
-
-        legh = [legh bar(mod(icell-1,3)*size(highdoses_all,2)+i,sum(dists2(celltype(highinds) == isite) > puls_thres(icell))./sum(celltype(highinds) == isite),'FaceColor',colmap(isite == highdoses,:))];
+        
+        errorb(count,1) = mod(icell-1,3)*size(highdoses_all,2)+i;
+        errorb(count,2) = sum(dists2(celltype(highinds) == isite) > puls_thres(icell))./sum(celltype(highinds) == isite);
+        
+        legh = [legh bar(errorb(count,1),errorb(count,2),'FaceColor',colmap(isite == highdoses,:))];
         legstr{end+1} = s.lig_name;
+        
+        errorb(count,3:4) = bootci(2000,{ratio_fun,dists2(celltype(highinds) == isite)},'alpha',.32);
+        
+        count = count + 1;
     end
     mutstr{end+1} = s.celltype(8:end);
     set(gca,'XTick',3.5:6:17.5,'XTickLabel',mutstr);
@@ -92,7 +107,9 @@ for icell = 1:size(highdoses_all,1)
     title(s.celltype(1:end-8))
     legend(legh,legstr)
 
-    xlabel('ligand')
+%     xlabel('ligand')
     ylabel('fraction of pulsing cells')
-    
+
 end
+
+errorbar(errorb(:,1),errorb(:,2),errorb(:,2)-errorb(:,3),errorb(:,4)-errorb(:,2),'LineStyle','none','Color','k');
