@@ -1,7 +1,7 @@
 load('./Workspaces/harm_basis_130722_corrected_retracked_all_cleaned_late_newBTC')
 load('./Workspaces/scores_early_5basis_noFGF_newBTC');
 late_ws = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC');
-
+close all;
 myextension = '130722_corrected_retracked_all_cleaned';
 
 sites_all = [17 57 64];
@@ -56,7 +56,7 @@ end
 
 legend(legh,legstr)
 
-set(gca,'XLim',[50 1000],'XTick',120:100:920,'XTickLabel',0:100:800)
+set(gca,'XLim',[50 700],'XTick',120:100:920,'XTickLabel',0:100:800)
 % plot([200 200],get(gca,'YLim'),'k--')
 
 xlabel('time [min]')

@@ -5,7 +5,7 @@ mekipuls = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC
 load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC_ATKi')
 noInh = load('./Workspaces/scores_early_5basis_noFGF_newBTC');
 noInhpuls = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC');
-
+close all;
 pcs = [2 3];
 
 sites_all = [17 37 44 4 64 57];
@@ -49,7 +49,7 @@ for i = 1:length(sites_akti)
     plot([nanmean(scores_early(pcs(1),celltypes == isite)) nanmean(noInh.scores_early(pcs(1),noInh.celltypes == isite2))],[nanmean(scores_early(pcs(2),celltypes == isite)) nanmean(noInh.scores_early(pcs(2),noInh.celltypes == isite2))],'k--','Color','k')
 %     plotEllipsis(scores_early(pcs(1),celltypes == isite),scores_early(pcs(2),celltypes == isite),colmap(isite == sites_akti,:),.5);
 end
-
+set(gca,'XLim',[-0.3 0.25],'YLim',[-0.02 0.1])
 % xlim = [-.4 .3];
 % set(gca,'XLim',xlim)
 % ylim = [-.08 .12];
@@ -105,7 +105,7 @@ for i = 1:length(sites_akti)
 %     titstr = sprintf('%s %g %s',titstr,s.lig_dose,s.inh_name);
 
 end
-% set(gca,'XLim',[min(scores_puls_boxcox) max(scores_puls_boxcox)]+[-.2 .2]*range(scores_puls_boxcox))
+%
 %     set(gca,'XLim',xlim_all(icell,:))
 title('184A1')
 set(gca,'XTick',3.5:7:17.5,'XTickLabel',{'WT','MEKi','AKTi'});

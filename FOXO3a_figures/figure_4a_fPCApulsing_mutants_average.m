@@ -1,6 +1,6 @@
 addpath('./Functions/')
 load('./Workspaces/scores_04-15_new')
-
+close all;
 extension = '04-15-2014';
 pcs = [2 3];
 
@@ -48,9 +48,9 @@ for icell = 1:size(highdoses_all,1)
         
     end
 
-    xlim = [-.4 .3];
+    xlim = [-0.1 .2];
     set(gca,'XLim',xlim)
-    ylim = [-.08 .12];
+    ylim = [-.02 .07];
     set(gca,'YLim',ylim)
 
     ylabel(['fPC ' num2str(pcs(2))])
