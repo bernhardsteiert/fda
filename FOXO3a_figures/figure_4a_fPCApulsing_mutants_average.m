@@ -4,7 +4,7 @@ close all;
 extension = '04-15-2014';
 pcs = [2 3];
 
-highdoses_all = [1 24 25 48 49 66; 3 22 27 46 51 65; 5 20 29 44 53 64; 7 18 31 42 55 63; 9 16 33 40 57 62; 11 14 35 38 59 61];
+highdoses_all = [1 24 25 48 49; 3 22 27 46 51; 5 20 29 44 53; 7 18 31 42 55; 9 16 33 40 57; 11 14 35 38 59];
 
 kswidth_all = ones(1,6)*35;
 % puls_thres = [.3 .5 .45 .2 .2 .2];
@@ -27,7 +27,7 @@ for icell = 1:size(highdoses_all,1)
     hold on
 
     color_ind = 1;
-    colmap = hsv(length(highdoses));
+    colmap = hsv(length(highdoses)+1);
     legstr = {};
     for isite = highdoses
         s = siteprop(isite,extension);
@@ -57,7 +57,7 @@ for icell = 1:size(highdoses_all,1)
     xlabel(['fPC ' num2str(pcs(1))])
 
     set(gca,'CLim',[0 1])
-    colormap(colmap)
+    colormap(colmap(1:end-1,:))
     colorbar('YTick',linspace(1./(2*length(highdoses)),1-1./(2*length(highdoses)),length(highdoses)),'YTickLabel',legstr,'TickLength', 0) % Vertical colorbar
     
 end
@@ -102,7 +102,7 @@ for icell = 1:size(highdoses_all,1)
         count = count + 1;
     end
     mutstr{end+1} = s.celltype(8:end);
-    set(gca,'XTick',3.5:6:17.5,'XTickLabel',mutstr);
+    set(gca,'XTick',3:5:13,'XTickLabel',mutstr);
 
     title(s.celltype(1:end-8))
     legend(legh,legstr)

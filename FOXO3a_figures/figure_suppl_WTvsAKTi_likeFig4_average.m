@@ -8,9 +8,9 @@ noInhpuls = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBT
 close all;
 pcs = [2 3];
 
-sites_all = [17 37 44 4 64 57];
-sites_akti = [19 39 42 2 62 59];
-sites_meki = [20 40 41 1 61 60];
+sites_all = [17 37 44 4 64];
+sites_akti = [19 39 42 2 62];
+sites_meki = [20 40 41 1 61];
 
 puls_thres = .3;
 
@@ -28,7 +28,7 @@ hold on
 plot(scores_early(pcs(1),:),scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
 
 color_ind = 1;
-colmap = hsv(length(sites_akti));
+colmap = hsv(length(sites_akti)+1);
 legstr = {};
 markers = {'o','s','v','d','^','>'};
 for i = 1:length(sites_akti)
@@ -66,7 +66,7 @@ ylabel(['PC ' num2str(pcs(2))])
 xlabel(['PC ' num2str(pcs(1))])
 
 set(gca,'CLim',[0 1])
-colormap(colmap)
+colormap(colmap(1:end-1,:))
 colorbar('YTick',linspace(1./(2*length(sites_akti)),1-1./(2*length(sites_akti)),length(sites_akti)),'YTickLabel',legstr,'TickLength', 0) % Vertical colorbar
 % return
 
@@ -111,7 +111,7 @@ end
 %
 %     set(gca,'XLim',xlim_all(icell,:))
 title('184A1')
-set(gca,'XTick',3.5:7:17.5,'XTickLabel',{'WT','MEKi','AKTi'});
+set(gca,'XTick',3:5:13,'XTickLabel',{'WT','MEKi','AKTi'});
 % plot([thres_trafo thres_trafo],get(gca,'YLim'),'k--')
 % plot([0 0],get(gca,'YLim'),'k:')
 % plot([1 1],get(gca,'YLim'),'k:')
