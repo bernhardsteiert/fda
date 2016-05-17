@@ -39,11 +39,14 @@ for i = 1:length(sites_akti)
     legstr{end+1} = titstr;
     
     plot(nanmean(scores_early(pcs(1),celltypes == isite)),nanmean(scores_early(pcs(2),celltypes == isite)),markers{isite == sites_akti},'Color',colmap(isite == sites_akti,:),'MarkerFaceColor',colmap(isite == sites_akti,:),'MarkerEdgeColor','w','MarkerSize',12)
+    plotEllipsis(scores_early(pcs(1),celltypes == isite),scores_early(pcs(2),celltypes == isite),colmap(isite == sites_akti,:),2/sqrt(sum(~isnan(scores_early(pcs(1),celltypes == isite)))));
     
     isite3 = sites_meki(i);
     plot(nanmean(meki.scores_early(pcs(1),meki.celltypes == isite3)),nanmean(meki.scores_early(pcs(2),meki.celltypes == isite3)),markers{isite3 == sites_meki},'Color',colmap(isite3 == sites_meki,:),'MarkerFaceColor',colmap(isite3 == sites_meki,:),'MarkerEdgeColor','k','MarkerSize',12)
+    plotEllipsis(meki.scores_early(pcs(1),meki.celltypes == isite3),meki.scores_early(pcs(2),meki.celltypes == isite3),colmap(isite3 == sites_meki,:),2/sqrt(sum(~isnan(meki.scores_early(pcs(1),meki.celltypes == isite3)))));
     isite2 = sites_all(i);
     plot(nanmean(noInh.scores_early(pcs(1),noInh.celltypes == isite2)),nanmean(noInh.scores_early(pcs(2),noInh.celltypes == isite2)),markers{isite2 == sites_all},'Color',colmap(isite2 == sites_all,:),'MarkerFaceColor',colmap(isite2 == sites_all,:),'MarkerSize',12)
+    plotEllipsis(noInh.scores_early(pcs(1),noInh.celltypes == isite2),noInh.scores_early(pcs(2),noInh.celltypes == isite2),colmap(isite2 == sites_all,:),2/sqrt(sum(~isnan(noInh.scores_early(pcs(1),noInh.celltypes == isite2)))));
     
     plot([nanmean(noInh.scores_early(pcs(1),noInh.celltypes == isite2)) nanmean(meki.scores_early(pcs(1),meki.celltypes == isite3))],[nanmean(noInh.scores_early(pcs(2),noInh.celltypes == isite2)) nanmean(meki.scores_early(pcs(2),meki.celltypes == isite3))],'-','Color',colmap(isite == sites_akti,:),'LineWidth',2)
     plot([nanmean(scores_early(pcs(1),celltypes == isite)) nanmean(noInh.scores_early(pcs(1),noInh.celltypes == isite2))],[nanmean(scores_early(pcs(2),celltypes == isite)) nanmean(noInh.scores_early(pcs(2),noInh.celltypes == isite2))],'k--','Color','k')

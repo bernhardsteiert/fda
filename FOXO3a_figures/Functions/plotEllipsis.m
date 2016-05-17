@@ -1,4 +1,8 @@
-function plotEllipsis(x_scores,y_scores,mycolor,alpha)
+function plotEllipsis(x_scores,y_scores,mycolor,factor)%,alpha)
+
+    if(~exist('factor','var'))
+        factor = 1;
+    end
 
     xsize = size(x_scores);
     if xsize(1) < xsize(2)
@@ -24,7 +28,7 @@ function plotEllipsis(x_scores,y_scores,mycolor,alpha)
     t = linspace(0,2*pi,100);
     e = [cos(t) ; sin(t)];        %# unit circle
     VV = V*sqrt(D);               %# scale eigenvectors
-    e = bsxfun(@plus, VV*e, Mu'); %#' project circle back to orig space
+    e = bsxfun(@plus, VV*e*factor, Mu'); %#' project circle back to orig space
 
     tmpx = e(1,:);
     tmpy = e(2,:);
