@@ -1,7 +1,6 @@
 load('./Workspaces/harm_basis_130722_corrected_retracked_all_cleaned_late_newBTC')
 load('./Workspaces/scores_early_5basis_noFGF_newBTC');
 late_ws = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC');
-close all;
 myextension = '130722_corrected_retracked_all_cleaned';
 
 sites_all = [17 57 64];
