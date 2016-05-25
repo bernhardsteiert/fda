@@ -5,7 +5,6 @@ mekipuls = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC
 load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC_ATKi')
 noInh = load('./Workspaces/scores_early_5basis_noFGF_newBTC');
 noInhpuls = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC');
-close all;
 pcs = [2 3];
 
 sites_all = [17 37 44 4 64];
