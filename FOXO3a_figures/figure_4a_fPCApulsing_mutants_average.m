@@ -38,12 +38,15 @@ for icell = 1:size(highdoses_all,1)
             reference(isite==highdoses,1:2) = [nanmean(scores_all(pcs(1),celltype == isite)),nanmean(scores_all(pcs(2),celltype == isite))];
             title(s.celltype(1:end-3))
             plot(nanmean(scores_all(pcs(1),celltype == isite)),nanmean(scores_all(pcs(2),celltype == isite)),markers{isite == highdoses},'Color',colmap(isite == highdoses,:),'MarkerFaceColor',colmap(isite == highdoses,:),'MarkerSize',12)
+            plotEllipsis(scores_all(pcs(1),celltype == isite),scores_all(pcs(2),celltype == isite),colmap(isite == highdoses,:),2/sqrt(sum(~isnan(scores_all(pcs(1),celltype == isite)))));
         elseif mod(icell,3) == 0
             plot([reference(isite==highdoses,1) nanmean(scores_all(pcs(1),celltype == isite))],[reference(isite==highdoses,2) nanmean(scores_all(pcs(2),celltype == isite))],'--','Color','k')
             plot(nanmean(scores_all(pcs(1),celltype == isite)),nanmean(scores_all(pcs(2),celltype == isite)),markers{isite == highdoses},'Color',colmap(isite == highdoses,:),'MarkerFaceColor',colmap(isite == highdoses,:),'MarkerEdgeColor','w','MarkerSize',12)
+            plotEllipsis(scores_all(pcs(1),celltype == isite),scores_all(pcs(2),celltype == isite),colmap(isite == highdoses,:),2/sqrt(sum(~isnan(scores_all(pcs(1),celltype == isite)))));
         else
             plot([reference(isite==highdoses,1) nanmean(scores_all(pcs(1),celltype == isite))],[reference(isite==highdoses,2) nanmean(scores_all(pcs(2),celltype == isite))],'-','Color',colmap(isite == highdoses,:),'LineWidth',2)
             plot(nanmean(scores_all(pcs(1),celltype == isite)),nanmean(scores_all(pcs(2),celltype == isite)),markers{isite == highdoses},'Color',colmap(isite == highdoses,:),'MarkerFaceColor',colmap(isite == highdoses,:),'MarkerEdgeColor','k','MarkerSize',12)
+            plotEllipsis(scores_all(pcs(1),celltype == isite),scores_all(pcs(2),celltype == isite),colmap(isite == highdoses,:),2/sqrt(sum(~isnan(scores_all(pcs(1),celltype == isite)))));
         end
         
     end
