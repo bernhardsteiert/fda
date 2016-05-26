@@ -368,3 +368,8 @@ figure
 boxplot(boxCorrC','outliersize',1)
 
 set(gca,'XTick',1:length(highdoses),'XTickLabel',mylab)
+
+%% Test against NS
+for i = 1:size(boxCorrC,1)-1
+    fprintf('p-Value %s vs. %s = %g\n',mylab{i},mylab{end},ranksum(boxCorrC(i,:),boxCorrC(end,:)))
+end
