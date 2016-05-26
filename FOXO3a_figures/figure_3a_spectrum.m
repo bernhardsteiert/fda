@@ -77,13 +77,21 @@
 % 
 % % White noise:
 % c_signal_single{end+1} = .002*repmat(sin(2*pi*timestamp*60/(80*60)),1,size(c_signal,2))+.001*randn(size(c_signal));
+% c_signal_single{end+1} = .001*repmat(sin(2*pi*timestamp*60/(80*60)),1,size(c_signal,2))+.001*randn(size(c_signal));
+% c_signal_single{end+1} = .0005*repmat(sin(2*pi*timestamp*60/(80*60)),1,size(c_signal,2))+.001*randn(size(c_signal));
+% c_signal_single{end+1} = .0005*repmat(sin(2*pi*timestamp*60/(80*60)),1,size(c_signal,2))+.0007*randn(size(c_signal));
+% c_signal_single{end+1} = .0005*repmat(sin(2*pi*timestamp*60/(80*60)),1,size(c_signal,2))+.0005*randn(size(c_signal));
 % % Pink noise:
 % c_signal_single{end+1} = c_signal;
-% c_signal_single{end}(:) = .01*pinknoise(length(c_signal(:)))';
+% c_signal_single{end}(:) = .01*pinknoise(length(c_signal(:)))'*.6;
+% c_signal_single{end+1} = c_signal;
+% c_signal_single{end}(:) = .02*pinknoise(length(c_signal(:)))'*.6;
+% c_signal_single{end+1} = c_signal;
+% c_signal_single{end}(:) = .04*pinknoise(length(c_signal(:)))'*.6;
 % % c_signal_single{6} = c_signal;
 % % c_signal_single{6}(:) = .01*pinknoise2(length(c_signal(:)))';
 % 
-% save('fourier_signals_corrected_cleaned_newBTC','timestamp','c_signal_single','celltype')
+% save('fourier_signals_corrected_cleaned_newBTC2','timestamp','c_signal_single','celltype')
 % 
 % return
 
@@ -93,14 +101,22 @@ addpath('./Functions/')
 thres_sorted = [0 .1 .25 .5 .75 .9 1];
 % load('fourier_signals')
 % time_range = [200 500];
-load('./Workspaces/fourier_signals_corrected_cleaned_newBTC')
+load('./Workspaces/fourier_signals_corrected_cleaned_newBTC2')
 time_range = [200 1475];
 
-labels = {'< 10%', '10-25%', '25-50%', '50-75%', '75-90%', '> 90%', 'Pink noise', 'Sine + white noise'};
-colmap = gray(length(c_signal_single)+6);
-colmap = colmap(4:end-3,:);
-colmap(8,:) = [255,105,180]/255;
-colmap(7,:) = [205,133,63]/255;
+labels = {'< 10%', '10-25%', '25-50%', '50-75%', '75-90%', '> 90%', 'Pink noise 1', 'Pink noise 2', 'Pink noise 3', ...
+    'Sine 1 + white noise 1', 'Sine 2 + white noise 1', 'Sine 3 + white noise 1', 'Sine 3 + white noise 2', 'Sine 3 + white noise 3'};
+colmap = nan(length(c_signal_single),3);
+colmap2 = gray(14);
+colmap(1:6,:) = colmap2(4:9,:);
+colmap(12,:) = [255,105,180]/255;
+colmap(13,:) = [219,112,147]/255;
+colmap(14,:) = [199,21,133]/255;
+colmap(7,:) = [176,224,230]/255;
+colmap(8,:) = [135,206,250]/255;
+colmap(9,:) = [30,144,255]/255;
+colmap(10,:) = [70,130,180]/255;
+colmap(11,:) = [0,0,205]/255;
 % colmap(1,:) = [0 0 0];
 
 figure
@@ -126,9 +142,9 @@ NFFT = 2^nextpow2(L);
 legh = [];
 legstr = {};
 
-c_signal_single{8} = c_signal_single{8}*.6;
+% c_signal_single{8} = c_signal_single{8}*.6;
 
-for iplot = [1:6 8 7]
+for iplot = [1:6 12:14 7:11]
 
     c_signal_fft = [];
     c_signal_tmp = c_signal_single{iplot};
@@ -164,14 +180,14 @@ for iplot = [1:6 8 7]
     
     legh = [legh semilogx(f,10*log10(mean_fft),'Color',colmap(iplot,:),'LineWidth',linewidth)];
     
-    tmpx = [f'; flipud(f')];
-    % 3 sigma == 99.7% confidence 
-    tmpy = [10*log10(mean_fft+3*std_fft./2); flipud(10*log10(mean_fft-3*std_fft./2))];
-
-    ltmp = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpx)));
-    set(ltmp, 'FaceColor', colmap(iplot,:)*0.1+0.9, 'EdgeColor', colmap(iplot,:)*0.1+0.9,'LineWidth',linewidth);
-    ltmp2 = patch(tmpx, tmpy, -ones(size(tmpx)), ones(size(tmpx)));
-    set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', colmap(iplot,:)*0.3+0.7,'LineWidth',linewidth);
+%     tmpx = [f'; flipud(f')];
+%     % 3 sigma == 99.7% confidence 
+%     tmpy = [10*log10(mean_fft+3*std_fft./2); flipud(10*log10(mean_fft-3*std_fft./2))];
+% 
+%     ltmp = patch(tmpx, tmpy, -2*ones(size(tmpx)), ones(size(tmpx)));
+%     set(ltmp, 'FaceColor', colmap(iplot,:)*0.1+0.9, 'EdgeColor', colmap(iplot,:)*0.1+0.9,'LineWidth',linewidth);
+%     ltmp2 = patch(tmpx, tmpy, -ones(size(tmpx)), ones(size(tmpx)));
+%     set(ltmp2, 'LineStyle', '--', 'FaceColor', 'none', 'EdgeColor', colmap(iplot,:)*0.3+0.7,'LineWidth',linewidth);
     
 %     legstr{end+1} = labels{iplot};
 
