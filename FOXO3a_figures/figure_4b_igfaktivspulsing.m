@@ -7,6 +7,7 @@ sites_all = 1:72;
 extension = '03-30-2014';
 
 puls_thres = .55;
+puls_thres = .3;
 
 ratio_puls = nan(size(sites_all));
 ratio_puls_bd = nan(2,length(sites_all));

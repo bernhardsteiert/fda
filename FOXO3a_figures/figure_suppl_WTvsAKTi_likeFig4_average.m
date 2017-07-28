@@ -22,9 +22,12 @@ mekipuls.scores_puls = mekipuls.scores_puls(highindsMEKi,1);
 
 figure
 
-plot(noInh.scores_early(pcs(1),:),noInh.scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
+% plot(noInh.scores_early(pcs(1),:),noInh.scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
+% plot(noInh.scores_early(pcs(1),highindsNoInh),noInh.scores_early(pcs(2),highindsNoInh),'.','Color',[.7 .7 .7]) % WT
 hold on
-plot(scores_early(pcs(1),:),scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
+% plot(scores_early(pcs(1),:),scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
+% plot(scores_early(pcs(1),highinds),scores_early(pcs(2),highinds),'.','Color',[.7 .7 .7]) % AKTi
+% plot(meki.scores_early(pcs(1),highindsMEKi),meki.scores_early(pcs(2),highindsMEKi),'.','Color',[.7 .7 .7]) % MEKi
 
 color_ind = 1;
 colmap = hsv(length(sites_akti)+1);

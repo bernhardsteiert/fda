@@ -490,3 +490,37 @@ xlabel('fPC2')
 ylabel('Fraction of pulsing cells [%]')
 
 plot(early_pc2(1:end-1),frac_puls(1:end-1),'--','Color',mycolor)
+
+%% No ligand + No ligand AKTi
+akti = load('Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC_ATKi');
+aktipc2 = load('Workspaces/scores_early_5basis_noFGF_AKTi');
+celltypes = [celltypes akti.celltypes];
+scores_puls = [scores_puls; akti.scores_puls];
+scores_early = [early_ws.scores_early aktipc2.scores_early];
+celltypes_early = [early_ws.celltypes akti.celltypes];
+
+sites = [2 4:10];
+sites = sites(end:-1:1);
+early_pc2 = nan(1,length(sites));
+frac_puls = early_pc2;
+doses = early_pc2;
+
+figure
+hold on
+for isite = sites
+    s = siteprop(isite);
+    doses(isite == sites) = s.lig_dose;
+    early_pc2(isite == sites) = nanmedian(scores_early(2,celltypes_early == isite));
+    frac_puls(isite == sites) = sum(scores_puls(celltypes == isite,1) > puls_thres)/sum(celltypes == isite);
+    
+    mycolor = rgb2hsv([0 1 1]);
+    mycolor(2:3) = find(isite==sites)/length(sites)*mycolor(2:3);
+    mycolor = hsv2rgb(mycolor);
+    
+    plot(early_pc2(isite == sites),frac_puls(isite == sites),'o','Color',mycolor,'MarkerFaceColor',mycolor)
+end
+title(s.lig_name)
+xlabel('fPC2')
+ylabel('Fraction of pulsing cells [%]')
+
+plot(early_pc2(1:end-1),frac_puls(1:end-1),'--','Color',mycolor)

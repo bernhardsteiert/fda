@@ -12,14 +12,16 @@ puls_thres = [.3 .5 .45 .1 .1 .1];
 
 figure
 
-plot(scores_all(pcs(1),:),scores_all(pcs(2),:),'.','Color',[.7 .7 .7])
+% plot(scores_all(pcs(1),:),scores_all(pcs(2),:),'.','Color',[.7 .7 .7])
+% plot(scores_all(pcs(1),ismember(celltype,highdoses_all)),scores_all(pcs(2),ismember(celltype,highdoses_all)),'.','Color',[.7 .7 .7])
 
 markers = {'o','s','v','d','^','>'};
 for icell = 1:size(highdoses_all,1)
     
     if icell == 4
         figure
-        plot(scores_all(pcs(1),:),scores_all(pcs(2),:),'.','Color',[.7 .7 .7])
+        % plot(scores_all(pcs(1),:),scores_all(pcs(2),:),'.','Color',[.7 .7 .7])
+        % plot(scores_all(pcs(1),ismember(celltype,highdoses_all)),scores_all(pcs(2),ismember(celltype,highdoses_all)),'.','Color',[.7 .7 .7])
     end
 
     highdoses = highdoses_all(icell,:);

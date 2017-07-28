@@ -33,7 +33,7 @@ highdoses = highdoses(resort);
 
 figure;
 
-plot(scores_early(2,~ismember(celltypes,highdoses) & ~outliers),scores_early(3,~ismember(celltypes,highdoses) & ~outliers),'o','MarkerSize',1,'MarkerFaceColor',[.7 .7 .7],'MarkerEdgeColor','none')
+plot(scores_early(2,~ismember(celltypes,highdoses) & ~outliers),scores_early(3,~ismember(celltypes,highdoses) & ~outliers),'o','MarkerSize',1,'MarkerFaceColor',[.7 .7 .7],'MarkerEdgeColor',[.7 .7 .7])
 
 hold on
 
@@ -48,7 +48,7 @@ for isite = highdoses([6 2 3 4 5 1])
     legstr{isite == highdoses} = sprop.lig_name(1:3);
     
     scores = scores_early(:,celltypes == isite);
-    legh(isite == highdoses) = plot(scores(2,~outliers(celltypes == isite)),scores(3,~outliers(celltypes == isite)),markers{isite == highdoses},'MarkerSize',5,'MarkerFaceColor',colmap(isite == highdoses,:),'MarkerEdgeColor','none');
+    legh(isite == highdoses) = plot(scores(2,~outliers(celltypes == isite)),scores(3,~outliers(celltypes == isite)),markers{isite == highdoses},'MarkerSize',5,'MarkerFaceColor',colmap(isite == highdoses,:),'MarkerEdgeColor',colmap(isite == highdoses,:));
     plotEllipsis(scores(2,~outliers(celltypes == isite)),scores(3,~outliers(celltypes == isite)),colmap(isite == highdoses,:),.5);
 end
 
