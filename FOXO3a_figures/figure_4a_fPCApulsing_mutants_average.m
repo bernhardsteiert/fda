@@ -118,3 +118,81 @@ for icell = 1:size(highdoses_all,1)
 end
 
 errorbar(errorb(:,1),errorb(:,2),errorb(:,2)-errorb(:,3),errorb(:,4)-errorb(:,2),'LineStyle','none','Color','k');
+
+
+%%
+% % MCF10A
+% sites_all = [1 24 25 48 49];
+% sites_akti = [5 20 29 44 53]; % ERKspec
+% sites_meki = [3 22 27 46 51]; % AKTspec
+
+% % 184A1
+sites_all = [7 18 31 42 55];
+sites_akti = [11 14 35 38 59]; % ERKspec
+sites_meki = [9 16 33 40 57]; % AKTspec
+
+sites_single = [sites_all sites_akti sites_meki];
+celltypes_single = [];
+c_signal_single = [];
+
+for isite = sites_single
+    tmp = load(sprintf('Workspaces/site_%i_04-15-2014_all_paper_cleaned',isite));
+    c_signal_single = [c_signal_single tmp.intensity];
+    timestamp_single = tmp.timestamp;
+    celltypes_single = [celltypes_single ones(1,size(tmp.intensity,2))*isite];
+end
+
+nrows = 2;
+ncols = 3;
+
+ntraces = 25; % This is the maximal number of traces to be plotted
+
+figure
+colmap = hsv(length(sites_akti)+1);
+for i = 1:length(sites_all)
+    subplot(nrows,ncols,i)
+    hold on
+
+    ex2 = find(celltypes_single==sites_akti(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120+45,c_signal_single(:,ex2(1:min([ntraces length(ex2)]))),'Color',[.7 .7 .7])
+    
+    ex1 = find(celltypes_single == sites_all(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120+45,c_signal_single(:,ex1(1:min([ntraces length(ex1)]))),'Color',colmap(i,:))
+
+    a = plot(timestamp_single-120+45,nanmean(c_signal_single(:,celltypes_single==sites_all(i)),2),'k','LineWidth',2);
+    b = plot(timestamp_single-120+45,nanmean(c_signal_single(:,celltypes_single==sites_akti(i)),2),'k--','LineWidth',2);
+    
+    s = siteprop(sites_all(i),extension);
+    titstr = s.lig_name;
+    title(titstr)
+    
+    legend([a b],{'WT','ERKspec'},'Location','SouthEast')
+    
+    set(gca,'YLim',[.9 1.1])
+    set(gca,'XLim',[-70 720])
+end
+
+figure
+colmap = hsv(length(sites_akti)+1);
+for i = 1:length(sites_all)
+    subplot(nrows,ncols,i)
+    hold on
+
+    ex2 = find(celltypes_single==sites_meki(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120+45,c_signal_single(:,ex2(1:min([ntraces length(ex2)]))),'Color',[.7 .7 .7])
+    
+    ex1 = find(celltypes_single == sites_all(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120+45,c_signal_single(:,ex1(1:min([ntraces length(ex1)]))),'Color',colmap(i,:))
+
+    a = plot(timestamp_single-120+45,nanmean(c_signal_single(:,celltypes_single==sites_all(i)),2),'k','LineWidth',2);
+    b = plot(timestamp_single-120+45,nanmean(c_signal_single(:,celltypes_single==sites_meki(i)),2),'k--','LineWidth',2);
+    
+    s = siteprop(sites_all(i),extension);
+    titstr = s.lig_name;
+    title(titstr)
+    
+    legend([a b],{'WT','AKTspec'},'Location','SouthEast')
+    
+    set(gca,'YLim',[.9 1.1])
+    set(gca,'XLim',[-70 720])
+end
