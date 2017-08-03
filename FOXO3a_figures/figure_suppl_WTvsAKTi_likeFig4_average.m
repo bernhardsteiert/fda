@@ -124,7 +124,7 @@ ylabel('fraction of pulsing cells')
 
 errorbar(errorb(:,1),errorb(:,2),errorb(:,2)-errorb(:,3),errorb(:,4)-errorb(:,2),'LineStyle','none','Color','k');
 
-return
+% return
 % 
 % 
 % kswidth = 40;
@@ -133,11 +133,11 @@ return
 % scores_puls_boxcox = boxcox_apply(noInhpuls.scores_puls(highinds,1),lambda,c);
 % scores_puls_boxcox = (scores_puls_boxcox-mymin_trafo)./myrange;
 
-% figure
+figure
 
-% plot(noInh.scores_early(pcs(1),:),noInh.scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
-% hold on
-% plot(scores_early(pcs(1),:),scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
+plot(noInh.scores_early(pcs(1),:),noInh.scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
+hold on
+plot(scores_early(pcs(1),:),scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
 
 color_ind = 1;
 colmap = hsv(length(sites_all));
@@ -195,3 +195,69 @@ colorbar('YTick',linspace(1./(2*length(sites_all)),1-1./(2*length(sites_all)),le
 % 
 % xlabel('pulsatory score [au]')
 % ylabel('probability density')
+
+sites_single = [sites_all sites_akti sites_meki];
+celltypes_single = [];
+c_signal_single = [];
+
+for isite = sites_single
+    tmp = load(sprintf('Workspaces/site_%d_130722_corrected_retracked_all_paper_cleaned',isite));
+    c_signal_single = [c_signal_single tmp.intensity];
+    timestamp_single = tmp.timestamp;
+    celltypes_single = [celltypes_single ones(1,size(tmp.intensity,2))*isite];
+end
+
+nrows = 2;
+ncols = 3;
+
+ntraces = 25; % This is the maximal number of traces to be plotted
+
+figure
+colmap = hsv(length(sites_akti)+1);
+for i = 1:length(sites_all)
+    subplot(nrows,ncols,i)
+    hold on
+
+    ex2 = find(celltypes_single==sites_akti(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120,c_signal_single(:,ex2(1:min([ntraces length(ex2)]))),'Color',[.7 .7 .7])
+    
+    ex1 = find(celltypes_single == sites_all(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120,c_signal_single(:,ex1(1:min([ntraces length(ex1)]))),'Color',colmap(i,:))
+
+    a = plot(timestamp_single-120,nanmean(c_signal_single(:,celltypes_single==sites_all(i)),2),'k','LineWidth',2);
+    b = plot(timestamp_single-120,nanmean(c_signal_single(:,celltypes_single==sites_akti(i)),2),'k--','LineWidth',2);
+    
+    s = siteprop(sites_all(i));
+    titstr = s.lig_name;
+    title(titstr)
+    
+    legend([a b],{'Ligand','+ AKTi'},'Location','SouthEast')
+    
+    set(gca,'YLim',[.9 1.1])
+    set(gca,'XLim',[-70 720])
+end
+
+figure
+colmap = hsv(length(sites_akti)+1);
+for i = 1:length(sites_all)
+    subplot(nrows,ncols,i)
+    hold on
+
+    ex2 = find(celltypes_single==sites_meki(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120,c_signal_single(:,ex2(1:min([ntraces length(ex2)]))),'Color',[.7 .7 .7])
+    
+    ex1 = find(celltypes_single == sites_all(i) & sum(isnan(c_signal_single),1) < 10);
+    plot(timestamp_single-120,c_signal_single(:,ex1(1:min([ntraces length(ex1)]))),'Color',colmap(i,:))
+
+    a = plot(timestamp_single-120,nanmean(c_signal_single(:,celltypes_single==sites_all(i)),2),'k','LineWidth',2);
+    b = plot(timestamp_single-120,nanmean(c_signal_single(:,celltypes_single==sites_meki(i)),2),'k--','LineWidth',2);
+    
+    s = siteprop(sites_all(i));
+    titstr = s.lig_name;
+    title(titstr)
+    
+    legend([a b],{'Ligand','+ MEKi'},'Location','SouthEast')
+    
+    set(gca,'YLim',[.9 1.1])
+    set(gca,'XLim',[-70 720])
+end
