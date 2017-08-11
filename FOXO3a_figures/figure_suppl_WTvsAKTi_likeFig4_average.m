@@ -7,9 +7,18 @@ noInh = load('./Workspaces/scores_early_5basis_noFGF_newBTC');
 noInhpuls = load('./Workspaces/scores_puls_corrected_retracked_all_cleaned_newBTC');
 pcs = [2 3];
 
-sites_all = [17 37 44 4 64];
-sites_akti = [19 39 42 2 62];
-sites_meki = [20 40 41 1 61];
+includeIGF = false;
+% includeIGF = true;
+
+if includeIGF
+    sites_all = [17 37 44 4 64];
+    sites_akti = [19 39 42 2 62];
+    sites_meki = [20 40 41 1 61];
+else
+    sites_all = [37 44 4 64];
+    sites_akti = [39 42 2 62];
+    sites_meki = [40 41 1 61];
+end
 
 puls_thres = .3;
 
@@ -23,16 +32,20 @@ mekipuls.scores_puls = mekipuls.scores_puls(highindsMEKi,1);
 figure
 
 % plot(noInh.scores_early(pcs(1),:),noInh.scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
-% plot(noInh.scores_early(pcs(1),highindsNoInh),noInh.scores_early(pcs(2),highindsNoInh),'.','Color',[.7 .7 .7]) % WT
+plot(noInh.scores_early(pcs(1),highindsNoInh),noInh.scores_early(pcs(2),highindsNoInh),'.','Color',[.7 .7 .7]) % WT
 hold on
 % plot(scores_early(pcs(1),:),scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
 % plot(scores_early(pcs(1),highinds),scores_early(pcs(2),highinds),'.','Color',[.7 .7 .7]) % AKTi
-% plot(meki.scores_early(pcs(1),highindsMEKi),meki.scores_early(pcs(2),highindsMEKi),'.','Color',[.7 .7 .7]) % MEKi
+plot(meki.scores_early(pcs(1),highindsMEKi),meki.scores_early(pcs(2),highindsMEKi),'.','Color',[.7 .7 .7]) % MEKi
 
 color_ind = 1;
-colmap = hsv(length(sites_akti)+1);
-legstr = {};
+colmap = hsv(5+1);
 markers = {'o','s','v','d','^','>'};
+if ~includeIGF
+    colmap = colmap(2:end,:);
+    markers = markers(2:end);
+end
+legstr = {};
 for i = 1:length(sites_akti)
     isite = sites_akti(i);
     s = siteprop(isite);
@@ -41,14 +54,14 @@ for i = 1:length(sites_akti)
     legstr{end+1} = titstr;
     
     plot(nanmean(scores_early(pcs(1),celltypes == isite)),nanmean(scores_early(pcs(2),celltypes == isite)),markers{isite == sites_akti},'Color',colmap(isite == sites_akti,:),'MarkerFaceColor',colmap(isite == sites_akti,:),'MarkerEdgeColor','w','MarkerSize',12)
-    plotEllipsis(scores_early(pcs(1),celltypes == isite),scores_early(pcs(2),celltypes == isite),colmap(isite == sites_akti,:),2/sqrt(sum(~isnan(scores_early(pcs(1),celltypes == isite)))));
+%     plotEllipsis(scores_early(pcs(1),celltypes == isite),scores_early(pcs(2),celltypes == isite),colmap(isite == sites_akti,:),2/sqrt(sum(~isnan(scores_early(pcs(1),celltypes == isite)))));
     
     isite3 = sites_meki(i);
     plot(nanmean(meki.scores_early(pcs(1),meki.celltypes == isite3)),nanmean(meki.scores_early(pcs(2),meki.celltypes == isite3)),markers{isite3 == sites_meki},'Color',colmap(isite3 == sites_meki,:),'MarkerFaceColor',colmap(isite3 == sites_meki,:),'MarkerEdgeColor','k','MarkerSize',12)
-    plotEllipsis(meki.scores_early(pcs(1),meki.celltypes == isite3),meki.scores_early(pcs(2),meki.celltypes == isite3),colmap(isite3 == sites_meki,:),2/sqrt(sum(~isnan(meki.scores_early(pcs(1),meki.celltypes == isite3)))));
+%     plotEllipsis(meki.scores_early(pcs(1),meki.celltypes == isite3),meki.scores_early(pcs(2),meki.celltypes == isite3),colmap(isite3 == sites_meki,:),2/sqrt(sum(~isnan(meki.scores_early(pcs(1),meki.celltypes == isite3)))));
     isite2 = sites_all(i);
     plot(nanmean(noInh.scores_early(pcs(1),noInh.celltypes == isite2)),nanmean(noInh.scores_early(pcs(2),noInh.celltypes == isite2)),markers{isite2 == sites_all},'Color',colmap(isite2 == sites_all,:),'MarkerFaceColor',colmap(isite2 == sites_all,:),'MarkerSize',12)
-    plotEllipsis(noInh.scores_early(pcs(1),noInh.celltypes == isite2),noInh.scores_early(pcs(2),noInh.celltypes == isite2),colmap(isite2 == sites_all,:),2/sqrt(sum(~isnan(noInh.scores_early(pcs(1),noInh.celltypes == isite2)))));
+%     plotEllipsis(noInh.scores_early(pcs(1),noInh.celltypes == isite2),noInh.scores_early(pcs(2),noInh.celltypes == isite2),colmap(isite2 == sites_all,:),2/sqrt(sum(~isnan(noInh.scores_early(pcs(1),noInh.celltypes == isite2)))));
     
     plot([nanmean(noInh.scores_early(pcs(1),noInh.celltypes == isite2)) nanmean(meki.scores_early(pcs(1),meki.celltypes == isite3))],[nanmean(noInh.scores_early(pcs(2),noInh.celltypes == isite2)) nanmean(meki.scores_early(pcs(2),meki.celltypes == isite3))],'-','Color',colmap(isite == sites_akti,:),'LineWidth',2)
     plot([nanmean(scores_early(pcs(1),celltypes == isite)) nanmean(noInh.scores_early(pcs(1),noInh.celltypes == isite2))],[nanmean(scores_early(pcs(2),celltypes == isite)) nanmean(noInh.scores_early(pcs(2),noInh.celltypes == isite2))],'k--','Color','k')
@@ -140,7 +153,10 @@ hold on
 plot(scores_early(pcs(1),:),scores_early(pcs(2),:),'.','Color',[.7 .7 .7])
 
 color_ind = 1;
-colmap = hsv(length(sites_all));
+colmap = hsv(5+1);
+if ~includeIGF
+    colmap = colmap(2:end,:);
+end
 legstr = {};
 for isite = sites_all
     s = siteprop(isite);
@@ -166,7 +182,7 @@ xlabel(['PC ' num2str(pcs(1))])
 
 set(gca,'CLim',[0 1])
 colormap(colmap)
-colorbar('YTick',linspace(1./(2*length(sites_all)),1-1./(2*length(sites_all)),length(sites_all)),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
+colorbar('YTick',linspace(1./(2*5),1-1./(2*5),5),'YTickLabel',legstr,'TickLength', [0 0]) % Vertical colorbar
 
 
 % figure
@@ -213,7 +229,10 @@ ncols = 3;
 ntraces = 25; % This is the maximal number of traces to be plotted
 
 figure
-colmap = hsv(length(sites_akti)+1);
+colmap = hsv(5+1);
+if ~includeIGF
+    colmap = colmap(2:end,:);
+end
 for i = 1:length(sites_all)
     subplot(nrows,ncols,i)
     hold on
@@ -238,7 +257,6 @@ for i = 1:length(sites_all)
 end
 
 figure
-colmap = hsv(length(sites_akti)+1);
 for i = 1:length(sites_all)
     subplot(nrows,ncols,i)
     hold on
