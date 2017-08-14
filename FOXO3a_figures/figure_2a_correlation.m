@@ -1,16 +1,24 @@
 % Figure 2a: Linear correlation of pERK/pAKT vs. pS294/pS253
 addpath('./Functions/')
 
-[westerndata,description] = xlsread('./Workspaces/westernBlotData_final');
+% [westerndata,description,raw] = xlsread('./Workspaces/westernBlotData_final2');
+[westerndata,description,raw] = xlsread('./Workspaces/westernBlotData_final3');
 experiments_investigated = 1:2;
 
 liglabels = {'NS','EGF','IGF','HRG','HGF','EPR','BTC'};
+tmpligs = [1 2 3 5 6 7 8];
 exind = 1;
 timeind = 2;
 ligind = 3;
 obsind = 4:7;
 myobs = [4 5 6 7];
 normind = 8;
+if all(isnan(westerndata(:,ligind)))
+    for i = 1:length(liglabels)
+        ind = strcmp(liglabels{i},raw(2:end,ligind));
+        westerndata(ind,ligind) = tmpligs(i);
+    end
+end
 uni_ligs = unique(westerndata(:,ligind));
 resort = [1 3 4 5 2 7 6];
 uni_ligs = uni_ligs(resort);
@@ -81,7 +89,7 @@ for iplot = 1:size(scaledData,2)
      set(gca,'YLim',[-7 1],'YTick',[-6:2:0])
 end
 
-legend(legh,liglabels{2:end-1})
+legend(legh,liglabels{2:end})
 
 % Plotting correlation diagram
 markers = {'o','s','v','d','^','>','<'};
@@ -112,8 +120,8 @@ plot([min(min(erkaktratio)) max(max(erkaktratio))],[min(min(erkaktratio)) max(ma
 chi2 = sum(([(erkaktratio(:)-(foxositesratio(:)-axb(2))./axb(1))./(erkaktratio_std(:)); (foxositesratio(:)-axb(1)*foxositesratio(:)-axb(2))./(foxositesratio_std(:))]).^2);
 
 legend(legh,liglabels{2:end},'Location','NorthWest')
-xlabel(['log_{2} ' description{myobs(1)} '/' description{myobs(2)}])
-ylabel(['log_{2} ' description{myobs(3)} '/' description{myobs(4)}])
+xlabel(['log_{2} ' description{1,myobs(1)} '/' description{1,myobs(2)}])
+ylabel(['log_{2} ' description{1,myobs(3)} '/' description{1,myobs(4)}])
 
 set(gca,'XLim',[-7.5 5],'YLim',[-3 3.5],'XTick',[-6:2:4])
 
